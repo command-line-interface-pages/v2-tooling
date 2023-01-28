@@ -149,8 +149,10 @@ while [[ -n "$1" ]]; do
         declare placeholder="$option"
         declare explanation
         explanation="$(explain "$placeholder")"
-        (($? == 0)) && echo -e "$placeholder: ${SUCCESS_COLOR}explained:$RESET_COLOR" >&2
-        echo "$explanation"
+        (($? == 0)) && {
+            echo -e "$placeholder: ${SUCCESS_COLOR}explained:$RESET_COLOR" >&2
+            echo "$explanation"
+        }
         shift
         ;;
     esac
