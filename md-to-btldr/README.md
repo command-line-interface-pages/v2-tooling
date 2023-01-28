@@ -50,6 +50,6 @@ Output Better TlDr page:
 
 - All Better TlDr placeholders are required by default as there is no special syntax
   to present optional placeholders in TlDr pages.
-- All Better TlDr repeated placeholders are allows 0 or more arguments to be substituted
+- All Better TlDr repeated placeholders allow 0 or more arguments to be substituted
   by default as there is no special syntax to present placeholders requiring other
   argument count in TlDr pages.
