@@ -14,15 +14,15 @@ Input Better TlDr page:
 
 - Create specific directories:
 
-`mkdir {directory* value}`
+`mkdir {directory* some}`
 
 - Create specific directories and their [p]arents if needed:
 
-`mkdir -p {directory* value}`
+`mkdir -p {directory* some}`
 
 - Create directories with specific permissions:
 
-`mkdir -m {string value: rwxrw-r--} {directory* value}`
+`mkdir -m {string value: rwxrw-r--} {directory* some}`
 ```
 
 Output TlDr page:
@@ -35,15 +35,15 @@ Output TlDr page:
 
 - Create specific directories:
 
-`mkdir {{path/to/value_directory1 path/to/value_directory2 ...}}`
+`mkdir {{path/to/some_directory1 path/to/some_directory2 ...}}`
 
 - Create specific directories and their [p]arents if needed:
 
-`mkdir -p {{path/to/value_directory1 path/to/value_directory2 ...}}`
+`mkdir -p {{path/to/some_directory1 path/to/some_directory2 ...}}`
 
 - Create directories with specific permissions:
 
-`mkdir -m {{rwxrw-r--}} {{path/to/value_directory1 path/to/value_directory2 ...}}`
+`mkdir -m {{rwxrw-r--}} {{path/to/some_directory1 path/to/some_directory2 ...}}`
 ```
 
 ## Notes
