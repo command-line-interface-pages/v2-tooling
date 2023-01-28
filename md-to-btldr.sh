@@ -5,7 +5,7 @@
 declare -i SUCCESS=0
 declare -i FAIL=1
 
-declare RESET_COLOR="\e[31m"
+declare RESET_COLOR="\e[0m"
 declare ERROR_COLOR="\e[31m"
 declare SUCCESS_COLOR="\e[32m"
 
@@ -17,7 +17,7 @@ Usage:
   $0 (--version|-v)
   $0 (--author|-a)
   $0 (--email|-e)
-  $0 <file1.md file2.md ...>
+  $0 [(--output-directory|-od) <directory>] <file1.md file2.md ...>
 
 Notes:
   Output files are created in the same directories where the original ones existed.
@@ -43,7 +43,7 @@ convert() {
 "
 
   sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<< "$page_content" || {
-    echo -e "$0: $page_file: ${ERROR_COLOR}invalid page layout$RESET_COLOR" >&2
+    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
@@ -130,8 +130,11 @@ if (($# == 0)); then
   help
 fi
 
+declare output_directory
+
 while [[ -n "$1" ]]; do
   declare option="$1"
+  declare value="$2"
 
   case "$option" in
   --help | -h)
@@ -150,17 +153,31 @@ while [[ -n "$1" ]]; do
     email
     exit
     ;;
+  --output-directory | -od)
+    [[ -z "$value" ]] && {
+      echo -e "$0: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+    output_directory="$value"
+    shift 2
+    ;;
   *)
     declare tldr_file="$option"
-    declare btldr_file="$(dirname "$tldr_file")/$(sed -E 's/.*\///; s/\.md$/.btldr/' <<< "$tldr_file")"
+    declare btldr_file="$(sed -E 's/.*\///; s/\.md$/.btldr/' <<< "$tldr_file")"
+    if [[ -z "$output_directory" ]]; then
+      btldr_file="$(dirname "$tldr_file")/$btldr_file"
+    else
+      btldr_file="$output_directory/$btldr_file"
+    fi
+
     declare btldr_content
     btldr_content="$(convert "$tldr_file")"
-    (($? != 0)) && exit $FAIL
+    (($? != 0)) && exit "$FAIL"
 
     echo "$btldr_content" > "$btldr_file"
 
     echo -e "$0: $tldr_file: ${SUCCESS_COLOR}converted to $btldr_file$RESET_COLOR" >&2
-    exit
+    shift
     ;;
   esac
 done
