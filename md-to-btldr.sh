@@ -65,7 +65,11 @@ convert() {
   }
   
   /^`/ {
+    # correcting broken TlDr placeholders
+    s/ *\{\{\.\.\.\}\} */ /g
+
     s/\{\{(\/?)dev\/sd.\}\}/{{\1path\/to\/device_file}}/g
+    s/\{\{(\/?)file_or_directory\}\}/{{\1path\/to\/file_or_directory}}/g
 
     s/\{\{(\/?)file_?(name)?((\.[^.{}]+)?)\}\}/{{\1path\/to\/file\3}}/g
     s/\{\{(\/?)directory\}\}/{{\1path\/to\/directory}}/g
@@ -78,6 +82,46 @@ convert() {
 
     s/\{\{(\/?)(([^{}/]+)_)(files|file_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
     s/\{\{(\/?)(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+
+    # converting TlDr placeholders to Better TlDr placeholders
+    s/\{\{(true|false|yes|no)\}\}/{bool flag: \1}/g
+
+    s/\{\{([-+]?[[:digit:]]+)\}\}/{int value: \1}/g
+    s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float value: \1}/g
+
+    s/\{\{character\}\}/{char value}/g
+
+    s/\{\{([-+]?[[:digit:]]+)\.\.([-+]?[[:digit:]]+)\}\}/{int range: \1..\2}/g
+    s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\.\.([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float range: \1..\2}/g
+
+    s/\{\{user_?name\}\}/{string user}/g
+    s/\{\{group_?name\}\}/{string group}/g
+    s/\{\{url\}\}/{string url}/g
+    s/\{\{ip\}\}/{string ip}/g
+    s/\{\{db\}\}/{string database}/g
+
+
+    s/\{\{(\/?)path\/to\/file_or_directory\}\}/{\1path value}/g
+
+    s/\{\{(\/?)path\/to\/file_?(name)?\}\}/{\1file value}/g
+    s/\{\{(\/?)path\/to\/file_?(name)?(\.[^.{}]+)\}\}/{\1file value: sample\3}/g
+    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?\}\}/{\1directory value}/g
+
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)file_?(name)?((\.[^.{}]+)?)\}\}/{\1file value: \3\5}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)?dir(ectory)?_?(name)?\}\}/{\1directory value: \3}/g
+
+    s/\{\{(\/?)path\/to\/file_or_directory[[:digit:]]+ +\1path\/to\/file_or_directory[[:digit:]]+ +\.\.\.\}\}/{\1path* value}/g
+
+    s/\{\{(\/?)path\/to\/file_?(name)?[[:digit:]]+ +\1path\/to\/file_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1file* value}/g
+    s/\{\{(\/?)path\/to\/file_?(name)?[[:digit:]]+(\.[^.{}]+) +\1path\/to\/file_?(name)?[[:digit:]]+\3 +\.\.\.\}\}/{\1file* value: sample\3}/g
+    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\1path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value}/g
+
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)file_?(name)?[[:digit:]]+((\.[^.{}]+)?) \1path\/to\/\2file_?(name)?[[:digit:]]+\5 +\.\.\.\}\}/{\1file* value: \3\5}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)dir(ectory)?_?(name)?[[:digit:]]+ \1path\/to\/\2dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value: \3}/g
+
+
+    s/\{\{([^{}]+)\}\}/{string value: \1}/g
+
   }' <<< "$page_content"
 }
 
