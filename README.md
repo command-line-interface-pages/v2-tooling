@@ -1,3 +1,3 @@
 # Prototypes
 
-Regex-based tools.
+Tool prototypes written in different languages.
