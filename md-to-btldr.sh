@@ -19,9 +19,12 @@ Usage:
   $0 (--email|-e)
   $0 [(--output-directory|-od) <directory>] <file1.md file2.md ...>
 
+Converters:
+  - 'More information' and 'See also' tags simplification
+  - Placeholder conversion and optimization
+
 Notes:
-  Output files are created in the same directories where the original ones existed.
-  Escaping is not supported."
+  Escaping and placeholders with alternatives are not recognized and treated literally."
 }
 
 version() {
