@@ -23,7 +23,10 @@ Converters:
   - Placeholder conversion
 
 Notes:
-  Escaping and placeholders with alternatives are not recognized and treated literally."
+  Escaping and placeholders with alternatives are not recognized and treated literally.
+  
+  Example values override generic placeholder syntax. In other words, to have example values
+  instead of argument description or ellipsis provide examples."
 }
 
 version() {
