@@ -56,21 +56,21 @@ convert() {
   
   /^`/ {
     # converting Better TlDr placeholders to TlDr placeholders
-    s/\{bool +[^{}:]+\}/{{boolean}}/g
+    s/\{bool\?? +[^{}:]+\}/{{boolean}}/g
     s/\{bool +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\1}}/g
-    s/\{bool +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\1}}/g
+    s/\{bool\?? +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\1}}/g
 
-    s/\{(int|float|char|string|command|string) +([^{}:]+)\}/{{\2}}/g
-    s/\{(int|float|char|string|command|string) +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\2}}/g
-    s/\{(int|float|char|string|command|string) +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\2}}/g
+    s/\{(int|float|char|string|command|string)\?? +([^{}:]+)\}/{{\2}}/g
+    s/\{(int|float|char|string|command|string)\?? +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\2}}/g
+    s/\{(int|float|char|string|command|string)\?? +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\2}}/g
 
-    s/\{(\/?)(file|directory) +([^{}:]+)\}/{{\1path\/to\/\3_\2}}/g
-    s/\{\/?(file|directory) +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\2}}/g
-    s/\{\/?(file|directory) +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\2}}/g
+    s/\{(\/?)(file|directory)\?? +([^{}:]+)\}/{{\1path\/to\/\3_\2}}/g
+    s/\{\/?(file|directory)\?? +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\2}}/g
+    s/\{\/?(file|directory)\?? +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\2}}/g
 
-    s/\{(\/?)path +[^{}:]+\}/{{\1path\/to\/file_or_directory}}/g
-    s/\{\/?path +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\1}}/g
-    s/\{\/?path +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\1}}/g
+    s/\{(\/?)path\?? +[^{}:]+\}/{{\1path\/to\/file_or_directory}}/g
+    s/\{\/?path\?? +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\1}}/g
+    s/\{\/?path\?? +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\1}}/g
 
     s/\{(\/?)(file|directory)\* +([^{}:]+)\}/{{\1path\/to\/\3_\21 \1path\/to\/\3_\22 ...}}/g
     s/\{(\/?)(file|directory)\+ +([^{}:]+)\}/{{\1path\/to\/\3_\21}} {{\1path\/to\/\3_\22 \1path\/to\/\3_\23 ...}}/g
