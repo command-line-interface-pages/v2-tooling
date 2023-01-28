@@ -68,14 +68,14 @@ convert() {
     # correcting broken TlDr placeholders
     s/ *\{\{\.\.\.\}\} */ /g
 
-    s/\{\{(\/?)dev\/sd.\}\}/{{\1path\/to\/device_file}}/g
-    s/\{\{(\/?)file_or_directory\}\}/{{\1path\/to\/file_or_directory}}/g
+    s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
+    s/\{\{(\/?)file_or_directory([[:digit:]]*)\}\}/{{\1path\/to\/file_or_directory\2}}/g
 
-    s/\{\{(\/?)file_?(name)?((\.[^.{}]+)?)\}\}/{{\1path\/to\/file\3}}/g
-    s/\{\{(\/?)directory\}\}/{{\1path\/to\/directory}}/g
+    s/\{\{(\/?)file_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file\3\4}}/g
+    s/\{\{(\/?)directory([[:digit:]]*)\}\}/{{\1path\/to\/directory\2}}/g
 
-    s/\{\{(\/?)(([^{}/]+)_)file_?(name)?((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file\5}}/g
-    s/\{\{(\/?)(([^{}/]+)_)directory\}\}/{{\1path\/to\/\3_directory}}/g
+    s/\{\{(\/?)(([^{}/]+)_)file_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file\5\6}}/g
+    s/\{\{(\/?)(([^{}/]+)_)directory([[:digit:]]*)\}\}/{{\1path\/to\/\3_directory\4}}/g
 
     s/\{\{(\/?)(files|file_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
@@ -84,31 +84,31 @@ convert() {
     s/\{\{(\/?)(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
     # converting TlDr placeholders to Better TlDr placeholders
-    s/\{\{(true|false|yes|no)\}\}/{bool flag: \1}/g
+    s/\{\{(true|false|yes|no)[[:digit:]]*\}\}/{bool flag: \1}/g
 
     s/\{\{([-+]?[[:digit:]]+)\}\}/{int value: \1}/g
     s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float value: \1}/g
 
-    s/\{\{character\}\}/{char value}/g
+    s/\{\{character[[:digit:]]*\}\}/{char value}/g
 
     s/\{\{([-+]?[[:digit:]]+)\.\.([-+]?[[:digit:]]+)\}\}/{int range: \1..\2}/g
     s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\.\.([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float range: \1..\2}/g
 
-    s/\{\{user_?name\}\}/{string user}/g
-    s/\{\{group_?name\}\}/{string group}/g
-    s/\{\{url\}\}/{string url}/g
-    s/\{\{ip\}\}/{string ip}/g
-    s/\{\{db\}\}/{string database}/g
+    s/\{\{user_?name[[:digit:]]*\}\}/{string user}/g
+    s/\{\{group_?name[[:digit:]]*\}\}/{string group}/g
+    s/\{\{url[[:digit:]]*\}\}/{string url}/g
+    s/\{\{ip[[:digit:]]*\}\}/{string ip}/g
+    s/\{\{db[[:digit:]]*\}\}/{string database}/g
 
 
-    s/\{\{(\/?)path\/to\/file_or_directory\}\}/{\1path value}/g
+    s/\{\{(\/?)path\/to\/file_or_directory[[:digit:]]*\}\}/{\1path value}/g
 
-    s/\{\{(\/?)path\/to\/file_?(name)?\}\}/{\1file value}/g
-    s/\{\{(\/?)path\/to\/file_?(name)?(\.[^.{}]+)\}\}/{\1file value: sample\3}/g
-    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?\}\}/{\1directory value}/g
+    s/\{\{(\/?)path\/to\/file_?(name)?[[:digit:]]*\}\}/{\1file value}/g
+    s/\{\{(\/?)path\/to\/file_?(name)?[[:digit:]]*(\.[^.{}]+)\}\}/{\1file value: sample\3}/g
+    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?[[:digit:]]*\}\}/{\1directory value}/g
 
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)file_?(name)?((\.[^.{}]+)?)\}\}/{\1file value: \3\5}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)?dir(ectory)?_?(name)?\}\}/{\1directory value: \3}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)file_?(name)?[[:digit:]]*((\.[^.{}]+)?)\}\}/{\1file value: \3\5}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)?dir(ectory)?_?(name)?[[:digit:]]*\}\}/{\1directory value: \3}/g
 
     s/\{\{(\/?)path\/to\/file_or_directory[[:digit:]]+ +\1path\/to\/file_or_directory[[:digit:]]+ +\.\.\.\}\}/{\1path* value}/g
 
@@ -118,6 +118,11 @@ convert() {
 
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)file_?(name)?[[:digit:]]+((\.[^.{}]+)?) \1path\/to\/\2file_?(name)?[[:digit:]]+\5 +\.\.\.\}\}/{\1file* value: \3\5}/g
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)dir(ectory)?_?(name)?[[:digit:]]+ \1path\/to\/\2dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value: \3}/g
+
+
+    # omptimizing Better TlDr placeholders
+    s/\{(\/?)([^ {}:]+) +([^:{}]+)\} +\{\1\2\*\ \3}/{\1\2+ \3}/g
+    s/\{(\/?)([^ {}:]+) +([^:{}]+):( +[^{}]+)\} +\{\1\2\*\ \3:\4}/{\1\2+ \3:\4}/g
 
 
     s/\{\{([^{}]+)\}\}/{string value: \1}/g
