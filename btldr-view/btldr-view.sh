@@ -307,7 +307,7 @@ while [[ -n "$1" ]]; do
     declare local_file_or_remote_page="$option"
     declare is_local=1
 
-    file_to_render="$(mktemp "/tmp/$0.XXXXXX")"
+    file_to_render="$(mktemp "/tmp/btldr.XXXXXX")"
     [[ "$local_file_or_remote_page" =~ .btldr$ ]] && is_local=0
 
     declare file_to_render
