@@ -8,10 +8,6 @@ declare -i FAIL=1
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.btldr}"
 
-# Error colors:
-declare RESET_COLOR="\e[0m"
-declare ERROR_COLOR="\e[31m"
-
 color_to_code() {
   declare color="$1"
 
@@ -66,6 +62,18 @@ color_to_code() {
       ;;
   esac
 }
+
+# Error colors:
+declare RESET_COLOR="$(color_to_code none)"
+declare ERROR_COLOR="$(color_to_code red)"
+
+# Help colors:
+declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
+declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
+declare HELP_OPTION_COLOR="\e[$(color_to_code green)m"
+declare HELP_PLACEHOLDER_COLOR="\e[$(color_to_code cyan)m"
+declare HELP_PUNCTUATION_COLOR="\e[$(color_to_code gray)m"
+
 
 # Header options:
 declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX:-Command: }"
@@ -130,17 +138,19 @@ declare CODE_EXAMPLE_PLACEHOLDER_QUANTIFIER_COLOR="$(color_to_code "${CODE_EXAMP
 declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR:-green}")"
 
 help() {
-  echo "Render for Better TlDr pages.
+  declare program_name="$(basename "$0")"
 
-Usage:
-  $0 (--help|-h)
-  $0 (--version|-v)
-  $0 (--author|-a)
-  $0 (--email|-e)
-  $0 (--clear-cache|-cc)
-  $0 [(--operating-system|-os) <android|linux|osx|sunos|windows>] [(--update-page|-up)] (<local-file.md>|<remote-page>)...
+  echo -e "${HELP_TEXT_COLOR}Render for Better TlDr pages.
 
-Environment variables:
+${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--help$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-h$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)] ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
+
+${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
   - HEADER_COMMAND_PREFIX
     - HEADER_COMMAND_PREFIX_COLOR
     - HEADER_COMMAND_SUFFIX_COLOR
@@ -165,7 +175,7 @@ Environment variables:
       CODE_EXAMPLE_OPTIONAL_PLACEHOLDER_CONTENT_COLOR, CODE_EXAMPLE_PLACEHOLDER_QUANTIFIER_COLOR,
       CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR
 
-Notes:
+${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
   Escaping and placeholders with alternatives are not recognized and treated literally."
 }
 
@@ -261,6 +271,7 @@ render() {
 
 if (($# == 0)); then
   help
+  exit "$SUCCESS"
 fi
 
 declare operating_system=common
@@ -273,19 +284,19 @@ while [[ -n "$1" ]]; do
   case "$option" in
   --help | -h)
     help
-    exit
+    exit "$SUCCESS"
     ;;
   --version | -v)
     version
-    exit
+    exit "$SUCCESS"
     ;;
   --author | -a)
     author
-    exit
+    exit "$SUCCESS"
     ;;
   --email | -e)
     email
-    exit
+    exit "$SUCCESS"
     ;;
   --operating-system | -os)
     [[ -z "$value" ]] && {
@@ -297,7 +308,7 @@ while [[ -n "$1" ]]; do
     ;;
   --clear-cache | -cc)
     rm -rf "$CACHE_DIRECTORY/$page_path"
-    exit
+    exit "$SUCCESS"
     ;;
   --update-cache | -uc)
     update_cache=0
