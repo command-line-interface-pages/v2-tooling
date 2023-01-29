@@ -133,7 +133,7 @@ Usage:
   $0 (--version|-v)
   $0 (--author|-a)
   $0 (--email|-e)
-  $0 (<local-file.md>|<remote-page>)...
+  $0 [(--operating-system|-os) <android|linux|osx|sunos|windows>] (<local-file.md>|<remote-page>)...
 
 Environment variables:
   - HEADER_COMMAND_PREFIX
@@ -258,8 +258,11 @@ if (($# == 0)); then
   help
 fi
 
+declare operating_system=common
+
 while [[ -n "$1" ]]; do
   declare option="$1"
+  declare value="$2"
 
   case "$option" in
   --help | -h)
@@ -278,25 +281,34 @@ while [[ -n "$1" ]]; do
     email
     exit
     ;;
+  --operating-system | -os)
+    [[ -z "$value" ]] && {
+        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+    operating_system="$value"
+    shift 2
+    ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
 
-    if [[ "$local_file_or_remote_page" =~ .btldr$ ]]; then
-      is_local=0
-    else
-      echo -e "$0: $local_file_or_remote_page: ${ERROR_COLOR}local file expected, remote rendering is not yet implemented$RESET_COLOR" >&2
-      exit "$FAIL"
-    fi
+    file_to_render="$(mktemp "/tmp/$0.XXXXXX")"
+    [[ "$local_file_or_remote_page" =~ .btldr$ ]] && is_local=0
 
     declare file_to_render
     if ((is_local == 0)); then
-      file_to_render="$(mktemp "/tmp/$0.XXXXXX")"
       [[ -f "$local_file_or_remote_page" ]] || {
         echo -e "$0: $page_file: ${ERROR_COLOR}existing page expected$RESET_COLOR" >&2
         exit "$FAIL"
       }
       cat "$local_file_or_remote_page" > "$file_to_render"
+    else
+      declare page_path="$operating_system/$local_file_or_remote_page.btldr"
+      wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2> /dev/null || {
+        echo -e "$0: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
+        exit "$FAIL"
+      }
     fi
 
     render "$file_to_render" || {
