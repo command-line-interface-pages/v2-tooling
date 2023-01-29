@@ -340,6 +340,15 @@ while [[ -n "$1" ]]; do
       exit "$FAIL"
     }
     rm "$file_to_render"
+
+    declare next_argument="$2"
+    [[ -n "$next_argument" ]] && [[ ! "$next_argument" =~ --?.+ ]] && { 
+      echo
+      printf "%.0s- " {1..10}
+      echo
+      echo
+    }
+
     shift
     ;;
   esac
