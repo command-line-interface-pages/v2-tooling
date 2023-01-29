@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=2016,2155
+# shellcheck disable=2016,2155,2115
 
 declare -i SUCCESS=0
 declare -i FAIL=1
 
+# Cache options:
+declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.btldr}"
+
+# Error colors:
 declare RESET_COLOR="\e[0m"
 declare ERROR_COLOR="\e[31m"
 
@@ -133,7 +137,8 @@ Usage:
   $0 (--version|-v)
   $0 (--author|-a)
   $0 (--email|-e)
-  $0 [(--operating-system|-os) <android|linux|osx|sunos|windows>] (<local-file.md>|<remote-page>)...
+  $0 (--clear-cache|-cc)
+  $0 [(--operating-system|-os) <android|linux|osx|sunos|windows>] [(--update-page|-up)] (<local-file.md>|<remote-page>)...
 
 Environment variables:
   - HEADER_COMMAND_PREFIX
@@ -259,6 +264,7 @@ if (($# == 0)); then
 fi
 
 declare operating_system=common
+declare -i update_cache=1
 
 while [[ -n "$1" ]]; do
   declare option="$1"
@@ -289,6 +295,14 @@ while [[ -n "$1" ]]; do
     operating_system="$value"
     shift 2
     ;;
+  --clear-cache | -cc)
+    rm -rf "$CACHE_DIRECTORY/$page_path"
+    exit
+    ;;
+  --update-cache | -uc)
+    update_cache=0
+    shift 2
+    ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
@@ -305,10 +319,20 @@ while [[ -n "$1" ]]; do
       cat "$local_file_or_remote_page" > "$file_to_render"
     else
       declare page_path="$operating_system/$local_file_or_remote_page.btldr"
-      wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2> /dev/null || {
-        echo -e "$0: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
-        exit "$FAIL"
-      }
+
+      ((update_cache == 0)) && rm -rf "$CACHE_DIRECTORY/$page_path"
+
+      if [[ ! -f "$CACHE_DIRECTORY/$page_path" ]]; then
+        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2> /dev/null || {
+          echo -e "$0: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
+          exit "$FAIL"
+        }
+
+        mkdir -p "$(dirname "$CACHE_DIRECTORY/$page_path")"
+        cat "$file_to_render" > "$CACHE_DIRECTORY/$page_path"
+      else
+        cat "$CACHE_DIRECTORY/$page_path" > "$file_to_render"
+      fi
     fi
 
     render "$file_to_render" || {
