@@ -337,6 +337,10 @@ while [[ -n "$1" ]]; do
     update_cache=0
     shift 2
     ;;
+  --update-page | -up)
+    update_cache=0
+    shift
+    ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
