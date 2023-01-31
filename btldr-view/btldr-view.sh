@@ -64,8 +64,8 @@ color_to_code() {
 }
 
 # Error colors:
-declare RESET_COLOR="$(color_to_code none)"
-declare ERROR_COLOR="$(color_to_code red)"
+declare RESET_COLOR="\e[$(color_to_code none)m"
+declare ERROR_COLOR="\e[$(color_to_code red)m"
 
 # Help colors:
 declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
