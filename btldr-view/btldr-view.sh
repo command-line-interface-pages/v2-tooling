@@ -199,7 +199,13 @@ ${HELP_HEADER_COLOR}  Code example:$HELP_TEXT_COLOR
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR ${HELP_TEXT_COLOR}color for a placeholder example
 
 ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
-  Escaping and placeholders with alternatives are not recognized and treated literally."
+  Escaping and placeholders with alternatives are not recognized and treated literally.
+
+${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
+  $program_name ${HELP_PLACEHOLDER_COLOR}sed$HELP_TEXT_COLOR view 'sed' command examples
+    Cached version is used if it's already here.
+  $program_name ${HELP_PUNCTUATION_COLOR}($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) ${HELP_PLACEHOLDER_COLOR}android$HELP_PUNCTUATION_COLOR ${HELP_PLACEHOLDER_COLOR}am$HELP_TEXT_COLOR view 'am' Android command examples
+  $program_name ${HELP_PUNCTUATION_COLOR}($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR) ${HELP_PLACEHOLDER_COLOR}sed$HELP_TEXT_COLOR view the latest 'sed' command examples"
 }
 
 version() {
