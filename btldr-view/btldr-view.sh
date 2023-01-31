@@ -349,6 +349,28 @@ while [[ -n "$1" ]]; do
         exit "$FAIL"
     }
     render="$value"
+
+    case "$render" in
+      tldr*)
+        HEADER_COMMAND_PREFIX=""
+        
+        SUMMARY_DESCRIPTION_PREFIX=""
+        SUMMARY_MORE_INFORMATION_PREFIX="More information: "
+
+        CODE_DESCRIPTION_PREFIX="- "
+        CODE_DESCRIPTION_MNEMONIC_PREFIX="["
+        CODE_DESCRIPTION_MNEMONIC_SUFFIX="]"
+
+        CODE_EXAMPLE_PREFIX="  "
+        CODE_EXAMPLE_PLACEHOLDER_PREFIX=""
+        CODE_EXAMPLE_PLACEHOLDER_SUFFIX=""
+        ;;
+      docopt*)
+        CODE_EXAMPLE_PLACEHOLDER_PREFIX="<"
+        CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
+        ;;
+    esac
+
     shift 2
     ;;
   --clear-cache | -cc)
