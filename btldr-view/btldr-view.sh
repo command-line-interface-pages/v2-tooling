@@ -138,6 +138,11 @@ declare CODE_EXAMPLE_OPTIONAL_PLACEHOLDER_CONTENT_COLOR="$(color_to_code "${CODE
 declare CODE_EXAMPLE_PLACEHOLDER_QUANTIFIER_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_QUANTIFIER_COLOR-yellow}")"
 declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-green}")"
 
+declare CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR-black}")"
+declare CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR-red}")"
+declare CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR-cyan}")"
+declare CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR-green}")"
+
 help() {
   declare program_name="$(basename "$0")"
 
@@ -198,6 +203,12 @@ ${HELP_HEADER_COLOR}  Code example:$HELP_TEXT_COLOR
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PLACEHOLDER_QUANTIFIER_COLOR ${HELP_TEXT_COLOR}color for a placeholder note possibly containing quantifier
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR ${HELP_TEXT_COLOR}color for a placeholder example
 
+${HELP_HEADER_COLOR}    TlDr-more specific:$HELP_TEXT_COLOR
+      $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR ${HELP_TEXT_COLOR}color for a required placeholder
+      $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR ${HELP_TEXT_COLOR}color for an optional placeholder
+      $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR ${HELP_TEXT_COLOR}color for a placeholder repeated 0..more times
+      $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR ${HELP_TEXT_COLOR}color for a placeholder repeated 1..more times
+
 ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
   Escaping and placeholders with alternatives are not recognized and treated literally.
 
@@ -223,16 +234,8 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
-render() {
-  declare page_file="$1"
-  declare page_content="$(cat "$page_file")
-
-"
-
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content" || {
-    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+better_tldr_render() {
+  declare page_content="$1"
 
   echo -e "$(sed -E "/^#/ {
     s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
@@ -246,7 +249,7 @@ render() {
   }
 
   /^- / {
-    s/\[([^ ]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
+    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
     s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
     s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
   }
@@ -299,6 +302,115 @@ render() {
     # broken placeholders
     s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_REQUIRED_PLACEHOLDER_CONTENT_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
   }" <<<"$page_content")"
+}
+
+tldr_render() {
+  declare page_content="$1"
+  
+  page_content="$(sed -E '/^`/ {
+    s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
+  }' <<< "$page_content")"
+
+  echo -e "$(sed -E "/^#/ {
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+  
+  /^>/ {
+    s/^> Aliases: (.*)$/\\\\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\\\\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> See also: (.*)$/\\\\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\\\\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> More information: (.*)$/\\\\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\\\\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m\1\\\\e[0m/
+    /^> (Aliases|See also|More information):/! s/^> (.*)$/\\\\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\\\\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+
+  /^- / {
+    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
+    s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
+  }
+  
+  /^\`/ {
+    s/\`(.*)\`/\\\\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m\1\\\\e[0m/
+
+    # placeholders without examples
+    s/\{(bool|int|float|char|string|command|any)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # broken placeholders
+    s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_REQUIRED_PLACEHOLDER_CONTENT_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  }" <<<"$page_content")"
+}
+
+tldr_render_colorful() {
+  declare page_content="$1"
+  
+  page_content="$(sed -E '/^`/ {
+    s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
+  }' <<< "$page_content")"
+
+  echo -e "$(sed -E "/^#/ {
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+  
+  /^>/ {
+    s/^> Aliases: (.*)$/\\\\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\\\\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> See also: (.*)$/\\\\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\\\\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> More information: (.*)$/\\\\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\\\\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m\1\\\\e[0m/
+    /^> (Aliases|See also|More information):/! s/^> (.*)$/\\\\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\\\\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+
+  /^- / {
+    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
+    s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
+  }
+  
+  /^\`/ {
+    s/\`(.*)\`/\\\\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m\1\\\\e[0m/
+
+    # placeholders without examples and without quantifiers
+    s/\{(bool|int|float|char|string|command|any) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  
+    # placeholders without examples and with ? quantifier
+    s/\{(bool|int|float|char|string|command|any)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # placeholders without examples and with * quantifier
+    s/\{(bool|int|float|char|string|command|any)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # placeholders without examples and with + quantifier
+    s/\{(bool|int|float|char|string|command|any)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # broken placeholders
+    s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_REQUIRED_PLACEHOLDER_CONTENT_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  }" <<<"$page_content")"
+}
+
+render() {
+  declare page_file="$1"
+  declare render="$2"
+  declare page_content="$(cat "$page_file")
+
+"
+
+  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content" || {
+    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+
+  case "$render" in
+    better-tldr)
+      better_tldr_render "$page_content"
+      ;;
+    tldr)
+      tldr_render "$page_content"
+      ;;
+    tldr-colorful)
+      tldr_render_colorful "$page_content"
+      ;;
+  esac
 }
 
 if (($# == 0)); then
@@ -413,7 +525,7 @@ while [[ -n "$1" ]]; do
       fi
     fi
 
-    render "$file_to_render" || {
+    render "$file_to_render" "$render" || {
       rm "$file_to_render"
       exit "$FAIL"
     }
