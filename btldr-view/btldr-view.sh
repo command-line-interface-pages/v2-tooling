@@ -67,7 +67,11 @@ color_to_code() {
 declare RESET_COLOR="\e[$(color_to_code none)m"
 declare ERROR_COLOR="\e[$(color_to_code red)m"
 
+
 # Help colors:
+declare HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN="\e[40;97mT\e[107;30mxt$RESET_COLOR"
+declare HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN="\e[41;97mR\e[107;32mg\e[34mb$RESET_COLOR"
+
 declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
 declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
 declare HELP_OPTION_COLOR="\e[$(color_to_code green)m"
@@ -78,10 +82,12 @@ declare HELP_ENVIRONMENT_VARIABLE_COLOR="\e[$(color_to_code cyan)m"
 
 # Header options:
 declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-Command: }"
+declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX}"
 
+declare HEADER_COMMAND_COLOR="$(color_to_code "${HEADER_COMMAND_COLOR-cyan}")"
 declare HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "${HEADER_COMMAND_PREFIX_COLOR-blue}")"
+declare HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "${HEADER_COMMAND_SUFFIX_COLOR-blue}")"
 
-declare HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "${HEADER_COMMAND_SUFFIX_COLOR-cyan}")"
 
 # Summary options:
 declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-Description: }"
@@ -99,12 +105,14 @@ declare SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_SUFFIX_
 declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_SUFFIX_COLOR-cyan}")"
 declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-cyan}")"
 
+
 # Code description options:
 declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-Code description: }"
 
 declare CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_PREFIX_COLOR-green}")"
 
 declare CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_SUFFIX_COLOR-cyan}")"
+
 
 # Code description mnemonic options:
 declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-}"
@@ -113,6 +121,7 @@ declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-}"
 
 declare CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_COLOR-red}")"
 
+
 # Code description stream options:
 declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-\'}"
 
@@ -120,12 +129,14 @@ declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-\'}"
 
 declare CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_COLOR-red}")"
 
+
 # Code example options:
 declare CODE_EXAMPLE_PREFIX="${CODE_EXAMPLE_PREFIX-Code example: }"
 
 declare CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PREFIX_COLOR-red}")"
 
 declare CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_SUFFIX_COLOR-gray}")"
+
 
 # Code example placeholder options:
 declare CODE_EXAMPLE_PLACEHOLDER_PREFIX="${CODE_EXAMPLE_PLACEHOLDER_PREFIX-<}"
@@ -143,6 +154,7 @@ declare CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EX
 declare CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR-cyan}")"
 declare CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR-green}")"
 
+
 help() {
   declare program_name="$(basename "$0")"
 
@@ -158,10 +170,12 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
 ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_PREFIX ${HELP_TEXT_COLOR}everything before a command name and everything after it
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_PREFIX ${HELP_TEXT_COLOR}everything before a command name
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_SUFFIX ${HELP_TEXT_COLOR}everything after the last subcommand or a command name
 
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a command name
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for command name and everything after it
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_COLOR ${HELP_TEXT_COLOR}everything after a command name
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a command name
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for command name and everything after it
 
 ${HELP_HEADER_COLOR}  Description:$HELP_TEXT_COLOR
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_PREFIX ${HELP_TEXT_COLOR}everything before a command description
@@ -223,7 +237,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.0" >&2
+  echo "1.1" >&2
 }
 
 author() {
@@ -238,7 +252,7 @@ better_tldr_render() {
   declare page_content="$1"
 
   echo -e "$(sed -E "/^#/ {
-    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
   }
   
   /^>/ {
@@ -312,7 +326,7 @@ tldr_render() {
   }' <<< "$page_content")"
 
   echo -e "$(sed -E "/^#/ {
-    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
   }
   
   /^>/ {
@@ -348,7 +362,7 @@ tldr_render_colorful() {
   }' <<< "$page_content")"
 
   echo -e "$(sed -E "/^#/ {
-    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
   }
   
   /^>/ {
@@ -396,7 +410,7 @@ docopt_render() {
   }' <<< "$page_content")"
 
   echo -e "$(sed -E "/^#/ {
-    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
   }
   
   /^>/ {
@@ -443,7 +457,7 @@ docopt_render_colorful() {
   }' <<< "$page_content")"
 
   echo -e "$(sed -E "/^#/ {
-    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
   }
   
   /^>/ {
@@ -566,6 +580,7 @@ while [[ -n "$1" ]]; do
     case "$render" in
       tldr*)
         HEADER_COMMAND_PREFIX=""
+        HEADER_COMMAND_SUFFIX=""
         
         SUMMARY_DESCRIPTION_PREFIX=""
         SUMMARY_MORE_INFORMATION_PREFIX="More information: "
@@ -579,6 +594,9 @@ while [[ -n "$1" ]]; do
         CODE_EXAMPLE_PLACEHOLDER_SUFFIX=""
         ;;
       docopt*)
+        HEADER_COMMAND_PREFIX=""
+        HEADER_COMMAND_SUFFIX=""
+        
         CODE_EXAMPLE_PLACEHOLDER_PREFIX="<"
         CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
 
