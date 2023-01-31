@@ -388,6 +388,90 @@ tldr_render_colorful() {
   }" <<<"$page_content")"
 }
 
+docopt_render() {
+  declare page_content="$1"
+  
+  page_content="$(sed -E '/^`/ {
+    s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
+  }' <<< "$page_content")"
+
+  echo -e "$(sed -E "/^#/ {
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+  
+  /^>/ {
+    s/^> Aliases: (.*)$/\\\\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\\\\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> See also: (.*)$/\\\\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\\\\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> More information: (.*)$/\\\\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\\\\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m\1\\\\e[0m/
+    /^> (Aliases|See also|More information):/! s/^> (.*)$/\\\\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\\\\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+
+  /^- / {
+    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
+    s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
+  }
+  
+  /^\`/ {
+    s/\`(.*)\`/\\\\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m\1\\\\e[0m/
+
+    # placeholders without examples
+    s/\{(bool|int|float|char|string|command|any)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # broken placeholders
+    s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_REQUIRED_PLACEHOLDER_CONTENT_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  }" <<<"$page_content")"
+}
+
+docopt_render_colorful() {
+  declare page_content="$1"
+  
+  page_content="$(sed -E '/^`/ {
+    s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
+  }' <<< "$page_content")"
+
+  echo -e "$(sed -E "/^#/ {
+    s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+  
+  /^>/ {
+    s/^> Aliases: (.*)$/\\\\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\\\\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> See also: (.*)$/\\\\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\\\\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/^> More information: (.*)$/\\\\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\\\\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m\1\\\\e[0m/
+    /^> (Aliases|See also|More information):/! s/^> (.*)$/\\\\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\\\\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+  }
+
+  /^- / {
+    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
+    s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
+    s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
+  }
+  
+  /^\`/ {
+    s/\`(.*)\`/\\\\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m\1\\\\e[0m/
+
+    # placeholders without examples and without quantifiers
+    s/\{(bool|int|float|char|string|command|any) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REQUIRED_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  
+    # placeholders without examples and with ? quantifier
+    s/\{(bool|int|float|char|string|command|any)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_OPTIONAL_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # placeholders without examples and with * quantifier
+    s/\{(bool|int|float|char|string|command|any)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ZERO_OR_MORE_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # placeholders without examples and with + quantifier
+    s/\{(bool|int|float|char|string|command|any)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR}m\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+    s/\{(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR}mpath\/to\/\2\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+
+    # broken placeholders
+    s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\\\\e[${CODE_EXAMPLE_REQUIRED_PLACEHOLDER_CONTENT_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m/g
+  }" <<<"$page_content")"
+}
+
 render() {
   declare page_file="$1"
   declare render="$2"
@@ -409,6 +493,12 @@ render() {
       ;;
     tldr-colorful)
       tldr_render_colorful "$page_content"
+      ;;
+    docopt)
+      docopt_render "$page_content"
+      ;;
+    docopt-colorful)
+      docopt_render_colorful "$page_content"
       ;;
   esac
 }
@@ -480,6 +570,12 @@ while [[ -n "$1" ]]; do
       docopt*)
         CODE_EXAMPLE_PLACEHOLDER_PREFIX="<"
         CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
+
+        CODE_DESCRIPTION_PREFIX="- "
+        CODE_DESCRIPTION_MNEMONIC_PREFIX="["
+        CODE_DESCRIPTION_MNEMONIC_SUFFIX="]"
+
+        CODE_EXAMPLE_PREFIX="  "
         ;;
     esac
 
