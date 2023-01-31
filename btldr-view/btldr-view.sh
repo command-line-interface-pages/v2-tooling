@@ -82,7 +82,7 @@ declare HELP_ENVIRONMENT_VARIABLE_COLOR="\e[$(color_to_code cyan)m"
 
 # Header options:
 declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-Command: }"
-declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX}"
+declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX-}"
 
 declare HEADER_COMMAND_COLOR="$(color_to_code "${HEADER_COMMAND_COLOR-cyan}")"
 declare HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "${HEADER_COMMAND_PREFIX_COLOR-blue}")"
