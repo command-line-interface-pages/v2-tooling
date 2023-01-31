@@ -339,10 +339,6 @@ while [[ -n "$1" ]]; do
     rm -rf "$CACHE_DIRECTORY/$page_path"
     exit "$SUCCESS"
     ;;
-  --update-cache | -uc)
-    update_cache=0
-    shift 2
-    ;;
   --update-page | -up)
     update_cache=0
     shift
