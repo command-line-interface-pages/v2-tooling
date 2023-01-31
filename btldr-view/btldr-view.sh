@@ -149,7 +149,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)] ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
+  $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)] ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
 ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
@@ -307,6 +307,7 @@ if (($# == 0)); then
 fi
 
 declare operating_system=common
+declare render=better-tldr
 declare -i update_cache=1
 
 while [[ -n "$1" ]]; do
@@ -336,6 +337,18 @@ while [[ -n "$1" ]]; do
         exit "$FAIL"
     }
     operating_system="$value"
+    shift 2
+    ;;
+  --render | -r)
+    [[ -z "$value" ]] && {
+        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+    [[ "$value" =~ ^(tldr|tldr-colorful|docopt|docopt-colorful)$ ]] || {
+        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+    render="$value"
     shift 2
     ;;
   --clear-cache | -cc)
