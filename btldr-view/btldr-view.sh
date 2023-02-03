@@ -275,8 +275,18 @@ better_tldr_render() {
   declare command_summary_internal="$(sed -nE 's/^> Internal: *//p' <<< "$page_content" | sed -n '1p')"
   declare command_summary_deprecated="$(sed -nE 's/^> Deprecated: *//p' <<< "$page_content" | sed -n '1p')"
 
-  [[ "$command_summary_internal" == true ]] && command_summary_internal="\n$SUMMARY_ATTENTION_SIGN This command should not be called directly"
-  [[ "$command_summary_deprecated" == true ]] && command_summary_deprecated="\n$SUMMARY_ATTENTION_SIGN This command is deprecated and should not be used"
+  if [[ "$command_summary_internal" == true ]]; then
+    command_summary_internal="\n$SUMMARY_ATTENTION_SIGN This command should not be called directly"
+  else
+    command_summary_internal=""
+  fi
+
+  if [[ "$command_summary_deprecated" == true ]]; then
+    command_summary_deprecated="\n$SUMMARY_ATTENTION_SIGN This command is deprecated and should not be used"
+  else
+    command_summary_deprecated=""
+  fi
+  
   command_summary="$(echo -e "$command_summary$command_summary_internal$command_summary_deprecated")"
   command_summary="$(sed -E ':x; N; $! bx; s/\n/\n  /g' <<< "$command_summary")"
 
