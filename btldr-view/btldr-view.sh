@@ -114,6 +114,9 @@ declare SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_SUFFIX_
 declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_SUFFIX_COLOR-blue}")"
 declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-blue}")"
 
+declare SUMMARY_DESCRIPTION_ATTENTION_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_ATTENTION_COLOR-blue}")"
+declare SUMMARY_ATTENTION_SIGN="\e[${SUMMARY_DESCRIPTION_ATTENTION_COLOR}m[!]\e[${SUMMARY_DESCRIPTION_COLOR}m"
+
 
 # Code description options:
 declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-Code description: }"
@@ -265,16 +268,20 @@ better_tldr_render() {
   declare page_content="$1"
 
   declare command_name="$(sed -nE 's/^# //p' <<< "$page_content")"
-  declare command_summary="$(sed -nE '/> (Aliases|See also|More information):/! s/^> //p' <<< "$page_content")"
-  declare command_summary_aliases="$(sed -nE 's/^> Aliases: *//p' <<< "$page_content")"
-  declare command_summary_see_also="$(sed -nE 's/^> See also: *//p' <<< "$page_content")"
-  declare command_summary_more_information="$(sed -nE 's/^> More information: *//p' <<< "$page_content")"
+  declare command_summary="$(sed -nE '/> (Aliases|See also|More information|Internal|Deprecated):/! s/^> //p' <<< "$page_content")"
+  declare command_summary_aliases="$(sed -nE 's/^> Aliases: *//p' <<< "$page_content" | sed -n '1p')"
+  declare command_summary_see_also="$(sed -nE 's/^> See also: *//p' <<< "$page_content" | sed -n '1p')"
+  declare command_summary_more_information="$(sed -nE 's/^> More information: *//p' <<< "$page_content" | sed -n '1p')"
+  declare command_summary_internal="$(sed -nE 's/^> Internal: *//p' <<< "$page_content" | sed -n '1p')"
+  declare command_summary_deprecated="$(sed -nE 's/^> Deprecated: *//p' <<< "$page_content" | sed -n '1p')"
 
-  command_summary="$(sed -E 'N; s/\n/\n  /' <<< "$command_summary")"
+  [[ "$command_summary_internal" == true ]] && command_summary_internal="\n$SUMMARY_ATTENTION_SIGN This command should not be called directly"
+  [[ "$command_summary_deprecated" == true ]] && command_summary_deprecated="\n$SUMMARY_ATTENTION_SIGN This command is deprecated and should not be used"
+  command_summary="$(echo -e "$command_summary$command_summary_internal$command_summary_deprecated")"
+  command_summary="$(sed -E ':x; N; $! bx; s/\n/\n  /g' <<< "$command_summary")"
 
   echo -e "\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\e[${HEADER_COMMAND_COLOR}m$command_name\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX"
 
-  echo
   echo -e "\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\e[${SUMMARY_DESCRIPTION_COLOR}m$command_summary\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m$SUMMARY_DESCRIPTION_SUFFIX"
 
   [[ -n "$command_summary_aliases" ]] && \
