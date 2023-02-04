@@ -126,27 +126,30 @@ declare SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_S
 
 
 # Code description options:
-declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-Code description: }"
+declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-- }"
+declare CODE_DESCRIPTION_SUFFIX="${CODE_DESCRIPTION_SUFFIX-}"
 
-declare CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_PREFIX_COLOR-green}")"
-
-declare CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_SUFFIX_COLOR-cyan}")"
+declare CODE_DESCRIPTION_COLOR="$(color_to_code "${CODE_DESCRIPTION_COLOR-gray}")"
+declare CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_PREFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_SUFFIX_COLOR-red}")"
 
 
 # Code description mnemonic options:
 declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-}"
-
 declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-}"
 
-declare CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_COLOR-red}")"
+declare CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_COLOR-light-red}")"
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR-red}")"
 
 
 # Code description stream options:
-declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-\'}"
+declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-}"
+declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-}"
 
-declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-\'}"
-
-declare CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_COLOR-red}")"
+declare CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_COLOR-light-red}")"
+declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_PREFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR-red}")"
 
 
 # Code example options:
@@ -232,16 +235,28 @@ ${HELP_HEADER_COLOR}  Description:$HELP_TEXT_COLOR
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'Deprecated' tag value
 
 ${HELP_HEADER_COLOR}  Code description:$HELP_TEXT_COLOR
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_PREFIX ${HELP_TEXT_COLOR}everything before a code description
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_PREFIX ${HELP_TEXT_COLOR}everything before a mnemonic
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_SUFFIX ${HELP_TEXT_COLOR}everything after mnemonic
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_PREFIX ${HELP_TEXT_COLOR}everything before an I/O stream
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_SUFFIX ${HELP_TEXT_COLOR}everything after an I/O stream
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_PREFIX ${HELP_TEXT_COLOR}everything before a code description
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_SUFFIX ${HELP_TEXT_COLOR}everything after a code description
 
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a code description
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for a code description
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_COLOR ${HELP_TEXT_COLOR}color for a mnemonic
-    $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_COLOR ${HELP_TEXT_COLOR}color for an I/O stream
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_COLOR ${HELP_TEXT_COLOR}color for a code description
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a code description
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after a code description
+
+${HELP_HEADER_COLOR}    Code description mnemonics:$HELP_TEXT_COLOR
+      $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_PREFIX ${HELP_TEXT_COLOR}everything before a code description mnemonic
+      $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_SUFFIX ${HELP_TEXT_COLOR}everything after a code description mnemonic
+
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_COLOR ${HELP_TEXT_COLOR}color for a code description mnemonic
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a code description mnemonic
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after a code description mnemonic
+
+${HELP_HEADER_COLOR}    Code description I/O streams:$HELP_TEXT_COLOR
+      $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_PREFIX ${HELP_TEXT_COLOR}everything before a code description I/O stream
+      $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_SUFFIX ${HELP_TEXT_COLOR}everything after a code description I/O stream
+
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_COLOR ${HELP_TEXT_COLOR}color for a code description I/O stream
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a code description I/O stream
+      $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_STREAM_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after a code description I/O stream
 
 ${HELP_HEADER_COLOR}  Code example:$HELP_TEXT_COLOR
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PREFIX ${HELP_TEXT_COLOR}everything before a code example
@@ -309,7 +324,7 @@ summary_awk_parsable_tags() {
   sed -nE '/^> .+:/ {
     s/^> +//
     s/ +$//
-    s/: +/:/
+    s/: +/::/
     s/^(.+):/\L\1:/
     s/^more +information/more_information/
     s/^see +also/see_also/
@@ -323,8 +338,8 @@ examples_awk_parsable_example() {
   declare page_content="$1"
   declare -i example_number="$2"
 
-  page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\1:\2\n/g' <<< "$page_content")"
-  page_content="$(sed -nE '/[#>]/!p' <<< "$page_content")"
+  page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\n\1::\2\n/g' <<< "$page_content")"
+  page_content="$(sed -nE '/^[#>]/!p' <<< "$page_content" | sed -n '/^$/!p')"
 
   (( example_number < 1 || example_number > 8 )) && return
 
@@ -344,12 +359,12 @@ better_tldr_render() {
 
   declare tags="$(summary_awk_parsable_tags "$page_content")"
   declare more_information_tag_value="$(sed -n 's/^more_information://p'<<< "$tags")"
-  declare help_tag_value="$(awk -F : '/^help/ { print $2 }'<<< "$tags")"
-  declare version_tag_value="$(awk -F : '/^version/ { print $2 }'<<< "$tags")"
-  declare internal_tag_value="$(awk -F : '/^internal/ { print $2 }'<<< "$tags")"
-  declare deprecated_tag_value="$(awk -F : '/^deprecated/ { print $2 }'<<< "$tags")"
-  declare see_also_tag_value="$(awk -F : '/^see_also/ { print $2 }'<<< "$tags")"
-  declare aliases_tag_value="$(awk -F : '/^aliases/ { print $2 }'<<< "$tags")"
+  declare help_tag_value="$(awk -F :: '/^help/ { print $2 }'<<< "$tags")"
+  declare version_tag_value="$(awk -F :: '/^version/ { print $2 }'<<< "$tags")"
+  declare internal_tag_value="$(awk -F :: '/^internal/ { print $2 }'<<< "$tags")"
+  declare deprecated_tag_value="$(awk -F :: '/^deprecated/ { print $2 }'<<< "$tags")"
+  declare see_also_tag_value="$(awk -F :: '/^see_also/ { print $2 }'<<< "$tags")"
+  declare aliases_tag_value="$(awk -F :: '/^aliases/ { print $2 }'<<< "$tags")"
 
   declare internal_tag_message=""
   [[ "$internal_tag_value" == true ]] &&
@@ -374,6 +389,67 @@ better_tldr_render() {
   
   printed_tags="$(sed -E ':x; N; $! bx; s/\n+/\n/g' <<< "$printed_tags")"
   echo -e "$printed_tags"
+
+  for example_number in {1..8}; do
+    declare example="$(examples_awk_parsable_example "$page_content" "$example_number")"
+    [[ -z "$example" ]] && return
+    declare description="$(awk -F :: '{ print $1 }'<<< "$example")"
+    declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
+
+    declare -i index=0
+    declare is_next_character_escaped=false
+
+    # colorizing mnemonics
+    declare colorized_description=""
+
+    declare is_inside_mnemonic=false
+
+    while ((index < ${#description})); do
+      declare string_between_mnemonics=""
+      declare mnemonic=""
+      declare is_last_mnemonic_closed=true
+
+      while [[ "$index" -lt "${#description}" && "${description:index:1}" != "["  ]]; do
+        declare character="${description:index:1}"
+        declare next_character="${description:index + 1:1}"
+        if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
+          index+=1
+        else
+          string_between_mnemonics+="$character"
+        fi
+        ((index++))
+      done
+      ((index++))
+      while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
+        [[ "${description:index:1}" == " " ]] && {
+          ((index--))
+          break
+        }
+        mnemonic+="${description:index:1}"
+        ((index++))
+        
+        
+        if [[ "$index" -eq "${#description}" && "${description:index:1}" != "]" ]]; then
+          is_last_mnemonic_closed=false
+        fi
+      done
+      ((index++))
+
+      ((${#string_between_mnemonics} != 0)) && colorized_description+="\e[${CODE_DESCRIPTION_COLOR}m$string_between_mnemonics"
+      ((${#mnemonic} != 0)) && {
+        if [[ "$is_last_mnemonic_closed" == true ]]; then
+          colorized_description+="\e[${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$mnemonic\e[${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_SUFFIX"
+        else
+          colorized_description+="$mnemonic"
+        fi
+      }
+    done
+
+    echo -e "$colorized_description"
+    return
+  done
+
+  return
 
   echo -e "$(sed -nE "
   /^- / {
