@@ -192,7 +192,11 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR] [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)] ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
+  $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR]
+    [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR]
+    [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)]
+    [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<long|short>$HELP_PUNCTUATION_COLOR]
+    ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
 ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
@@ -710,6 +714,8 @@ is_layout_valid() {
 render() {
   declare page_file="$1"
   declare render="$2"
+  declare option_type="$3"
+
   declare page_content="$(cat "$page_file")
 
 "
@@ -718,6 +724,21 @@ render() {
     echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
+
+
+  declare -i option_group_number=0
+  case "$option_type" in
+    long)
+      option_group_number=1
+      ;;
+    short)
+      option_group_number=2
+      ;;
+  esac
+
+  page_content="$(sed -E "/^\`/ {
+    s/\{option[?+*]? +[^{}:]+: ([^{},]+), *([^{},]+)\}/\\$option_group_number/g
+  }" <<< "$page_content")"
 
   case "$render" in
     better-tldr)
@@ -746,6 +767,7 @@ fi
 declare operating_system=common
 declare render=better-tldr
 declare -i update_cache=1
+declare option_type=long
 
 while [[ -n "$1" ]]; do
   declare option="$1"
@@ -841,6 +863,18 @@ while [[ -n "$1" ]]; do
     update_cache=0
     shift
     ;;
+  --option-type | -ot)
+    [[ -z "$value" ]] && {
+        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+    [[ "$value" =~ ^(long|short)$ ]] || {
+        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+    option_type="$value"
+    shift 2
+    ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
@@ -873,7 +907,7 @@ while [[ -n "$1" ]]; do
       fi
     fi
 
-    render "$file_to_render" "$render" || {
+    render "$file_to_render" "$render" "$option_type" || {
       rm "$file_to_render"
       exit "$FAIL"
     }
