@@ -738,6 +738,7 @@ render() {
 
   page_content="$(sed -E "/^\`/ {
     s/\{option[?+*]? +[^{}:]+: ([^{},]+), *([^{},]+)\}/\\$option_group_number/g
+    s/\{option[?+*]?: ([^{},]+), *([^{},]+)\}/\\$option_group_number/g
   }" <<< "$page_content")"
 
   case "$render" in
