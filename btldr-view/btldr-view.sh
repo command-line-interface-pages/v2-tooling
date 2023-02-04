@@ -411,6 +411,7 @@ better_tldr_render() {
         declare next_character="${description:index + 1:1}"
         if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
           index+=1
+          string_between_mnemonics+="$next_character"
         else
           string_between_mnemonics+="$character"
         fi
@@ -450,13 +451,6 @@ better_tldr_render() {
   return
 
   echo -e "$(sed -nE "
-  /^- / {
-    s/\[([^ /]+)\]/\\\\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\1$CODE_DESCRIPTION_MNEMONIC_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/g
-    s/^- (.*):$/\\\\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m\1\\\\e[0m/
-    s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m/
-    p
-  }
-  
   /^\`/ {
     s/\`(.*)\`/\\\\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\\\\e[${CODE_EXAMPLE_SUFFIX_COLOR}m\1\\\\e[0m\n/
 
