@@ -6,7 +6,7 @@ declare -i SUCCESS=0
 declare -i FAIL=1
 
 # Cache options:
-declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.btldr}"
+declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
 
 color_to_code() {
   declare color="$1"
@@ -180,7 +180,7 @@ declare CODE_EXAMPLE_TLDR_REPEATED_ONE_OR_MORE_PLACEHOLDER_COLOR="$(color_to_cod
 help() {
   declare program_name="$(basename "$0")"
 
-  echo -e "${HELP_TEXT_COLOR}Render for Better TlDr pages.
+  echo -e "${HELP_TEXT_COLOR}Render for Command Line Interface Pages pages.
 
 ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--help$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-h$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
@@ -846,8 +846,8 @@ while [[ -n "$1" ]]; do
     declare local_file_or_remote_page="$option"
     declare is_local=1
 
-    file_to_render="$(mktemp "/tmp/btldr-XXXXXX")"
-    [[ "$local_file_or_remote_page" =~ .btldr$ ]] && is_local=0
+    file_to_render="$(mktemp "/tmp/clip-XXXXXX")"
+    [[ "$local_file_or_remote_page" =~ .clip$ ]] && is_local=0
 
     declare file_to_render
     if ((is_local == 0)); then
@@ -857,7 +857,7 @@ while [[ -n "$1" ]]; do
       }
       cat "$local_file_or_remote_page" > "$file_to_render"
     else
-      declare page_path="$operating_system/$local_file_or_remote_page.btldr"
+      declare page_path="$operating_system/$local_file_or_remote_page.clip"
 
       ((update_cache == 0)) && rm -rf "$CACHE_DIRECTORY/$page_path"
 

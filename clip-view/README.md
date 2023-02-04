@@ -1,6 +1,6 @@
-# Render for Better TlDr pages
+# Render for Command Line Interface Pages pages
 
-Render for Better TlDr pages.
+Render for Command Line Interface Pages pages.
 
 ## Example
 
