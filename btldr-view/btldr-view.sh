@@ -397,12 +397,9 @@ better_tldr_render() {
     declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
 
     declare -i index=0
-    declare is_next_character_escaped=false
-
+    
     # colorizing mnemonics
     declare colorized_description=""
-
-    declare is_inside_mnemonic=false
 
     while ((index < ${#description})); do
       declare string_between_mnemonics=""
@@ -446,7 +443,7 @@ better_tldr_render() {
     done
 
     echo -e "$colorized_description"
-    return
+    #return
   done
 
   return
