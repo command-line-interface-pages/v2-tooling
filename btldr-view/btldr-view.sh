@@ -358,7 +358,7 @@ better_tldr_render() {
   echo -e "\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\e[${SUMMARY_DESCRIPTION_COLOR}m$command_description\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m$SUMMARY_DESCRIPTION_SUFFIX"
 
   declare tags="$(summary_awk_parsable_tags "$page_content")"
-  declare more_information_tag_value="$(sed -n 's/^more_information://p'<<< "$tags")"
+  declare more_information_tag_value="$(sed -n 's/^more_information:://p'<<< "$tags")"
   declare help_tag_value="$(awk -F :: '/^help/ { print $2 }'<<< "$tags")"
   declare version_tag_value="$(awk -F :: '/^version/ { print $2 }'<<< "$tags")"
   declare internal_tag_value="$(awk -F :: '/^internal/ { print $2 }'<<< "$tags")"
