@@ -397,7 +397,7 @@ better_tldr_render() {
     declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
 
     declare -i index=0
-    
+
     # colorizing mnemonics
     declare colorized_description=""
 
@@ -425,7 +425,6 @@ better_tldr_render() {
         mnemonic+="${description:index:1}"
         ((index++))
         
-        
         if [[ "$index" -eq "${#description}" && "${description:index:1}" != "]" ]]; then
           is_last_mnemonic_closed=false
         fi
@@ -441,6 +440,8 @@ better_tldr_render() {
         fi
       }
     done
+
+    colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
 
     echo -e "$colorized_description"
     #return
