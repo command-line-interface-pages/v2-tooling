@@ -341,7 +341,8 @@ examples_awk_parsable_example() {
   page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\n\1::\2\n/g' <<< "$page_content")"
   page_content="$(sed -nE '/^[#>]/!p' <<< "$page_content" | sed -n '/^$/!p')"
 
-  (( example_number < 1 || example_number > 8 )) && return
+  # 10 is used as 2 auto generated examples can appear here
+  (( example_number < 1 || example_number > 10 )) && return
 
   sed -n "${example_number}p" <<< "$page_content"
 }
@@ -390,7 +391,41 @@ better_tldr_render() {
   printed_tags="$(sed -E ':x; N; $! bx; s/\n+/\n/g' <<< "$printed_tags")"
   echo -e "$printed_tags"
 
-  for example_number in {1..8}; do
+  [[ -n "$help_tag_value" ]] && {
+    declare help_term="help"
+
+    case "$(sed -E 's/^-*//' <<< "$help_tag_value")" in
+      help)
+        help_term="[help]"
+        ;;
+      h)
+        help_term="[h]elp"
+        ;;
+    esac
+
+    page_content="$page_content
+- Display a $help_term:
+\`$command_name $help_tag_value\`"
+  }
+
+  [[ -n "$version_tag_value" ]] && {
+    declare version_term="version"
+
+    case "$(sed -E 's/^-*//' <<< "$version_tag_value")" in
+      version)
+        version_term="[version]"
+        ;;
+      v)
+        version_term="[v]ersion"
+        ;;
+    esac
+
+    page_content="$page_content
+- Display a $version_term:
+\`$command_name $version_tag_value\`"
+  }
+
+  for example_number in {1..10}; do
     declare example="$(examples_awk_parsable_example "$page_content" "$example_number")"
     [[ -z "$example" ]] && return
     declare description="$(awk -F :: '{ print $1 }'<<< "$example")"
