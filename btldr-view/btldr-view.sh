@@ -419,14 +419,24 @@ better_tldr_render() {
       done
       ((index++))
       while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
-        [[ "${description:index:1}" == " " ]] && {
+        declare character="${description:index:1}"
+        declare next_character="${description:index + 1:1}"
+
+        [[ "$character" =~ [\ /] ]] && {
           ((index--))
           break
         }
-        mnemonic+="${description:index:1}"
+
+        if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
+          ((index++))
+          mnemonic+="$next_character"
+        else
+          mnemonic+="$character"
+        fi
+        
         ((index++))
         
-        if [[ "$index" -eq "${#description}" && "${description:index:1}" != "]" ]]; then
+        if [[ "$index" -eq "${#description}" && "$character" != "]" ]]; then
           is_last_mnemonic_closed=false
         fi
       done
@@ -445,7 +455,6 @@ better_tldr_render() {
     colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
 
     echo -e "$colorized_description"
-    #return
   done
 
   return
