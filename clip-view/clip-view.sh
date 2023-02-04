@@ -356,6 +356,69 @@ term_with_mnemonic() {
   sed -E "s/($option)/[\1]/" <<< "$term"
 }
 
+get_colorized_description() {
+  declare description="$1"
+
+  declare -i index=0
+
+  # colorizing mnemonics
+  declare colorized_description=""
+
+  while ((index < ${#description})); do
+    declare string_between_mnemonics=""
+    declare mnemonic=""
+    declare is_last_mnemonic_closed=true
+
+    while [[ "$index" -lt "${#description}" && "${description:index:1}" != "["  ]]; do
+      declare character="${description:index:1}"
+      declare next_character="${description:index + 1:1}"
+      if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
+        index+=1
+        string_between_mnemonics+="$next_character"
+      else
+        string_between_mnemonics+="$character"
+      fi
+      ((index++))
+    done
+    ((index++))
+    while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
+      declare character="${description:index:1}"
+      declare next_character="${description:index + 1:1}"
+
+      [[ "$character" =~ [\ /] ]] && {
+        ((index--))
+        break
+      }
+
+      if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
+        ((index++))
+        mnemonic+="$next_character"
+      else
+        mnemonic+="$character"
+      fi
+      
+      ((index++))
+      
+      if [[ "$index" -eq "${#description}" && "$character" != "]" ]]; then
+        is_last_mnemonic_closed=false
+      fi
+    done
+    ((index++))
+
+    ((${#string_between_mnemonics} != 0)) && colorized_description+="\e[${CODE_DESCRIPTION_COLOR}m$string_between_mnemonics"
+    ((${#mnemonic} != 0)) && {
+      if [[ "$is_last_mnemonic_closed" == true ]]; then
+        colorized_description+="\e[${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$mnemonic\e[${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_SUFFIX"
+      else
+        colorized_description+="$mnemonic"
+      fi
+    }
+  done
+
+  colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
+  echo -n "$colorized_description"
+}
+
 better_tldr_render() {
   declare page_content="$1"
 
@@ -422,63 +485,7 @@ better_tldr_render() {
     declare description="$(awk -F :: '{ print $1 }'<<< "$example")"
     declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
 
-    declare -i index=0
-
-    # colorizing mnemonics
-    declare colorized_description=""
-
-    while ((index < ${#description})); do
-      declare string_between_mnemonics=""
-      declare mnemonic=""
-      declare is_last_mnemonic_closed=true
-
-      while [[ "$index" -lt "${#description}" && "${description:index:1}" != "["  ]]; do
-        declare character="${description:index:1}"
-        declare next_character="${description:index + 1:1}"
-        if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
-          index+=1
-          string_between_mnemonics+="$next_character"
-        else
-          string_between_mnemonics+="$character"
-        fi
-        ((index++))
-      done
-      ((index++))
-      while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
-        declare character="${description:index:1}"
-        declare next_character="${description:index + 1:1}"
-
-        [[ "$character" =~ [\ /] ]] && {
-          ((index--))
-          break
-        }
-
-        if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
-          ((index++))
-          mnemonic+="$next_character"
-        else
-          mnemonic+="$character"
-        fi
-        
-        ((index++))
-        
-        if [[ "$index" -eq "${#description}" && "$character" != "]" ]]; then
-          is_last_mnemonic_closed=false
-        fi
-      done
-      ((index++))
-
-      ((${#string_between_mnemonics} != 0)) && colorized_description+="\e[${CODE_DESCRIPTION_COLOR}m$string_between_mnemonics"
-      ((${#mnemonic} != 0)) && {
-        if [[ "$is_last_mnemonic_closed" == true ]]; then
-          colorized_description+="\e[${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_PREFIX\e[${CODE_DESCRIPTION_MNEMONIC_COLOR}m$mnemonic\e[${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR}m$CODE_DESCRIPTION_MNEMONIC_SUFFIX"
-        else
-          colorized_description+="$mnemonic"
-        fi
-      }
-    done
-
-    colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
+    colorized_description="$(get_colorized_description "$description")"
 
     echo -e "\e[${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\e[${CODE_DESCRIPTION_COLOR}m$colorized_description\e[${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR}m$CODE_DESCRIPTION_SUFFIX"
   done
