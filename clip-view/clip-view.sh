@@ -522,6 +522,9 @@ tldr_render() {
     s/\{(bool|int|float|char|string|command|any)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{(\/\?)?(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mpath\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{\/(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{(\/\?)?remote-(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote\/path\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{\/remote-(file|directory|path)[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/remote\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{remote-any[?*+]? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote \1\\\\e[${CODE_EXAMPLE_COLOR}m/g
 
     # broken placeholders
     s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_COLOR}m/g
@@ -559,21 +562,33 @@ tldr_render_colorful() {
     s/\{(bool|int|float|char|string|command|any) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{(\/\?)?(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mpath\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{\/(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{(\/\?)?remote-(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote\/path\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{\/remote-(file|directory|path) +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/remote\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{remote-any +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote \1\\\\e[${CODE_EXAMPLE_COLOR}m/g
 
     # placeholders with '?' quantifier
     s/\{(bool|int|float|char|string|command|any)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{(\/\?)?(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mpath\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{\/(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{(\/\?)?remote-(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mremote\/path\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{\/remote-(file|directory|path)\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\/remote\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{remote-any\? +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mremote \1\\\\e[${CODE_EXAMPLE_COLOR}m/g
 
     # placeholders with '+' quantifier
     s/\{(bool|int|float|char|string|command|any)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{(\/\?)?(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mpath\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{\/(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{(\/\?)?remote-(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mremote\/path\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{\/remote-(file|directory|path)\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\/remote\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{remote-any\+ +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mremote \1\\\\e[${CODE_EXAMPLE_COLOR}m/g
 
     # placeholders with '*' quantifier
     s/\{(bool|int|float|char|string|command|any)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{(\/\?)?(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mpath\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
     s/\{\/(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{(\/\?)?remote-(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mremote\/path\/to\/\3\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{\/remote-(file|directory|path)\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\/remote\/path\/to\/\2\\\\e[${CODE_EXAMPLE_COLOR}m/g
+    s/\{remote-any\* +([^{}:]+)\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mremote \1\\\\e[${CODE_EXAMPLE_COLOR}m/g
 
     # broken placeholders
     s/\{[^ {}]+[^{}]*\}/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}munsupported placeholder\\\\e[${CODE_EXAMPLE_COLOR}m/g
