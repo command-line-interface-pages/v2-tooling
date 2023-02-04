@@ -195,7 +195,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)]
-    [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<long|short>$HELP_PUNCTUATION_COLOR]
+    [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<short>$HELP_PUNCTUATION_COLOR]
     ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
@@ -869,8 +869,8 @@ while [[ -n "$1" ]]; do
         echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
         exit "$FAIL"
     }
-    [[ "$value" =~ ^(long|short)$ ]] || {
-        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+    [[ "$value" != "short" ]] && {
+        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected'$value'$RESET_COLOR" >&2
         exit "$FAIL"
     }
     option_type="$value"
