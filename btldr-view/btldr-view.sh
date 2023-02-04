@@ -94,28 +94,35 @@ declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-Description: }"
 declare SUMMARY_ALIASES_PREFIX="${SUMMARY_ALIASES_PREFIX-Aliases: }"
 declare SUMMARY_SEE_ALSO_PREFIX="${SUMMARY_SEE_ALSO_PREFIX-Similar commands: }"
 declare SUMMARY_MORE_INFORMATION_PREFIX="${SUMMARY_MORE_INFORMATION_PREFIX-Documentation: }"
+declare SUMMARY_INTERNAL_PREFIX="${SUMMARY_INTERNAL_PREFIX-[!] }"
+declare SUMMARY_DEPRECATED_PREFIX="${SUMMARY_DEPRECATED_PREFIX-[!] }"
 declare SUMMARY_DESCRIPTION_SUFFIX="${SUMMARY_DESCRIPTION_SUFFIX-}"
 declare SUMMARY_ALIASES_SUFFIX="${SUMMARY_ALIASES_SUFFIX-}"
 declare SUMMARY_SEE_ALSO_SUFFIX="${SUMMARY_SEE_ALSO_SUFFIX-}"
 declare SUMMARY_MORE_INFORMATION_SUFFIX="${SUMMARY_MORE_INFORMATION_SUFFIX-}"
+declare SUMMARY_INTERNAL_SUFFIX="${SUMMARY_INTERNAL_SUFFIX-}"
+declare SUMMARY_DEPRECATED_SUFFIX="${SUMMARY_DEPRECATED_SUFFIX-}"
 
 declare SUMMARY_DESCRIPTION_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_COLOR-cyan}")"
 declare SUMMARY_ALIASES_COLOR="$(color_to_code "${SUMMARY_ALIASES_COLOR-cyan}")"
 declare SUMMARY_SEE_ALSO_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_COLOR-cyan}")"
 declare SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_COLOR-cyan}")"
+declare SUMMARY_INTERNAL_COLOR="$(color_to_code "${SUMMARY_INTERNAL_COLOR-cyan}")"
+declare SUMMARY_DEPRECATED_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_COLOR-cyan}")"
 
 declare SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_PREFIX_COLOR-blue}")"
 declare SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_PREFIX_COLOR-blue}")"
 declare SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_PREFIX_COLOR-blue}")"
 declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_PREFIX_COLOR-blue}")"
+declare SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_PREFIX_COLOR-red}")"
+declare SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_PREFIX_COLOR-red}")"
 
 declare SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_SUFFIX_COLOR-blue}")"
 declare SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_SUFFIX_COLOR-blue}")"
 declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_SUFFIX_COLOR-blue}")"
 declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-blue}")"
-
-declare SUMMARY_DESCRIPTION_ATTENTION_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_ATTENTION_COLOR-blue}")"
-declare SUMMARY_ATTENTION_SIGN="\e[${SUMMARY_DESCRIPTION_ATTENTION_COLOR}m[!]\e[${SUMMARY_DESCRIPTION_COLOR}m"
+declare SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_SUFFIX_COLOR-red}")"
+declare SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_SUFFIX_COLOR-red}")"
 
 
 # Code description options:
@@ -194,19 +201,35 @@ ${HELP_HEADER_COLOR}  Description:$HELP_TEXT_COLOR
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_PREFIX ${HELP_TEXT_COLOR}everything before 'Aliases' tag
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_PREFIX ${HELP_TEXT_COLOR}everything before 'See also' tag
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_PREFIX ${HELP_TEXT_COLOR}everything before 'More information' tag
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_PREFIX ${HELP_TEXT_COLOR}everything before 'Internal' tag
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_PREFIX ${HELP_TEXT_COLOR}everything before 'Deprecated' tag
+    
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_SUFFIX ${HELP_TEXT_COLOR}everything after 'Aliases' tag value
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_SUFFIX ${HELP_TEXT_COLOR}everything after 'See also' tag value
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_SUFFIX ${HELP_TEXT_COLOR}everything after 'More information' tag value
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_SUFFIX ${HELP_TEXT_COLOR}everything after 'Internal' tag value
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_SUFFIX ${HELP_TEXT_COLOR}everything after 'Deprecated' tag value
 
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a command description
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before 'Aliases' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before 'See also' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before 'More information' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before 'Internal' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before 'Deprecated' tag value
+
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_COLOR ${HELP_TEXT_COLOR}color for a command description
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_COLOR ${HELP_TEXT_COLOR}color for 'Aliases' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_COLOR ${HELP_TEXT_COLOR}color for 'See also' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_COLOR ${HELP_TEXT_COLOR}color for 'More information' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_COLOR ${HELP_TEXT_COLOR}color for 'Internal' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_COLOR ${HELP_TEXT_COLOR}color for 'Deprecated' tag value
+    
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after a command description
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'Aliases' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'See also' tag value
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'More information' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'Internal' tag value
+    $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for everything after 'Deprecated' tag value
 
 ${HELP_HEADER_COLOR}  Code description:$HELP_TEXT_COLOR
     $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_PREFIX ${HELP_TEXT_COLOR}everything before a code description
@@ -264,46 +287,93 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
+
+# Page layout is already checked in `render` function.
+# Empty lines are already removed.
+header_awk_parsable_name() {
+  declare page_content="$1"
+  sed -nE '1 { s/^# +//; s/ +$//; p }' <<< "$page_content"
+}
+
+# Page layout is already checked in `render` function.
+# Empty lines are already removed.
+summary_awk_parsable_description() {
+  declare page_content="$1"
+  sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p }' <<< "$page_content"
+}
+
+# Page layout is already checked in `render` function.
+# Empty lines are already removed.
+summary_awk_parsable_tags() {
+  declare page_content="$1"
+  sed -nE '/^> .+:/ {
+    s/^> +//
+    s/ +$//
+    s/: +/:/
+    s/^(.+):/\L\1:/
+    s/^more +information/more_information/
+    s/^see +also/see_also/
+    p
+  }' <<< "$page_content"
+}
+
+# Page layout is already checked in `render` function.
+# Empty lines are already removed.
+examples_awk_parsable_example() {
+  declare page_content="$1"
+  declare -i example_number="$2"
+
+  page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\1:\2\n/g' <<< "$page_content")"
+  page_content="$(sed -nE '/[#>]/!p' <<< "$page_content")"
+
+  (( example_number < 1 || example_number > 8 )) && return
+
+  sed -n "${example_number}p" <<< "$page_content"
+}
+
 better_tldr_render() {
   declare page_content="$1"
 
-  declare command_name="$(sed -nE 's/^# //p' <<< "$page_content")"
-  declare command_summary="$(sed -nE '/> (Aliases|See also|More information|Internal|Deprecated):/! s/^> //p' <<< "$page_content")"
-  declare command_summary_aliases="$(sed -nE 's/^> Aliases: *//p' <<< "$page_content" | sed -n '1p')"
-  declare command_summary_see_also="$(sed -nE 's/^> See also: *//p' <<< "$page_content" | sed -n '1p')"
-  declare command_summary_more_information="$(sed -nE 's/^> More information: *//p' <<< "$page_content" | sed -n '1p')"
-  declare command_summary_internal="$(sed -nE 's/^> Internal: *//p' <<< "$page_content" | sed -n '1p')"
-  declare command_summary_deprecated="$(sed -nE 's/^> Deprecated: *//p' <<< "$page_content" | sed -n '1p')"
+  page_content="$(sed -nE '/^$/!p' <<< "$page_content")"
 
-  if [[ "$command_summary_internal" == true ]]; then
-    command_summary_internal="\n$SUMMARY_ATTENTION_SIGN This command should not be called directly"
-  else
-    command_summary_internal=""
-  fi
-
-  if [[ "$command_summary_deprecated" == true ]]; then
-    command_summary_deprecated="\n$SUMMARY_ATTENTION_SIGN This command is deprecated and should not be used"
-  else
-    command_summary_deprecated=""
-  fi
-  
-  command_summary="$(echo -e "$command_summary$command_summary_internal$command_summary_deprecated")"
-  command_summary="$(sed -E ':x; N; $! bx; s/\n/\n  /g' <<< "$command_summary")"
+  declare command_name="$(header_awk_parsable_name "$page_content")"
+  declare command_description="$(summary_awk_parsable_description "$page_content" | sed '1! s/^/  /')"
 
   echo -e "\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\e[${HEADER_COMMAND_COLOR}m$command_name\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX"
+  echo -e "\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\e[${SUMMARY_DESCRIPTION_COLOR}m$command_description\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m$SUMMARY_DESCRIPTION_SUFFIX"
 
-  echo -e "\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\e[${SUMMARY_DESCRIPTION_COLOR}m$command_summary\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m$SUMMARY_DESCRIPTION_SUFFIX"
+  declare tags="$(summary_awk_parsable_tags "$page_content")"
+  declare more_information_tag_value="$(sed -n 's/^more_information://p'<<< "$tags")"
+  declare help_tag_value="$(awk -F : '/^help/ { print $2 }'<<< "$tags")"
+  declare version_tag_value="$(awk -F : '/^version/ { print $2 }'<<< "$tags")"
+  declare internal_tag_value="$(awk -F : '/^internal/ { print $2 }'<<< "$tags")"
+  declare deprecated_tag_value="$(awk -F : '/^deprecated/ { print $2 }'<<< "$tags")"
+  declare see_also_tag_value="$(awk -F : '/^see_also/ { print $2 }'<<< "$tags")"
+  declare aliases_tag_value="$(awk -F : '/^aliases/ { print $2 }'<<< "$tags")"
 
-  [[ -n "$command_summary_aliases" ]] && \
-    echo -e "\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\e[${SUMMARY_ALIASES_COLOR}m$command_summary_aliases\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m$SUMMARY_ALIASES_SUFFIX"
+  declare internal_tag_message=""
+  [[ "$internal_tag_value" == true ]] &&
+    internal_tag_message="This command should not be called directly"
 
-  [[ -n "$command_summary_see_also" ]] && \
-    echo -e "\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\e[${SUMMARY_SEE_ALSO_COLOR}m$command_summary_see_also\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m$SUMMARY_SEE_ALSO_SUFFIX"
+  declare deprecated_tag_message=""
+  [[ "$deprecated_tag_value" == true ]] &&
+    deprecated_tag_message="This command is deprecated and should not be used"
 
-  [[ -n "$command_summary_more_information" ]] && \
-    echo -e "\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\e[${SUMMARY_MORE_INFORMATION_COLOR}m$command_summary_more_information\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m$SUMMARY_MORE_INFORMATION_SUFFIX"
+  declare printed_tags=""
   
-  echo
+  [[ -n "$see_also_tag_value" ]] &&
+    printed_tags+="\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\e[${SUMMARY_SEE_ALSO_COLOR}m$see_also_tag_value\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m$SUMMARY_SEE_ALSO_SUFFIX\n"
+  [[ -n "$aliases_tag_value" ]] &&
+    printed_tags+="\e[${SUMMARY_ALIASES_PREFIX_COLOR}m$SUMMARY_ALIASES_PREFIX\e[${SUMMARY_ALIASES_COLOR}m$aliases_tag_value\e[${SUMMARY_ALIASES_SUFFIX_COLOR}m$SUMMARY_ALIASES_SUFFIX\n"
+  [[ -n "$more_information_tag_value" ]] &&
+    printed_tags+="\e[${SUMMARY_MORE_INFORMATION_PREFIX_COLOR}m$SUMMARY_MORE_INFORMATION_PREFIX\e[${SUMMARY_MORE_INFORMATION_COLOR}m$more_information_tag_value\e[${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR}m$SUMMARY_MORE_INFORMATION_SUFFIX\n"
+  [[ -n "$internal_tag_message" ]] &&
+    printed_tags+="\e[${SUMMARY_INTERNAL_PREFIX_COLOR}m$SUMMARY_INTERNAL_PREFIX\e[${SUMMARY_INTERNAL_COLOR}m$internal_tag_message\e[${SUMMARY_INTERNAL_SUFFIX_COLOR}m$SUMMARY_INTERNAL_SUFFIX\n"
+  [[ -n "$deprecated_tag_message" ]] &&
+    printed_tags+="\e[${SUMMARY_DEPRECATED_PREFIX_COLOR}m$SUMMARY_DEPRECATED_PREFIX\e[${SUMMARY_DEPRECATED_COLOR}m$deprecated_tag_message\e[${SUMMARY_DEPRECATED_SUFFIX_COLOR}m$SUMMARY_DEPRECATED_SUFFIX\n"
+  
+  printed_tags="$(sed -E ':x; N; $! bx; s/\n+/\n/g' <<< "$printed_tags")"
+  echo -e "$printed_tags"
 
   echo -e "$(sed -nE "
   /^- / {
@@ -543,6 +613,12 @@ docopt_render_colorful() {
   }" <<<"$page_content")"
 }
 
+is_layout_valid() {
+  declare page_content="$1"
+
+  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content"
+}
+
 render() {
   declare page_file="$1"
   declare render="$2"
@@ -550,7 +626,7 @@ render() {
 
 "
 
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content" || {
+  is_layout_valid "$page_content" || {
     echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
