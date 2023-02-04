@@ -347,6 +347,14 @@ examples_awk_parsable_example() {
   sed -n "${example_number}p" <<< "$page_content"
 }
 
+term_with_mnemonic() {
+  declare term="$1"
+  declare option="$2"
+
+  option="$(sed -E 's/^-*//' <<< "$option")"
+  sed -E "s/($option)/[\1]/" <<< "$term"
+}
+
 better_tldr_render() {
   declare page_content="$1"
 
@@ -394,34 +402,16 @@ better_tldr_render() {
   [[ -n "$help_tag_value" ]] && {
     declare help_term="help"
 
-    case "$(sed -E 's/^-*//' <<< "$help_tag_value")" in
-      help)
-        help_term="[help]"
-        ;;
-      h)
-        help_term="[h]elp"
-        ;;
-    esac
-
     page_content="$page_content
-- Display a $help_term:
+- Display a $(term_with_mnemonic "$help_term" "$help_tag_value"):
 \`$command_name $help_tag_value\`"
   }
 
   [[ -n "$version_tag_value" ]] && {
     declare version_term="version"
 
-    case "$(sed -E 's/^-*//' <<< "$version_tag_value")" in
-      version)
-        version_term="[version]"
-        ;;
-      v)
-        version_term="[v]ersion"
-        ;;
-    esac
-
     page_content="$page_content
-- Display a $version_term:
+- Display a $(term_with_mnemonic "$version_term" "$version_tag_value"):
 \`$command_name $version_tag_value\`"
   }
 
