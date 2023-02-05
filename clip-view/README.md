@@ -1,0 +1,35 @@
+# Render for Command Line Interface Pages
+
+Render for Command Line Interface Pages.
+
+## Example
+
+Input TlDr page:
+
+```md
+# sed
+
+> Edit text in a scriptable manner
+> See also: awk, ed
+> More information: https://www.gnu.org/software/sed/manual/sed.html
+
+- Replace all specific strings (basic regex) with another one (basic regex) in all input lines:
+
+`{string input: command} | sed 's/{string replacable string: apple}/{string replacement string: mango}/g'`
+
+- Replace all specific strings (extended regex) with another one (extended regex) in all input lines:
+
+`{string input: command} | sed {option: --regexp-extended, -E} 's/{string replacable string: apple}/{string replacement string: mango}/g'`
+
+- Execute a specific script [f]ile:
+
+`{string input: command} | sed {option: --file, -f} {/?file script: sample.sed}`
+
+- Display a specific line:
+
+`{string input: command} | sed {option: --silent, -n} '{int line: 1}p'`
+```
+
+Output:
+
+![page](./screenshot.jpg)
