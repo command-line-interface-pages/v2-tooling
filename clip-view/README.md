@@ -1,6 +1,6 @@
-# Render for Command Line Interface Pages pages
+# Render for Command Line Interface Pages
 
-Render for Command Line Interface Pages pages.
+Render for Command Line Interface Pages.
 
 ## Example
 
