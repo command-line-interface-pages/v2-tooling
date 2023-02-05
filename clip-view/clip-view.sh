@@ -423,6 +423,131 @@ get_colorized_description() {
   echo -n "$colorized_description"
 }
 
+# Get everything before the first unescaped colon of everything
+get_placeholder_summary() {
+  declare placeholder_alternative_content="$1"
+
+  declare -i index=0
+  declare placeholder_summary=""
+
+  while [[ index -lt "${#placeholder_alternative_content}" && "${placeholder_alternative_content:index:1}" != ":" ]]; do
+    declare character="${placeholder_alternative_content:index:1}"
+    declare next_character="${placeholder_alternative_content:index + 1:1}"
+
+    if [[ "$character" == "\\" && "$next_character" == ":" ]]; then
+      index+=1
+      placeholder_summary+="$next_character"
+    else
+      placeholder_summary+="$character"
+    fi
+
+    ((index++))
+  done
+
+  echo "$placeholder_summary"
+  return "$index"
+}
+
+get_placeholder_examples() {
+  declare placeholder_alternative_content="$1"
+
+  get_placeholder_summary "$placeholder_alternative_content" > /dev/null
+  declare -i index="$(($? + 1))"
+
+  declare examples="${placeholder_alternative_content:index}"
+  sed -E 's/^ *//' <<< "$examples"
+}
+
+get_placeholder_summary_with_underscores() {
+  declare placeholder_alternative_summary="$1"
+
+  sed -E 's/ +/_/g; s/_/ /' <<< "$placeholder_alternative_summary"
+}
+
+get_colorized_complex_placeholder_content() {
+  declare placeholder_content="$1"
+
+  declare -i index=0
+  declare is_first_alternative=true
+
+  while ((index < ${#placeholder_content})); do
+    declare placeholder_content_alternative=""
+
+    while [[ "$index" -lt "${#placeholder_content}" && "${placeholder_content:index:1}" != "|" ]]; do
+      declare character="${placeholder_content:index:1}"
+      declare next_character="${placeholder_content:index + 1:1}"
+
+      if [[ "$character" == "\\" && "$next_character" == "|" ]]; then
+        index+=1
+        placeholder_content_alternative+="$next_character"
+      else
+        placeholder_content_alternative+="$character"
+      fi
+
+      ((index++))
+    done
+
+    ((index++))
+
+    [[ -n "$placeholder_content_alternative" ]] && {
+      [[ "$is_first_alternative" == false ]] && echo -en "\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m|"
+      is_first_alternative=false
+
+      # unescaped colon is meant
+      declare everything_before_colon="$(get_placeholder_summary "$placeholder_content_alternative")"
+      declare everything_after_colon="$(get_placeholder_examples "$placeholder_content_alternative")"
+
+      declare placeholder_content_summary="$(get_placeholder_summary_with_underscores "$everything_before_colon")"
+      declare placeholder_content_examples="$everything_after_colon" # later more processing will be done here
+
+      placeholder_content_summary="$(sed -E "/^(\/|(\/\?)?)(bool|int|float|char|string|command|any|file|directory|path|remote-file|remote-directory|remote-path|remote-any)[?+*]?/ {
+        # placeholders without quantifiers
+        s/^(bool|int|float|char|string|command|any) (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\2/g
+        s/^(\/\?)?(file|directory|path) (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mpath\/to\/\3/g
+        s/^\/(file|directory|path) (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/path\/to\/\2/g
+        s/^(\/\?)?remote-(file|directory|path) (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote\/path\/to\/\3/g
+        s/^\/remote-(file|directory|path) (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}m\/remote\/path\/to\/\2/g
+        s/^remote-any (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}mremote \1/g
+
+        # placeholders with '?' quantifier
+        s/^(bool|int|float|char|string|command|any)\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\2/g
+        s/^(\/\?)?(file|directory|path)\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mpath\/to\/\3/g
+        s/^\/(file|directory|path)\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\/path\/to\/\2/g
+        s/^(\/\?)?remote-(file|directory|path)\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mremote\/path\/to\/\3/g
+        s/^\/remote-(file|directory|path)\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}m\/remote\/path\/to\/\2/g
+        s/^remote-any\? (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR}mremote \1/g
+
+        # placeholders with '+' quantifier
+        s/^(bool|int|float|char|string|command|any)\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\2/g
+        s/^(\/\?)?(file|directory|path)\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mpath\/to\/\3/g
+        s/^\/(file|directory|path)\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\/path\/to\/\2/g
+        s/^(\/\?)?remote-(file|directory|path)\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mremote\/path\/to\/\3/g
+        s/^\/remote-(file|directory|path)\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}m\/remote\/path\/to\/\2/g
+        s/^remote-any\+ (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR}mremote \1/g
+
+        # placeholders with '*' quantifier
+        s/^(bool|int|float|char|string|command|any)\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\2/g
+        s/^(\/\?)?(file|directory|path)\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mpath\/to\/\3/g
+        s/^\/(file|directory|path)\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\/path\/to\/\2/g
+        s/^(\/\?)?remote-(file|directory|path)\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mremote\/path\/to\/\3/g
+        s/^\/remote-(file|directory|path)\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}m\/remote\/path\/to\/\2/g
+        s/^remote-any\* (.+)/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR}mremote \1/g
+
+        b
+      }
+
+      # broken placeholders
+      s/^.+$/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}munsupported placeholder/g
+      " <<< "$placeholder_content_summary")"
+
+      echo -n "$placeholder_content_summary"
+
+      [[ -n "$everything_after_colon" ]] &&
+        echo -en "\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m, like: \e[${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR}m$placeholder_content_examples"
+    }
+  done
+}
+
 get_colorized_code() {
   declare code="$1"
 
@@ -470,7 +595,8 @@ get_colorized_code() {
     ((${#string_between_placeholders} != 0)) && colorized_code+="\e[${CODE_EXAMPLE_COLOR}m$string_between_placeholders"
     ((${#placeholder} != 0)) && {
       if [[ "$is_last_placeholder_closed" == true ]]; then
-        colorized_code+="\e[${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$placeholder\e[${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX"
+        declare colorized_placeholder_content="$(get_colorized_complex_placeholder_content "$placeholder")"
+        colorized_code+="\e[${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$colorized_placeholder_content\e[${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX"
       else
         colorized_code+="$placeholder"
       fi
