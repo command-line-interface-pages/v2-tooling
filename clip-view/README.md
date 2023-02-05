@@ -4,7 +4,7 @@ Render for Command Line Interface Pages.
 
 ## Example
 
-Input TlDr page:
+Input CLIP page:
 
 ```md
 # sed
