@@ -10,30 +10,24 @@ Input TlDr page:
 # sed
 
 > Edit text in a scriptable manner
-> Aliases: test
 > See also: awk, ed
 > More information: https://www.gnu.org/software/sed/manual/sed.html
 
-- Replace all "apple" (basic regex) occurrences with "mango" (basic regex) in all input lines and print the result to stdout:
+- Replace all specific strings (basic regex) with another one (basic regex) in all input lines:
 
-`{string command: cat sample.txt} | sed {file+ input: sample.txt} 's/apple/mango/g'`
+`{string input: command} | sed 's/{string replacable string: apple}/{string replacement string: mango}/g'`
 
-- Execute a specific script [f]ile and print the result to stdout:
+- Replace all specific strings (extended regex) with another one (extended regex) in all input lines:
 
-`{string command: cat sample.txt} | sed -f {file script: sample.sed}`
+`{string input: command} | sed {option: --regexp-extended, -E} 's/{string replacable string: apple}/{string replacement string: mango}/g'`
 
-- Replace all "apple" ([E]xtended regex) occurrences with "APPLE" (extended regex) in all input lines and print the result to stdout:
+- Execute a specific script [f]ile:
 
-`{string command: cat sample.txt} | sed -E 's/(apple)/\U\1/g'`
+`{string input: command} | sed {option: --file, -f} {/?file script: sample.sed}`
 
-- Print just a first line to stdout:
+- Display a specific line:
 
-`{string command: cat sample.txt} | sed -n '1p'`
-
-- Replace all `apple` (basic regex) occurrences with `mango` (basic regex) in all input lines and save modifications to a specific file:
-
-`sed -i 's/apple/mango/g' {file output: sample.txt}`
-
+`{string input: command} | sed {option: --silent, -n} '{int line: 1}p'`
 ```
 
 Output:
