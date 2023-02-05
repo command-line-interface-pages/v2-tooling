@@ -364,8 +364,6 @@ get_colorized_description() {
   declare description="$1"
 
   declare -i index=0
-
-  # colorizing mnemonics
   declare colorized_description=""
 
   while ((index < ${#description})); do
@@ -384,7 +382,9 @@ get_colorized_description() {
       fi
       ((index++))
     done
+
     ((index++))
+    
     while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
       declare character="${description:index:1}"
       declare next_character="${description:index + 1:1}"
@@ -421,6 +421,63 @@ get_colorized_description() {
 
   colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
   echo -n "$colorized_description"
+}
+
+get_colorized_code() {
+  declare code="$1"
+
+  declare -i index=0
+  declare colorized_code=""
+
+  while ((index < ${#code})); do
+    declare string_between_placeholders=""
+    declare placeholder=""
+    declare is_last_placeholder_closed=true
+
+    while [[ "$index" -lt "${#code}" && "${code:index:1}" != "{"  ]]; do
+      declare character="${code:index:1}"
+      declare next_character="${code:index + 1:1}"
+      if [[ "$character" == "\\" && "$next_character" =~ \{|\} ]]; then
+        index+=1
+        string_between_placeholders+="$next_character"
+      else
+        string_between_placeholders+="$character"
+      fi
+      ((index++))
+    done
+
+    ((index++))
+
+    while [[ "$index" -lt "${#code}" && "${code:index:1}" != "}" ]]; do
+      declare character="${code:index:1}"
+      declare next_character="${code:index + 1:1}"
+
+      if [[ "$character" == "\\" && "$next_character" =~ \{|\} ]]; then
+        ((index++))
+        placeholder+="$next_character"
+      else
+        placeholder+="$character"
+      fi
+      
+      ((index++))
+      
+      if [[ "$index" -eq "${#code}" && "$character" != "}" ]]; then
+        is_last_placeholder_closed=false
+      fi
+    done
+    ((index++))
+
+    ((${#string_between_placeholders} != 0)) && colorized_code+="\e[${CODE_EXAMPLE_COLOR}m$string_between_placeholders"
+    ((${#placeholder} != 0)) && {
+      if [[ "$is_last_placeholder_closed" == true ]]; then
+        colorized_code+="\e[${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_PREFIX\e[${CODE_EXAMPLE_PLACEHOLDER_COLOR}m$placeholder\e[${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR}m$CODE_EXAMPLE_PLACEHOLDER_SUFFIX"
+      else
+        colorized_code+="$placeholder"
+      fi
+    }
+  done
+
+  echo -n "$colorized_code"
 }
 
 better_tldr_render() {
@@ -489,9 +546,13 @@ better_tldr_render() {
     declare description="$(awk -F :: '{ print $1 }'<<< "$example")"
     declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
 
-    colorized_description="$(get_colorized_description "$description")"
+    declare colorized_description="$(get_colorized_description "$description")"
+    echo -e "\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\e[${CODE_DESCRIPTION_COLOR}m$colorized_description\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m$CODE_DESCRIPTION_SUFFIX"
+  
+    declare colorized_code="$(get_colorized_code "$code")"
+    echo -e "\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\e[${CODE_EXAMPLE_COLOR}m$colorized_code\e[${CODE_EXAMPLE_SUFFIX_COLOR}m$CODE_EXAMPLE_SUFFIX"
 
-    echo -e "\e[${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\e[${CODE_DESCRIPTION_COLOR}m$colorized_description\e[${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR}m$CODE_DESCRIPTION_SUFFIX"
+    [[ -n "$(examples_awk_parsable_example "$page_content" "$((example_number + 1))")" ]] && echo
   done
 }
 
