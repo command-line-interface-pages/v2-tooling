@@ -93,7 +93,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.0" >&2
+  echo "1.1" >&2
 }
 
 author() {
@@ -104,14 +104,29 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
-convert() {
-  declare page_file="$1"
-  declare page_content="$(cat "$page_file")
+check_dependencies_correctness() {
+  which sed >/dev/null || {
+    echo -e "$PROGRAM_NAME: sed: ${ERROR_COLOR}installed command expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+}
+
+check_layout_correctness() {
+  declare page_content="$1
 
 "
 
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<< "$page_content" || {
-    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
+  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content"
+}
+
+convert() {
+  declare in_file="$1"
+
+  declare file_content="$(cat "$in_file")"
+  declare program_name="$(basename "$0")"
+
+  check_layout_correctness "$file_content" || {
+    echo -e "$program_name: $in_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
@@ -200,9 +215,10 @@ convert() {
 
     s/\{\{([^{}]+)\}\}/{string value: \1}/g
 
-  }' <<< "$page_content"
+  }' <<<"$file_content"
 }
 
+check_dependencies_correctness || exit "$FAIL"
 
 if (($# == 0)); then
   help
@@ -241,20 +257,20 @@ while [[ -n "$1" ]]; do
     ;;
   *)
     declare tldr_file="$option"
-    declare btldr_file="$(sed -E 's/.*\///; s/\.md$/.btldr/' <<< "$tldr_file")"
+    declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
     if [[ -z "$output_directory" ]]; then
-      btldr_file="$(dirname "$tldr_file")/$btldr_file"
+      clip_file="$(dirname "$tldr_file")/$clip_file"
     else
-      btldr_file="$output_directory/$btldr_file"
+      clip_file="$output_directory/$clip_file"
     fi
 
-    declare btldr_content
-    btldr_content="$(convert "$tldr_file")"
+    declare clip_content
+    clip_content="$(convert "$tldr_file")"
     (($? != 0)) && exit "$FAIL"
 
-    echo "$btldr_content" > "$btldr_file"
+    echo "$clip_content" >"$clip_file"
 
-    echo -e "$0: $tldr_file: ${SUCCESS_COLOR}converted to $btldr_file$RESET_COLOR" >&2
+    echo -e "$0: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
     shift
     ;;
   esac
