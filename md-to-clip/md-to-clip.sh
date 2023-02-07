@@ -85,7 +85,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
 
 ${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
-  - 'More information' and 'See also' tags simplification
+  - Command summary and tag simplification
   - Placeholder conversion and optimization
 
 ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
@@ -143,7 +143,9 @@ convert() {
     return "$FAIL"
   }
 
-  sed -E '/^>/ {
+  sed -E '
+  # Correcting summary: removing a trailing dot and removing all not supported characters from syntax.
+  /^>/ {
     s/\.$//
     s/More +information: <(.*)>$/More information: \1/
 
@@ -153,6 +155,7 @@ convert() {
     }
   }
   
+  # Correcting code descriptions: standardizing all I/O stream names.
   /^-/ {
     s/`(std(in|out|err))`/\1/g
     s/standard +input( +stream)?/stdin/g
@@ -160,18 +163,32 @@ convert() {
     s/standard +error( +stream)?/stderr/g
   }
   
+  # Correcting code examples: fixing some broken placeholders and correcting some placeholders.
   /^`/ {
-    # correcting broken TlDr placeholders
+    # Removing unfixable placeholders.
     s/ *\{\{\.\.\.\}\} */ /g
 
+    # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
+    s/\{\{char(acter)?([[:digit:]]*)\}\}/{{character\2}}/g
+
+    s/\{\{(\/?)device([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
     s/\{\{(\/?)(file|executable|program|script|source)_or_directory([[:digit:]]*)\}\}/{{\1path\/to\/file_or_directory\3}}/g
 
     s/\{\{(\/?)(file|executable|program|script|source)_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file\4\5}}/g
     s/\{\{(\/?)dir(ectory)?_?(name)?([[:digit:]]*)\}\}/{{\1path\/to\/directory\4}}/g
 
     s/\{\{(\/?)(([^{}/]+)_)(file|executable|program|script|source)_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file\6\7}}/g
-    s/\{\{(\/?)(([^{}/]+)_)directory([[:digit:]]*)\}\}/{{\1path\/to\/\3_directory\4}}/g
+    s/\{\{(\/?)(([^{}/]+)_)dir(ectory)?_?(name)?([[:digit:]]*)\}\}/{{\1path\/to\/\3_directory\6}}/g
+
+    # Expanding plural placeholders without path/to prefix for futher processing.
+    s/\{\{(chars|char_?names|characters|character_?names)\}\}/{{character1 character2 ...}}/g
+    s/\{\{(\/?)(devices|device_?names)\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
+    s/\{\{(users|user_?names)\}\}/{{user1 user2 ...}}/g
+    s/\{\{(groups|group_?names)\}\}/{{group1 group2 ...}}/g
+    s/\{\{(urls|url_?names)\}\}/{{url1 url2 ...}}/g
+    s/\{\{(ips|ip_?names)\}\}/{{ip1 ip2 ...}}/g
+    s/\{\{(dbs|dp_?names|database|database_?names)\}\}/{{database1 database2 ...}}/g
 
     s/\{\{(\/?)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
@@ -179,30 +196,67 @@ convert() {
     s/\{\{(\/?)(([^{}/]+)_)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
     s/\{\{(\/?)(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
+
+    s/\{\{(char\(s\)|char_?name\(s\)|character\(s\)|character_?name\(s\))\}\}/{{character1 character2 ...}}/g
+    s/\{\{(\/?)(device\(s\)|device_?name\(s\))\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
+    s/\{\{(user\(s\)|user_?name\(s\))\}\}/{{user1 user2 ...}}/g
+    s/\{\{(group\(s\)|group_?name\(s\))\}\}/{{group1 group2 ...}}/g
+    s/\{\{(url\(s\)|url_?name\(s\))\}\}/{{url1 url2 ...}}/g
+    s/\{\{(ip\(s\)|ip_?name\(s\))\}\}/{{ip1 ip2 ...}}/g
+    s/\{\{(db\(s\)|dp_?name\(s\)|database\(s\)|database_?name\(s\))\}\}/{{database1 database2 ...}}/g
+
+    s/\{\{(\/?)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
+    s/\{\{(\/?)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
+
+    s/\{\{(\/?)(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
+    s/\{\{(\/?)(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+
+    # Expanding plural placeholders with path/to prefix for futher processing.
     s/\{\{(\/?)path\/to\/(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)path\/to\/(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-
+    
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
-    # converting TlDr placeholders to Better TlDr placeholders
+
+    s/\{\{(\/?)path\/to\/(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
+    s/\{\{(\/?)path\/to\/(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
+    
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+
+    # Converting singular boolean placeholders.
     s/\{\{(true|false|yes|no)[[:digit:]]*\}\}/{bool flag: \1}/g
 
+    # Converting singular int/float placeholders.
     s/\{\{([-+]?[[:digit:]]+)\}\}/{int value: \1}/g
     s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float value: \1}/g
 
+    # Converting singular character placeholders.
     s/\{\{character[[:digit:]]*\}\}/{char value}/g
 
+    # Converting plural character placeholders.
+    s/\{\{character[[:digit:]]+ +character[[:digit:]]+ +\.\.\.\}\}/{char* value}/g
+
+    # Converting singular range placeholders.
     s/\{\{([-+]?[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+)\}\}/{int range: \1..\3}/g
     s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float range: \1..\3}/g
 
-    s/\{\{user_?name[[:digit:]]*\}\}/{string user}/g
-    s/\{\{group_?name[[:digit:]]*\}\}/{string group}/g
-    s/\{\{url[[:digit:]]*\}\}/{string url}/g
-    s/\{\{ip[[:digit:]]*\}\}/{string ip}/g
-    s/\{\{db[[:digit:]]*\}\}/{string database}/g
+    # Converting singular special placeholders.
+    s/\{\{user_?(name)?[[:digit:]]*\}\}/{string user}/g
+    s/\{\{group_?(name)?[[:digit:]]*\}\}/{string group}/g
+    s/\{\{url_?(name)?[[:digit:]]*\}\}/{string url}/g
+    s/\{\{ip_?(name)?[[:digit:]]*\}\}/{string ip}/g
+    s/\{\{db_?(name)?[[:digit:]]*\}\}/{string database}/g
 
+    # Converting plural special placeholders.
+    s/\{\{user[[:digit:]]+ +user[[:digit:]]+ +\.\.\.\}\}/{string* user}/g
+    s/\{\{group[[:digit:]]+ +group[[:digit:]]+ +\.\.\.\}\}/{string* group}/g
+    s/\{\{url[[:digit:]]+ +url[[:digit:]]+ +\.\.\.\}\}/{string* url}/g
+    s/\{\{ip[[:digit:]]+ +ip[[:digit:]]+ +\.\.\.\}\}/{string* ip}/g
+    s/\{\{database[[:digit:]]+ +database[[:digit:]]+ +\.\.\.\}\}/{string* database}/g
 
+    # Converting singular path placeholders.
     s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_or_directory[[:digit:]]*\}\}/{\1path value}/g
 
     s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]*\}\}/{\1file value}/g
@@ -214,6 +268,7 @@ convert() {
 
     s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_or_directory[[:digit:]]+ +\1path\/to\/\2_or_directory[[:digit:]]+ +\.\.\.\}\}/{\1path* value}/g
 
+    # Converting plural path placeholders.
     s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]+ +\1path\/to\/\2_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1file* value}/g
     s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]+(\.[^.{}]+) +\1path\/to\/\2_?(name)?[[:digit:]]+\4 +\.\.\.\}\}/{\1file* value: sample\4}/g
     s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\1path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value}/g
@@ -221,7 +276,7 @@ convert() {
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file|executable|program|script|source)_?(name)?[[:digit:]]+((\.[^.{}]+)?) \1path\/to\/\2\4_?(name)?[[:digit:]]+\6 +\.\.\.\}\}/{\1file* value: \3\6}/g
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)dir(ectory)?_?(name)?[[:digit:]]+ \1path\/to\/\2dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value: \3}/g
 
-    # omptimizing Better TlDr placeholders
+    # Omptimizing Better TlDr placeholders
     s/\{(\/?)([^ {}:]+) +([^:{}]+)\} +\{\1\2\*\ \3}/{\1\2+ \3}/g
     s/\{(\/?)([^ {}:]+) +([^:{}]+):( +[^{}]+)\} +\{\1\2\*\ \3:\4}/{\1\2+ \3:\4}/g
 
