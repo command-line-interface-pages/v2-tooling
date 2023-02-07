@@ -1,0 +1,451 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "color": {
+            "type": "string",
+            "enum": [
+                "red",
+                "green",
+                "yellow",
+                "blue",
+                "magenta",
+                "cyan",
+                "light-gray",
+                "gray",
+                "light-red",
+                "light-green",
+                "light-yellow",
+                "light-blue",
+                "light-magenta",
+                "light-cyan",
+                "white"
+            ]
+        }
+    },
+    "title": "theme",
+    "description": "A render theme",
+    "type": "object",
+    "properties": {
+        "header": {
+            "title": "header options",
+            "description": "Header options",
+            "type": "object",
+            "properties": {
+                "prefix": {
+                    "description": "Corresponds to $HEADER_COMMAND_PREFIX environment variable",
+                    "type": "string",
+                    "default": "Command: "
+                },
+                "suffix": {
+                    "description": "Corresponds to $HEADER_COMMAND_SUFFIX environment variable",
+                    "type": "string",
+                    "default": ""
+                },
+                "color": {
+                    "description": "Corresponds to $HEADER_COMMAND_COLOR environment variable",
+                    "$ref": "#/definitions/color",
+                    "default": "cyan"
+                },
+                "prefix_color": {
+                    "description": "Corresponds to $HEADER_COMMAND_PREFIX_COLOR environment variable",
+                    "$ref": "#/definitions/color",
+                    "default": "blue"
+                },
+                "suffix_color": {
+                    "description": "Corresponds to $HEADER_COMMAND_SUFFIX_COLOR environment variable",
+                    "$ref": "#/definitions/color",
+                    "default": "blue"
+                }
+            },
+            "additionalProperties": false
+        },
+        "summary": {
+            "title": "summary options",
+            "description": "Summary options",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "title": "summary description options",
+                    "description": "Summary description options",
+                    "type": "object",
+                    "properties": {
+                        "prefix": {
+                            "description": "Corresponds to $SUMMARY_DESCRIPTION_PREFIX environment variable",
+                            "type": "string",
+                            "default": "Command: "
+                        },
+                        "suffix": {
+                            "description": "Corresponds to $SUMMARY_DESCRIPTION_SUFFIX environment variable",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "color": {
+                            "description": "Corresponds to $SUMMARY_DESCRIPTION_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "cyan"
+                        },
+                        "prefix_color": {
+                            "description": "Corresponds to $SUMMARY_DESCRIPTION_PREFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "blue"
+                        },
+                        "suffix_color": {
+                            "description": "Corresponds to $SUMMARY_DESCRIPTION_SUFFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "blue"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "tag": {
+                    "title": "summary tag options",
+                    "description": "Summary tag options",
+                    "type": "object",
+                    "properties": {
+                        "aliases": {
+                            "title": "tag `Aliases` options",
+                            "description": "Tag `Aliases` options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $SUMMARY_ALIASES_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": "Aliases: "
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $SUMMARY_ALIASES_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $SUMMARY_ALIASES_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $SUMMARY_ALIASES_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $SUMMARY_ALIASES_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "see-also": {
+                            "title": "tag `See also` options",
+                            "description": "Tag `See also` options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $SUMMARY_SEE_ALSO_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": "Similar commands: "
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $SUMMARY_SEE_ALSO_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $SUMMARY_SEE_ALSO_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $SUMMARY_SEE_ALSO_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $SUMMARY_SEE_ALSO_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "more-information": {
+                            "title": "tag `More information` options",
+                            "description": "Tag `More information` options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $SUMMARY_MORE_INFORMATION_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": "Documentation: "
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $SUMMARY_MORE_INFORMATION_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $SUMMARY_MORE_INFORMATION_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $SUMMARY_MORE_INFORMATION_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $SUMMARY_MORE_INFORMATION_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "internal": {
+                            "title": "tag `Internal` options",
+                            "description": "Tag `Internal` options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $SUMMARY_INTERNAL_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": "[!] "
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $SUMMARY_INTERNAL_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $SUMMARY_INTERNAL_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $SUMMARY_INTERNAL_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $SUMMARY_INTERNAL_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "deprecated": {
+                            "title": "tag `Deprecated` options",
+                            "description": "Tag `Deprecated` options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $SUMMARY_DEPRECATED_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": "[!] "
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $SUMMARY_DEPRECATED_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $SUMMARY_DEPRECATED_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $SUMMARY_DEPRECATED_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $SUMMARY_DEPRECATED_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "example": {
+            "title": "example options",
+            "description": "Example options",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "title": "example description options",
+                    "description": "Example description options",
+                    "type": "object",
+                    "properties": {
+                        "prefix": {
+                            "description": "Corresponds to $CODE_DESCRIPTION_PREFIX environment variable",
+                            "type": "string",
+                            "default": "- "
+                        },
+                        "suffix": {
+                            "description": "Corresponds to $CODE_DESCRIPTION_SUFFIX environment variable",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "color": {
+                            "description": "Corresponds to $CODE_DESCRIPTION_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "blue"
+                        },
+                        "prefix_color": {
+                            "description": "Corresponds to $CODE_DESCRIPTION_PREFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "magenta"
+                        },
+                        "suffix_color": {
+                            "description": "Corresponds to $CODE_DESCRIPTION_SUFFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "magenta"
+                        },
+                        "mnemonic": {
+                            "title": "description mnemonic options",
+                            "description": "Description mnemonic options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_MNEMONIC_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_MNEMONIC_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_MNEMONIC_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "light-red"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "stream": {
+                            "title": "description stream options",
+                            "description": "Description stream options",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_STREAM_PREFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "suffix": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_STREAM_SUFFIX environment variable",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_STREAM_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "light-cyan"
+                                },
+                                "prefix_color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_STREAM_PREFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                },
+                                "suffix_color": {
+                                    "description": "Corresponds to $CODE_DESCRIPTION_STREAM_SUFFIX_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "code": {
+                    "title": "example code options",
+                    "description": "Example code options",
+                    "type": "object",
+                    "properties": {
+                        "prefix": {
+                            "description": "Corresponds to $CODE_EXAMPLE_PREFIX environment variable",
+                            "type": "string",
+                            "default": "- "
+                        },
+                        "suffix": {
+                            "description": "Corresponds to $CODE_EXAMPLE_SUFFIX environment variable",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "color": {
+                            "description": "Corresponds to $CODE_EXAMPLE_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "blue"
+                        },
+                        "prefix_color": {
+                            "description": "Corresponds to $CODE_EXAMPLE_PREFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "magenta"
+                        },
+                        "suffix_color": {
+                            "description": "Corresponds to $CODE_EXAMPLE_SUFFIX_COLOR environment variable",
+                            "$ref": "#/definitions/color",
+                            "default": "magenta"
+                        },
+                        "placeholder": {
+                            "title": "code placeholder options",
+                            "description": "Code placeholder options",
+                            "type": "object",
+                            "properties": {
+                                "required": {
+                                    "description": "Corresponds to $CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "red"
+                                },
+                                "optional": {
+                                    "description": "Corresponds to $CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "green"
+                                },
+                                "repeated-required": {
+                                    "description": "Corresponds to $CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "blue"
+                                },
+                                "repeated-optional": {
+                                    "description": "Corresponds to $CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "yellow"
+                                },
+                                "example": {
+                                    "description": "Corresponds to $CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR environment variable",
+                                    "$ref": "#/definitions/color",
+                                    "default": "cyan"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}
