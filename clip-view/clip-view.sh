@@ -7,6 +7,7 @@ declare -i FAIL=1
 
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
+declare THEME_CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip-themes}"
 
 color_to_code() {
   declare color="$1"
@@ -191,12 +192,15 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-page-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cpc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-theme-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ctc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)]
+    [($HELP_OPTION_COLOR--update-theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ut$HELP_PUNCTUATION_COLOR)]
     [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<short>$HELP_PUNCTUATION_COLOR]
-    ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
+    [($HELP_OPTION_COLOR--theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-t$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<local-theme-clip-view-theme.yaml|remote-theme>$HELP_PUNCTUATION_COLOR]
+    ($HELP_PLACEHOLDER_COLOR<local-file.clip>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
 ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
@@ -992,6 +996,7 @@ set_render_options_for_docopt_mode() {
   CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
 }
 
+
 if (($# == 0)); then
   help
   exit "$SUCCESS"
@@ -1000,6 +1005,7 @@ fi
 declare operating_system=common
 declare render=better-tldr
 declare -i update_cache=1
+declare -i update_theme_cache=1
 declare option_type=long
 
 while [[ -n "$1" ]]; do
@@ -1053,12 +1059,20 @@ while [[ -n "$1" ]]; do
 
     shift 2
     ;;
-  --clear-cache | -cc)
-    rm -rf "$CACHE_DIRECTORY/$page_path"
+  --clear-page-cache | -cpc)
+    rm -rf "$CACHE_DIRECTORY"
+    exit "$SUCCESS"
+    ;;
+  --clear-theme-cache | -ctc)
+    rm -rf "$THEME_CACHE_DIRECTORY"
     exit "$SUCCESS"
     ;;
   --update-page | -up)
     update_cache=0
+    shift
+    ;;
+  --update-theme | -ut)
+    update_theme_cache=0
     shift
     ;;
   --option-type | -ot)
@@ -1073,11 +1087,122 @@ while [[ -n "$1" ]]; do
     option_type="$value"
     shift 2
     ;;
+  --theme | -t)
+    [[ -z "$value" ]] && {
+        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+        exit "$FAIL"
+    }
+
+    declare local_or_remote_theme="$value"
+    declare is_local=1
+
+    declare theme_to_set="$(mktemp "/tmp/clip-XXXXXX")"
+    [[ "$local_or_remote_theme" =~ .yaml$ ]] && is_local=0
+
+    if ((is_local == 0)); then
+      [[ -f "$local_or_remote_theme" ]] || {
+        echo -e "$0: theme: ${ERROR_COLOR}existing theme expected$RESET_COLOR" >&2
+        exit "$FAIL"
+      }
+      cat "$local_or_remote_theme" > "$theme_to_set"
+    else
+      declare theme_path="themes/$local_or_remote_theme.yaml"
+
+      ((update_theme_cache == 0)) && rm -rf "$THEME_CACHE_DIRECTORY/$theme_path"
+
+      if [[ ! -f "$THEME_CACHE_DIRECTORY/$theme_path" ]]; then
+        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$theme_path" -O "$theme_to_set" 2> /dev/null || {
+          echo -e "$0: $theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
+          exit "$FAIL"
+        }
+
+        mkdir -p "$(dirname "$THEME_CACHE_DIRECTORY/$theme_path")"
+        cat "$theme_to_set" > "$THEME_CACHE_DIRECTORY/$theme_path"
+      else
+        cat "$THEME_CACHE_DIRECTORY/$theme_path" > "$theme_to_set"
+      fi
+    fi
+
+    HEADER_COMMAND_PREFIX="$(yq '.header.prefix // "Command: "' "$theme_to_set")"
+    HEADER_COMMAND_SUFFIX="$(yq '.header.suffix // ""' "$theme_to_set")"
+    HEADER_COMMAND_COLOR="$(color_to_code "$(yq '.header.color // "cyan"' "$theme_to_set")")"
+    HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "$(yq '.header.prefix_color // "blue"' "$theme_to_set")")"
+    HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "$(yq '.header.suffix_color // "blue"' "$theme_to_set")")"
+
+    SUMMARY_DESCRIPTION_PREFIX="$(yq '.summary.description.prefix // "Description: "' "$theme_to_set")"
+    SUMMARY_DESCRIPTION_SUFFIX="$(yq '.summary.description.suffix // ""' "$theme_to_set")"
+    SUMMARY_DESCRIPTION_COLOR="$(color_to_code "$(yq '.summary.description.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq '.summary.description.prefix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.description.suffix_color // "blue"' "$theme_to_set")")"
+
+    SUMMARY_ALIASES_PREFIX="$(yq '.summary.tag.aliases.prefix // "Aliases: "' "$theme_to_set")"
+    SUMMARY_ALIASES_SUFFIX="$(yq '.summary.tag.aliases.suffix // ""' "$theme_to_set")"
+    SUMMARY_ALIASES_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.prefix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.suffix_color // "blue"' "$theme_to_set")")"
+
+    SUMMARY_SEE_ALSO_PREFIX="$(yq '.summary.tag.see-also.prefix // "Similar commands: "' "$theme_to_set")"
+    SUMMARY_SEE_ALSO_SUFFIX="$(yq '.summary.tag.see-also.suffix // ""' "$theme_to_set")"
+    SUMMARY_SEE_ALSO_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.prefix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.suffix_color // "blue"' "$theme_to_set")")"
+
+    SUMMARY_MORE_INFORMATION_PREFIX="$(yq '.summary.tag.more-information.prefix // "Documentation: "' "$theme_to_set")"
+    SUMMARY_MORE_INFORMATION_SUFFIX="$(yq '.summary.tag.more-information.suffix // ""' "$theme_to_set")"
+    SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.prefix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.suffix_color // "blue"' "$theme_to_set")")"
+
+    SUMMARY_INTERNAL_PREFIX="$(yq '.summary.tag.internal.prefix // "[!] "' "$theme_to_set")"
+    SUMMARY_INTERNAL_SUFFIX="$(yq '.summary.tag.internal.suffix // ""' "$theme_to_set")"
+    SUMMARY_INTERNAL_COLOR="$(color_to_code "$(yq '.summary.tag.internal.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.internal.prefix_color // "red"' "$theme_to_set")")"
+    SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.internal.suffix_color // "red"' "$theme_to_set")")"
+
+    SUMMARY_DEPRECATED_PREFIX="$(yq '.summary.tag.deprecated.prefix // "[!] "' "$theme_to_set")"
+    SUMMARY_DEPRECATED_SUFFIX="$(yq '.summary.tag.deprecated.suffix // ""' "$theme_to_set")"
+    SUMMARY_DEPRECATED_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.color // "cyan"' "$theme_to_set")")"
+    SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.prefix_color // "red"' "$theme_to_set")")"
+    SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.suffix_color // "red"' "$theme_to_set")")"
+
+    CODE_DESCRIPTION_PREFIX="$(yq '.example.description.prefix // "- "' "$theme_to_set")"
+    CODE_DESCRIPTION_SUFFIX="$(yq '.example.description.suffix // ""' "$theme_to_set")"
+    CODE_DESCRIPTION_COLOR="$(color_to_code "$(yq '.example.description.color // "blue"' "$theme_to_set")")"
+    CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.prefix_color // "magenta"' "$theme_to_set")")"
+    CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.suffix_color // "magenta"' "$theme_to_set")")"
+
+    CODE_DESCRIPTION_MNEMONIC_PREFIX="$(yq '.example.description.mnemonic.prefix // "- "' "$theme_to_set")"
+    CODE_DESCRIPTION_MNEMONIC_SUFFIX="$(yq '.example.description.mnemonic.suffix // ""' "$theme_to_set")"
+    CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.color // "light-red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.prefix_color // "red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.suffix_color // "red"' "$theme_to_set")")"
+
+    CODE_DESCRIPTION_STREAM_PREFIX="$(yq '.example.description.stream.prefix // "- "' "$theme_to_set")"
+    CODE_DESCRIPTION_STREAM_SUFFIX="$(yq '.example.description.stream.suffix // ""' "$theme_to_set")"
+    CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "$(yq '.example.description.stream.color // "light-red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.stream.prefix_color // "red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.stream.suffix_color // "red"' "$theme_to_set")")"
+
+    CODE_EXAMPLE_PREFIX="$(yq '.example.code.prefix // "  "' "$theme_to_set")"
+    CODE_EXAMPLE_SUFFIX="$(yq '.example.code.suffix // ""' "$theme_to_set")"
+    CODE_EXAMPLE_COLOR="$(color_to_code "$(yq '.example.code.color // "blue"' "$theme_to_set")")"
+    CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "$(yq '.example.code.prefix_color // "magenta"' "$theme_to_set")")"
+    CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "$(yq '.example.code.suffix_color // "magenta"' "$theme_to_set")")"
+
+    CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.required // "red"' "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.optional // "green"' "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.repeated-required // "blue"' "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.repeated-optional // "yellow"' "$theme_to_set")")"
+
+    CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "$(yq '.example.code.placeholder.example // "cyan"' "$theme_to_set")")"
+
+    shift 2
+  ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
 
-    file_to_render="$(mktemp "/tmp/clip-XXXXXX")"
+    declare file_to_render="$(mktemp "/tmp/clip-XXXXXX")"
     [[ "$local_file_or_remote_page" =~ .clip$ ]] && is_local=0
 
     declare file_to_render
