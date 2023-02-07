@@ -123,7 +123,7 @@ convert() {
   declare in_file="$1"
 
   declare file_content="$(cat "$in_file")"
-  declare program_name="$(basename "$0")"
+  declare program_name="$(basename "$PROGRAM_NAME")"
 
   check_layout_correctness "$file_content" || {
     echo -e "$program_name: $in_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
@@ -249,7 +249,7 @@ while [[ -n "$1" ]]; do
     ;;
   --output-directory | -od)
     [[ -z "$value" ]] && {
-      echo -e "$0: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
     output_directory="$value"
@@ -270,7 +270,7 @@ while [[ -n "$1" ]]; do
 
     echo "$clip_content" >"$clip_file"
 
-    echo -e "$0: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+    echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
     shift
     ;;
   esac
