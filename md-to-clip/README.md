@@ -46,6 +46,24 @@ Output Command Line Interface Page:
 `mkdir -m {string value: rwxrw-r--} {directory* value}`
 ```
 
+The following script can be used to refresh all pages at once:
+
+```sh
+#!/usr/bin/env bash
+
+declare tldr_pages="path/to/tldr-english-pages"
+declare clip_pages="path/to/clip-english-pages"
+
+for category_path in "$tldr_pages/"*; do
+    declare category="${category_path##*/}"
+    echo "Refreshing pages in '$category' category"
+
+    for file in "$category_path/"*.md; do
+        bash md-to-clip.sh -od "$clip_pages/$category" "$file"
+    done
+done
+```
+
 ## Implementation details
 
 - `file`, `executable`, `program`, `script`, `source` are recognized as keywords just
