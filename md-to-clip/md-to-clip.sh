@@ -5,25 +5,90 @@
 declare -i SUCCESS=0
 declare -i FAIL=1
 
-declare RESET_COLOR="\e[0m"
-declare ERROR_COLOR="\e[31m"
-declare SUCCESS_COLOR="\e[32m"
+declare PROGRAM_NAME="$(basename "$0")"
+
+color_to_code() {
+  declare color="$1"
+
+  case "$color" in
+  red)
+    echo -n 31
+    ;;
+  green)
+    echo -n 32
+    ;;
+  yellow)
+    echo -n 33
+    ;;
+  blue)
+    echo -n 34
+    ;;
+  magenta)
+    echo -n 35
+    ;;
+  cyan)
+    echo -n 36
+    ;;
+  light-gray)
+    echo -n 37
+    ;;
+  gray)
+    echo -n 90
+    ;;
+  light-red)
+    echo -n 91
+    ;;
+  light-green)
+    echo -n 92
+    ;;
+  light-yellow)
+    echo -n 93
+    ;;
+  light-blue)
+    echo -n 94
+    ;;
+  light-magenta)
+    echo -n 95
+    ;;
+  light-cyan)
+    echo -n 96
+    ;;
+  white)
+    echo -n 97
+    ;;
+  *)
+    echo -n 0
+    ;;
+  esac
+}
+
+# Error colors:
+declare RESET_COLOR="\e[$(color_to_code none)m"
+declare ERROR_COLOR="\e[$(color_to_code red)m"
+declare SUCCESS_COLOR="\e[$(color_to_code green)m"
+
+# Help colors:
+declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
+declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
+declare HELP_OPTION_COLOR="\e[$(color_to_code green)m"
+declare HELP_PLACEHOLDER_COLOR="\e[$(color_to_code cyan)m"
+declare HELP_PUNCTUATION_COLOR="\e[$(color_to_code gray)m"
 
 help() {
-  echo "Converter from TlDr format to Better TlDr format.
+  echo -e "${HELP_TEXT_COLOR}Converter from TlDr format to Command Line Interface Pages format.
 
-Usage:
-  $0 (--help|-h)
-  $0 (--version|-v)
-  $0 (--author|-a)
-  $0 (--email|-e)
-  $0 [(--output-directory|-od) <directory>] <file1.md file2.md ...>
+${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--help$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-h$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
 
-Converters:
+${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
   - 'More information' and 'See also' tags simplification
   - Placeholder conversion and optimization
 
-Notes:
+${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
   Escaping and placeholders with alternatives are not recognized and treated literally."
 }
 
