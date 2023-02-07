@@ -1,6 +1,6 @@
-# Markdown to Better TlDr format converter
+# Markdown to Command Line Interface Pages format converter
 
-Converter from TlDr format to Better TlDr format.
+Converter from TlDr format to Command Line Interface Pages format.
 
 ## Example
 
@@ -25,7 +25,7 @@ Input TlDr page:
 `mkdir -m {{rwxrw-r--}} {{path/to/directory1 path/to/directory2 ...}}`
 ```
 
-Output Better TlDr page:
+Output Command Line Interface Page:
 
 ```md
 # mkdir
@@ -46,6 +46,24 @@ Output Better TlDr page:
 `mkdir -m {string value: rwxrw-r--} {directory* value}`
 ```
 
+The following script can be used to refresh all pages at once:
+
+```sh
+#!/usr/bin/env bash
+
+declare tldr_pages="path/to/tldr-english-pages"
+declare clip_pages="path/to/clip-english-pages"
+
+for category_path in "$tldr_pages/"*; do
+    declare category="${category_path##*/}"
+    echo "Refreshing pages in '$category' category"
+
+    for file in "$category_path/"*.md; do
+        bash md-to-clip.sh -od "$clip_pages/$category" "$file"
+    done
+done
+```
+
 ## Implementation details
 
 - `file`, `executable`, `program`, `script`, `source` are recognized as keywords just
@@ -61,8 +79,8 @@ Output Better TlDr page:
 
 ## Notes
 
-- All Better TlDr placeholders are required by default as there is no special syntax
+- All Command Line Interface Page placeholders are required by default as there is no special syntax
   to present optional placeholders in TlDr pages.
-- All Better TlDr repeated placeholders allow 0 or more arguments to be substituted
+- All Command Line Interface Page repeated placeholders allow 0 or more arguments to be substituted
   by default as there is no special syntax to present placeholders requiring other
   argument count in TlDr pages.
