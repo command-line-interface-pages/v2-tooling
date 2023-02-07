@@ -112,11 +112,19 @@ check_dependencies_correctness() {
 }
 
 check_layout_correctness() {
-  declare page_content="$1
+  declare content="$1
 
 "
 
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content"
+  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$content"
+}
+
+check_page_is_alias() {
+  declare content="$1
+
+"
+
+  ! sed -nE '/^- View documentation for the original command:$/ Q1' <<<"$content"
 }
 
 convert() {
@@ -127,6 +135,13 @@ convert() {
 
   check_layout_correctness "$file_content" || {
     echo -e "$program_name: $in_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+
+  check_page_is_alias "$file_content"
+  echo $? >&2
+  check_page_is_alias "$file_content" && {
+    echo -e "$program_name: $in_file: ${ERROR_COLOR}non-alias page expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
