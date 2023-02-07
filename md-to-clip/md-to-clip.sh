@@ -161,6 +161,8 @@ convert() {
     s/standard +input( +stream)?/stdin/g
     s/standard +output( +stream)?/stdout/g
     s/standard +error( +stream)?/stderr/g
+
+    s/\<(a|the) +(given|specified)\>/a specific/g
   }
   
   # Correcting code examples: fixing some broken placeholders and correcting some placeholders.
