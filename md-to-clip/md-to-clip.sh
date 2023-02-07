@@ -138,8 +138,6 @@ convert() {
     return "$FAIL"
   }
 
-  check_page_is_alias "$file_content"
-  echo $? >&2
   check_page_is_alias "$file_content" && {
     echo -e "$program_name: $in_file: ${ERROR_COLOR}non-alias page expected$RESET_COLOR" >&2
     return "$FAIL"
