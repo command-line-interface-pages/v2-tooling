@@ -72,7 +72,7 @@
                         "prefix": {
                             "description": "Corresponds to $SUMMARY_DESCRIPTION_PREFIX environment variable",
                             "type": "string",
-                            "default": "Command: "
+                            "default": "Description: "
                         },
                         "suffix": {
                             "description": "Corresponds to $SUMMARY_DESCRIPTION_SUFFIX environment variable",
