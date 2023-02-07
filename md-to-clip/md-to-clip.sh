@@ -246,6 +246,13 @@ convert() {
     # Converting plural character placeholders.
     s/\{\{character[[:digit:]]+ +character[[:digit:]]+ +\.\.\.\}\}/{char* value}/g
 
+    # Converting paired option placeholders.
+    s/\{\{(--[^{} =:|]+)\|(-[^{} =:|]+)\}\}/{option flag: \1, \2}/g
+    s/\{\{(-[^{} =:|]+)\|(--[^{} =:|]+)\}\}/{option flag: \2, \1}/g
+
+    # Converting singular option placeholders.
+    s/\{\{(--?[^{} =:]+)\}\}/{option flag: \1}/g
+
     # Converting singular range placeholders.
     s/\{\{([-+]?[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+)\}\}/{int range: \1..\3}/g
     s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float range: \1..\3}/g
