@@ -184,13 +184,13 @@ convert() {
     s/\{\{(\/?)(([^{}/]+)_)dir(ectory)?_?(name)?([[:digit:]]*)\}\}/{{\1path\/to\/\3_directory\6}}/g
 
     # Expanding plural placeholders without path/to prefix for futher processing.
-    s/\{\{(chars|char_?names|characters|character_?names)\}\}/{{character1 character2 ...}}/g
-    s/\{\{(\/?)(devices|device_?names)\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
-    s/\{\{(users|user_?names)\}\}/{{user1 user2 ...}}/g
-    s/\{\{(groups|group_?names)\}\}/{{group1 group2 ...}}/g
-    s/\{\{(urls|url_?names)\}\}/{{url1 url2 ...}}/g
-    s/\{\{(ips|ip_?names)\}\}/{{ip1 ip2 ...}}/g
-    s/\{\{(dbs|dp_?names|database|database_?names)\}\}/{{database1 database2 ...}}/g
+    s/\{\{(char(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|char_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|character(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|character_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{character1 character2 ...}}/g
+    s/\{\{(\/?)(device(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|device_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
+    s/\{\{(user(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|user_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{user1 user2 ...}}/g
+    s/\{\{(group(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|group_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{group1 group2 ...}}/g
+    s/\{\{(url(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|url_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{url1 url2 ...}}/g
+    s/\{\{(ip(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|ip_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{ip1 ip2 ...}}/g
+    s/\{\{(db(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|dp_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{database1 database2 ...}}/g
 
     s/\{\{(\/?)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
@@ -199,19 +199,18 @@ convert() {
     s/\{\{(\/?)(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
 
-    s/\{\{(char\(s\)|char_?name\(s\)|character\(s\)|character_?name\(s\))\}\}/{{character1 character2 ...}}/g
-    s/\{\{(\/?)(device\(s\)|device_?name\(s\))\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
-    s/\{\{(user\(s\)|user_?name\(s\))\}\}/{{user1 user2 ...}}/g
-    s/\{\{(group\(s\)|group_?name\(s\))\}\}/{{group1 group2 ...}}/g
-    s/\{\{(url\(s\)|url_?name\(s\))\}\}/{{url1 url2 ...}}/g
-    s/\{\{(ip\(s\)|ip_?name\(s\))\}\}/{{ip1 ip2 ...}}/g
-    s/\{\{(db\(s\)|dp_?name\(s\)|database\(s\)|database_?name\(s\))\}\}/{{database1 database2 ...}}/g
-
     s/\{\{(\/?)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
 
     s/\{\{(\/?)(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
     s/\{\{(\/?)(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+
+
+    s/\{\{(\/?)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
+    s/\{\{(\/?)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
+
+    s/\{\{(\/?)(([^{}/]+)_)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
+    s/\{\{(\/?)(([^{}/]+)_)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
     # Expanding plural placeholders with path/to prefix for futher processing.
     s/\{\{(\/?)path\/to\/(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
@@ -226,6 +225,13 @@ convert() {
     
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
     s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+
+
+    s/\{\{(\/?)path\/to\/(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
+    s/\{\{(\/?)path\/to\/(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
+    
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
+    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
 
     # Converting singular boolean placeholders.
     s/\{\{(true|false|yes|no)[[:digit:]]*\}\}/{bool flag: \1}/g
