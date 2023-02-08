@@ -7,6 +7,8 @@ shopt -s extglob
 declare -i SUCCESS=0
 declare -i FAIL=1
 
+declare PROGRAM_NAME="$(basename "$0")"
+
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
 declare THEME_CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip-themes}"
@@ -278,7 +280,7 @@ declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT="$(color_to_code cyan)"
 declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-$CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT}"
 
 help() {
-  declare program_name="$(basename "$0")"
+  declare program_name="$(basename "$PROGRAM_NAME")"
 
   echo -e "${HELP_TEXT_COLOR}Render for Command Line Interface Pages pages.
 
@@ -1007,7 +1009,7 @@ render() {
 "
 
   is_layout_valid "$page_content" || {
-    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
+    echo -e "$PROGRAM_NAME: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
@@ -1092,7 +1094,7 @@ set_render_options_from_theme() {
   declare theme_to_set="$1"
 
   yq "$theme_to_set" &> /dev/null || {
-    echo -e "$0: theme: ${ERROR_COLOR}valid yaml layout expected$RESET_COLOR" >&2
+    echo -e "$PROGRAM_NAME: theme: ${ERROR_COLOR}valid yaml layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
@@ -1204,7 +1206,7 @@ while [[ -n "$1" ]]; do
     ;;
   --operating-system | -os)
     [[ -z "$value" ]] && {
-      echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
     operating_system="$value"
@@ -1212,11 +1214,11 @@ while [[ -n "$1" ]]; do
     ;;
   --render | -r)
     [[ -z "$value" ]] && {
-      echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
     [[ "$value" =~ ^(tldr|tldr-colorful|docopt|docopt-colorful)$ ]] || {
-      echo -e "$0: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
     render="$value"
@@ -1250,11 +1252,11 @@ while [[ -n "$1" ]]; do
     ;;
   --option-type | -ot)
     [[ -z "$value" ]] && {
-      echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
     [[ "$value" != "short" ]] && {
-      echo -e "$0: $option: ${ERROR_COLOR}valid option value expected'$value'$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected'$value'$RESET_COLOR" >&2
       exit "$FAIL"
     }
     option_type="$value"
@@ -1262,7 +1264,7 @@ while [[ -n "$1" ]]; do
     ;;
   --theme | -t)
     [[ -z "$value" ]] && {
-      echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
 
@@ -1274,7 +1276,7 @@ while [[ -n "$1" ]]; do
 
     if ((is_local == 0)); then
       [[ -f "$local_or_remote_theme" ]] || {
-        echo -e "$0: theme: ${ERROR_COLOR}existing theme expected$RESET_COLOR" >&2
+        echo -e "$PROGRAM_NAME: theme: ${ERROR_COLOR}existing theme expected$RESET_COLOR" >&2
         exit "$FAIL"
       }
       cat "$local_or_remote_theme" >"$theme_to_set"
@@ -1285,7 +1287,7 @@ while [[ -n "$1" ]]; do
 
       if [[ ! -f "$THEME_CACHE_DIRECTORY/$theme_path" ]]; then
         wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
-          echo -e "$0: $theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
+          echo -e "$PROGRAM_NAME: $theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
@@ -1309,7 +1311,7 @@ while [[ -n "$1" ]]; do
     declare file_to_render
     if ((is_local == 0)); then
       [[ -f "$local_file_or_remote_page" ]] || {
-        echo -e "$0: $page_file: ${ERROR_COLOR}existing page expected$RESET_COLOR" >&2
+        echo -e "$PROGRAM_NAME: $page_file: ${ERROR_COLOR}existing page expected$RESET_COLOR" >&2
         exit "$FAIL"
       }
       cat "$local_file_or_remote_page" >"$file_to_render"
@@ -1320,7 +1322,7 @@ while [[ -n "$1" ]]; do
 
       if [[ ! -f "$CACHE_DIRECTORY/$page_path" ]]; then
         wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2>/dev/null || {
-          echo -e "$0: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
+          echo -e "$PROGRAM_NAME: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
