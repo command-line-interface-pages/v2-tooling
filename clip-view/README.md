@@ -2,9 +2,16 @@
 
 Render for Command Line Interface Pages.
 
-## Example
+## Features
 
-Input CLIP page:
+- Several render modes smarter than almost all TlDr clients provide.
+- Theming support via YAML files.
+
+## Examples
+
+### Rendering
+
+Input Command Line Interface Page:
 
 ```md
 # sed
@@ -33,3 +40,23 @@ Input CLIP page:
 Output:
 
 ![page](./screenshot.jpg)
+
+### Theming
+
+Input Command Line Interface Page theme with the same page:
+
+```yaml
+header:
+  prefix: "[ "
+  suffix: " ]"
+summary:
+  description:
+    prefix: "What is it? "
+  tag:
+    more-information:
+      prefix: "Want to learn more? "
+```
+
+Output:
+
+![page](./theme-screenshot.jpg)
