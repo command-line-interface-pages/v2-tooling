@@ -1091,6 +1091,11 @@ set_render_options_for_docopt_mode() {
 set_render_options_from_theme() {
   declare theme_to_set="$1"
 
+  yq "$theme_to_set" &> /dev/null || {
+    echo -e "$0: theme: ${ERROR_COLOR}valid yaml layout expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+
   HEADER_COMMAND_PREFIX="$(yq ".header.prefix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
   HEADER_COMMAND_SUFFIX="$(yq ".header.suffix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
   HEADER_COMMAND_COLOR="$(color_to_code "$(yq ".header.color // \"$HEADER_COMMAND_COLOR_DEFAULT\"" "$theme_to_set")")"
@@ -1291,7 +1296,7 @@ while [[ -n "$1" ]]; do
       fi
     fi
 
-    set_render_options_from_theme "$theme_to_set"
+    set_render_options_from_theme "$theme_to_set" || exit "$FAIL"
     shift 2
     ;;
   *)
