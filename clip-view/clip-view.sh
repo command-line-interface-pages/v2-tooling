@@ -2,6 +2,8 @@
 
 # shellcheck disable=2016,2155,2115
 
+shopt -s extglob
+
 declare -i SUCCESS=0
 declare -i FAIL=1
 
@@ -58,6 +60,9 @@ color_to_code() {
     white)
       echo -n 97
       ;;
+    3[1-7]|9[1-7])
+      echo -n "$color"
+      ;;
     *)
       echo -n 0
       ;;
@@ -82,104 +87,205 @@ declare HELP_ENVIRONMENT_VARIABLE_COLOR="\e[$(color_to_code cyan)m"
 
 
 # Header options:
-declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-Command: }"
-declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX-}"
+## Defaults:
+declare HEADER_COMMAND_PREFIX_DEFAULT="Command: "
+declare HEADER_COMMAND_SUFFIX_DEFAULT=""
 
-declare HEADER_COMMAND_COLOR="$(color_to_code "${HEADER_COMMAND_COLOR-cyan}")"
-declare HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "${HEADER_COMMAND_PREFIX_COLOR-blue}")"
-declare HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "${HEADER_COMMAND_SUFFIX_COLOR-blue}")"
+declare HEADER_COMMAND_COLOR_DEFAULT="$(color_to_code cyan)"
+declare HEADER_COMMAND_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare HEADER_COMMAND_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+
+## Options:
+declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-$HEADER_COMMAND_PREFIX_DEFAULT}"
+declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX-$HEADER_COMMAND_SUFFIX_DEFAULT}"
+
+declare HEADER_COMMAND_COLOR="${HEADER_COMMAND_COLOR-$HEADER_COMMAND_COLOR_DEFAULT}"
+declare HEADER_COMMAND_PREFIX_COLOR="${HEADER_COMMAND_PREFIX_COLOR-$HEADER_COMMAND_PREFIX_COLOR_DEFAULT}"
+declare HEADER_COMMAND_SUFFIX_COLOR="${HEADER_COMMAND_SUFFIX_COLOR-$HEADER_COMMAND_SUFFIX_COLOR_DEFAULT}"
 
 
 # Summary options:
-declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-Description: }"
-declare SUMMARY_ALIASES_PREFIX="${SUMMARY_ALIASES_PREFIX-Aliases: }"
-declare SUMMARY_SEE_ALSO_PREFIX="${SUMMARY_SEE_ALSO_PREFIX-Similar commands: }"
-declare SUMMARY_MORE_INFORMATION_PREFIX="${SUMMARY_MORE_INFORMATION_PREFIX-Documentation: }"
-declare SUMMARY_INTERNAL_PREFIX="${SUMMARY_INTERNAL_PREFIX-[!] }"
-declare SUMMARY_DEPRECATED_PREFIX="${SUMMARY_DEPRECATED_PREFIX-[!] }"
-declare SUMMARY_DESCRIPTION_SUFFIX="${SUMMARY_DESCRIPTION_SUFFIX-}"
-declare SUMMARY_ALIASES_SUFFIX="${SUMMARY_ALIASES_SUFFIX-}"
-declare SUMMARY_SEE_ALSO_SUFFIX="${SUMMARY_SEE_ALSO_SUFFIX-}"
-declare SUMMARY_MORE_INFORMATION_SUFFIX="${SUMMARY_MORE_INFORMATION_SUFFIX-}"
-declare SUMMARY_INTERNAL_SUFFIX="${SUMMARY_INTERNAL_SUFFIX-}"
-declare SUMMARY_DEPRECATED_SUFFIX="${SUMMARY_DEPRECATED_SUFFIX-}"
+## Defaults:
+declare SUMMARY_DESCRIPTION_PREFIX_DEFAULT="Description: "
+declare SUMMARY_ALIASES_PREFIX_DEFAULT="Aliases: "
+declare SUMMARY_SEE_ALSO_PREFIX_DEFAULT="Similar commands: "
+declare SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT="Documentation: "
+declare SUMMARY_INTERNAL_PREFIX_DEFAULT="[!] "
+declare SUMMARY_DEPRECATED_PREFIX_DEFAULT="[!] "
+declare SUMMARY_DESCRIPTION_SUFFIX_DEFAULT=""
+declare SUMMARY_ALIASES_SUFFIX_DEFAULT=""
+declare SUMMARY_SEE_ALSO_SUFFIX_DEFAULT=""
+declare SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT=""
+declare SUMMARY_INTERNAL_SUFFIX_DEFAULT=""
+declare SUMMARY_DEPRECATED_SUFFIX_DEFAULT=""
 
-declare SUMMARY_DESCRIPTION_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_COLOR-cyan}")"
-declare SUMMARY_ALIASES_COLOR="$(color_to_code "${SUMMARY_ALIASES_COLOR-cyan}")"
-declare SUMMARY_SEE_ALSO_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_COLOR-cyan}")"
-declare SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_COLOR-cyan}")"
-declare SUMMARY_INTERNAL_COLOR="$(color_to_code "${SUMMARY_INTERNAL_COLOR-cyan}")"
-declare SUMMARY_DEPRECATED_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_COLOR-cyan}")"
+declare SUMMARY_DESCRIPTION_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_ALIASES_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_SEE_ALSO_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_MORE_INFORMATION_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_INTERNAL_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_DEPRECATED_COLOR_DEFAULT="$(color_to_code cyan)"
 
-declare SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_PREFIX_COLOR-blue}")"
-declare SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_PREFIX_COLOR-blue}")"
-declare SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_PREFIX_COLOR-blue}")"
-declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_PREFIX_COLOR-blue}")"
-declare SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_PREFIX_COLOR-red}")"
-declare SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_PREFIX_COLOR-red}")"
+declare SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
 
-declare SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_SUFFIX_COLOR-blue}")"
-declare SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_SUFFIX_COLOR-blue}")"
-declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_SUFFIX_COLOR-blue}")"
-declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-blue}")"
-declare SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_SUFFIX_COLOR-red}")"
-declare SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_SUFFIX_COLOR-red}")"
+declare SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
+
+## Options:
+declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-$SUMMARY_DESCRIPTION_PREFIX_DEFAULT}"
+declare SUMMARY_ALIASES_PREFIX="${SUMMARY_ALIASES_PREFIX-$SUMMARY_ALIASES_PREFIX_DEFAULT}"
+declare SUMMARY_SEE_ALSO_PREFIX="${SUMMARY_SEE_ALSO_PREFIX-$SUMMARY_SEE_ALSO_PREFIX_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_PREFIX="${SUMMARY_MORE_INFORMATION_PREFIX-$SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT}"
+declare SUMMARY_INTERNAL_PREFIX="${SUMMARY_INTERNAL_PREFIX-$SUMMARY_INTERNAL_PREFIX_DEFAULT}"
+declare SUMMARY_DEPRECATED_PREFIX="${SUMMARY_DEPRECATED_PREFIX-$SUMMARY_DEPRECATED_PREFIX_DEFAULT}"
+declare SUMMARY_DESCRIPTION_SUFFIX="${SUMMARY_DESCRIPTION_SUFFIX-$SUMMARY_DESCRIPTION_SUFFIX_DEFAULT}"
+declare SUMMARY_ALIASES_SUFFIX="${SUMMARY_ALIASES_SUFFIX-$SUMMARY_ALIASES_SUFFIX_DEFAULT}"
+declare SUMMARY_SEE_ALSO_SUFFIX="${SUMMARY_SEE_ALSO_SUFFIX-$SUMMARY_SEE_ALSO_SUFFIX_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_SUFFIX="${SUMMARY_MORE_INFORMATION_SUFFIX-$SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT}"
+declare SUMMARY_INTERNAL_SUFFIX="${SUMMARY_INTERNAL_SUFFIX-$SUMMARY_INTERNAL_SUFFIX_DEFAULT}"
+declare SUMMARY_DEPRECATED_SUFFIX="${SUMMARY_DEPRECATED_SUFFIX-$SUMMARY_DEPRECATED_SUFFIX_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_COLOR="${SUMMARY_DESCRIPTION_COLOR-$SUMMARY_DESCRIPTION_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_COLOR="${SUMMARY_ALIASES_COLOR-$SUMMARY_ALIASES_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_COLOR="${SUMMARY_SEE_ALSO_COLOR-$SUMMARY_SEE_ALSO_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_COLOR="${SUMMARY_MORE_INFORMATION_COLOR-$SUMMARY_MORE_INFORMATION_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_COLOR="${SUMMARY_INTERNAL_COLOR-$SUMMARY_INTERNAL_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_COLOR="${SUMMARY_DEPRECATED_COLOR-$SUMMARY_DEPRECATED_COLOR_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_PREFIX_COLOR="${SUMMARY_DESCRIPTION_PREFIX_COLOR-$SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_PREFIX_COLOR="${SUMMARY_ALIASES_PREFIX_COLOR-$SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_PREFIX_COLOR="${SUMMARY_SEE_ALSO_PREFIX_COLOR-$SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR="${SUMMARY_MORE_INFORMATION_PREFIX_COLOR-$SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_PREFIX_COLOR="${SUMMARY_INTERNAL_PREFIX_COLOR-$SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_PREFIX_COLOR="${SUMMARY_DEPRECATED_PREFIX_COLOR-$SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_SUFFIX_COLOR="${SUMMARY_DESCRIPTION_SUFFIX_COLOR-$SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_SUFFIX_COLOR="${SUMMARY_ALIASES_SUFFIX_COLOR-$SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="${SUMMARY_SEE_ALSO_SUFFIX_COLOR-$SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-$SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_SUFFIX_COLOR="${SUMMARY_INTERNAL_SUFFIX_COLOR-$SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_SUFFIX_COLOR="${SUMMARY_DEPRECATED_SUFFIX_COLOR-$SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code description options:
-declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-- }"
-declare CODE_DESCRIPTION_SUFFIX="${CODE_DESCRIPTION_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_PREFIX_DEFAULT="- "
+declare CODE_DESCRIPTION_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_COLOR="$(color_to_code "${CODE_DESCRIPTION_COLOR-blue}")"
-declare CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_PREFIX_COLOR-magenta}")"
-declare CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_SUFFIX_COLOR-magenta}")"
+declare CODE_DESCRIPTION_COLOR_DEFAULT="$(color_to_code blue)"
+declare CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+declare CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+
+## Options:
+declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-$CODE_DESCRIPTION_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_SUFFIX="${CODE_DESCRIPTION_SUFFIX-$CODE_DESCRIPTION_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_COLOR="${CODE_DESCRIPTION_COLOR-$CODE_DESCRIPTION_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_PREFIX_COLOR="${CODE_DESCRIPTION_PREFIX_COLOR-$CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_SUFFIX_COLOR="${CODE_DESCRIPTION_SUFFIX_COLOR-$CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code description mnemonic options:
-declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-}"
-declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT=""
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_COLOR-light-red}")"
-declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR-red}")"
-declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT="$(color_to_code light-red)"
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
+
+## Options:
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-$CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-$CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_MNEMONIC_COLOR="${CODE_DESCRIPTION_MNEMONIC_COLOR-$CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR-$CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR-$CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code description stream options:
-declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-}"
-declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT=""
+declare CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_COLOR-light-cyan}")"
-declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_PREFIX_COLOR-red}")"
-declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_STREAM_COLOR_DEFAULT="$(color_to_code light-cyan)"
+declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
+
+## Options:
+declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-$CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-$CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_STREAM_COLOR="${CODE_DESCRIPTION_STREAM_COLOR-$CODE_DESCRIPTION_STREAM_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR="${CODE_DESCRIPTION_STREAM_PREFIX_COLOR-$CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR-$CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code example options:
-declare CODE_EXAMPLE_PREFIX="${CODE_EXAMPLE_PREFIX-  }"
-declare CODE_EXAMPLE_SUFFIX="${CODE_EXAMPLE_SUFFIX-}"
+## Defaults:
+declare CODE_EXAMPLE_PREFIX_DEFAULT="  "
+declare CODE_EXAMPLE_SUFFIX_DEFAULT=""
 
-declare CODE_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_COLOR-gray}")"
-declare CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PREFIX_COLOR-magenta}")"
-declare CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_SUFFIX_COLOR-magenta}")"
+declare CODE_EXAMPLE_COLOR_DEFAULT="$(color_to_code gray)"
+declare CODE_EXAMPLE_PREFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+declare CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+
+## Options:
+declare CODE_EXAMPLE_PREFIX="${CODE_EXAMPLE_PREFIX-$CODE_EXAMPLE_PREFIX_DEFAULT}"
+declare CODE_EXAMPLE_SUFFIX="${CODE_EXAMPLE_SUFFIX-$CODE_EXAMPLE_SUFFIX_DEFAULT}"
+
+declare CODE_EXAMPLE_COLOR="${CODE_EXAMPLE_COLOR-$CODE_EXAMPLE_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PREFIX_COLOR="${CODE_EXAMPLE_PREFIX_COLOR-$CODE_EXAMPLE_PREFIX_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_SUFFIX_COLOR="${CODE_EXAMPLE_SUFFIX_COLOR-$CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code example placeholder options:
-declare CODE_EXAMPLE_PLACEHOLDER_PREFIX="${CODE_EXAMPLE_PLACEHOLDER_PREFIX-<}"
-declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX->}"
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_DEFAULT="<"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_DEFAULT=">"
 
-declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR-black}")"
-declare CODE_EXAMPLE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_COLOR-black}")"
-declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR-black}")"
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR_DEFAULT="$(color_to_code black)"
+declare CODE_EXAMPLE_PLACEHOLDER_COLOR_DEFAULT="$(color_to_code black)"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR_DEFAULT="$(color_to_code black)"
+
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX="${CODE_EXAMPLE_PLACEHOLDER_PREFIX-$CODE_EXAMPLE_PLACEHOLDER_PREFIX_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX-$CODE_EXAMPLE_PLACEHOLDER_SUFFIX_DEFAULT}"
+
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR="${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR-$CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_COLOR="${CODE_EXAMPLE_PLACEHOLDER_COLOR-$CODE_EXAMPLE_PLACEHOLDER_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR-$CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR_DEFAULT}"
 
 
 # Code example placeholder keyword options:
-declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR-red}")"
-declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR-green}")"
-declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR-blue}")" # + quantifier or range beginning with non 0
-declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR-yellow}")" # * quantifier or range beginning with 0
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT="$(color_to_code green)"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT="$(color_to_code blue)" # + quantifier or range beginning with non 0
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT="$(color_to_code yellow)" # * quantifier or range beginning with 0
+
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT}"
 
 
 # Code example placeholder examples options:
-declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-cyan}")"
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT="$(color_to_code cyan)"
+
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-$CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT}"
 
 
 help() {
@@ -1123,78 +1229,78 @@ while [[ -n "$1" ]]; do
       fi
     fi
 
-    HEADER_COMMAND_PREFIX="$(yq '.header.prefix // "Command: "' "$theme_to_set")"
-    HEADER_COMMAND_SUFFIX="$(yq '.header.suffix // ""' "$theme_to_set")"
-    HEADER_COMMAND_COLOR="$(color_to_code "$(yq '.header.color // "cyan"' "$theme_to_set")")"
-    HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "$(yq '.header.prefix_color // "blue"' "$theme_to_set")")"
-    HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "$(yq '.header.suffix_color // "blue"' "$theme_to_set")")"
+    HEADER_COMMAND_PREFIX="$(yq ".header.prefix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    HEADER_COMMAND_SUFFIX="$(yq ".header.suffix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    HEADER_COMMAND_COLOR="$(color_to_code "$(yq ".header.color // \"$HEADER_COMMAND_COLOR_DEFAULT\"" "$theme_to_set")")"
+    HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "$(yq ".header.prefix_color // \"$HEADER_COMMAND_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "$(yq ".header.suffix_color // \"$HEADER_COMMAND_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_DESCRIPTION_PREFIX="$(yq '.summary.description.prefix // "Description: "' "$theme_to_set")"
-    SUMMARY_DESCRIPTION_SUFFIX="$(yq '.summary.description.suffix // ""' "$theme_to_set")"
-    SUMMARY_DESCRIPTION_COLOR="$(color_to_code "$(yq '.summary.description.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq '.summary.description.prefix_color // "blue"' "$theme_to_set")")"
-    SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.description.suffix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_DESCRIPTION_PREFIX="$(yq ".summary.description.prefix // \"$SUMMARY_DESCRIPTION_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_DESCRIPTION_SUFFIX="$(yq ".summary.description.suffix // \"$SUMMARY_DESCRIPTION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_DESCRIPTION_COLOR="$(color_to_code "$(yq ".summary.description.color // \"$SUMMARY_DESCRIPTION_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq ".summary.description.prefix_color // \"$SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.description.suffix_color // \"$SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_ALIASES_PREFIX="$(yq '.summary.tag.aliases.prefix // "Aliases: "' "$theme_to_set")"
-    SUMMARY_ALIASES_SUFFIX="$(yq '.summary.tag.aliases.suffix // ""' "$theme_to_set")"
-    SUMMARY_ALIASES_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.prefix_color // "blue"' "$theme_to_set")")"
-    SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.aliases.suffix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_ALIASES_PREFIX="$(yq ".summary.tag.aliases.prefix // \"$SUMMARY_ALIASES_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_ALIASES_SUFFIX="$(yq ".summary.tag.aliases.suffix // \"$SUMMARY_ALIASES_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_ALIASES_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.color // \"$SUMMARY_ALIASES_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.prefix_color // \"$SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.suffix_color // \"$SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_SEE_ALSO_PREFIX="$(yq '.summary.tag.see-also.prefix // "Similar commands: "' "$theme_to_set")"
-    SUMMARY_SEE_ALSO_SUFFIX="$(yq '.summary.tag.see-also.suffix // ""' "$theme_to_set")"
-    SUMMARY_SEE_ALSO_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.prefix_color // "blue"' "$theme_to_set")")"
-    SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.see-also.suffix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_SEE_ALSO_PREFIX="$(yq ".summary.tag.see-also.prefix // \"$SUMMARY_SEE_ALSO_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_SEE_ALSO_SUFFIX="$(yq ".summary.tag.see-also.suffix // \"$SUMMARY_SEE_ALSO_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_SEE_ALSO_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.color // \"$SUMMARY_SEE_ALSO_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.prefix_color // \"$SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.suffix_color // \"$SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_MORE_INFORMATION_PREFIX="$(yq '.summary.tag.more-information.prefix // "Documentation: "' "$theme_to_set")"
-    SUMMARY_MORE_INFORMATION_SUFFIX="$(yq '.summary.tag.more-information.suffix // ""' "$theme_to_set")"
-    SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.prefix_color // "blue"' "$theme_to_set")")"
-    SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.more-information.suffix_color // "blue"' "$theme_to_set")")"
+    SUMMARY_MORE_INFORMATION_PREFIX="$(yq ".summary.tag.more-information.prefix // \"$SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_MORE_INFORMATION_SUFFIX="$(yq ".summary.tag.more-information.suffix // \"$SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.color // \"$SUMMARY_MORE_INFORMATION_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.prefix_color // \"$SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.suffix_color // \"$SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_INTERNAL_PREFIX="$(yq '.summary.tag.internal.prefix // "[!] "' "$theme_to_set")"
-    SUMMARY_INTERNAL_SUFFIX="$(yq '.summary.tag.internal.suffix // ""' "$theme_to_set")"
-    SUMMARY_INTERNAL_COLOR="$(color_to_code "$(yq '.summary.tag.internal.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.internal.prefix_color // "red"' "$theme_to_set")")"
-    SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.internal.suffix_color // "red"' "$theme_to_set")")"
+    SUMMARY_INTERNAL_PREFIX="$(yq ".summary.tag.internal.prefix // \"$SUMMARY_INTERNAL_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_INTERNAL_SUFFIX="$(yq ".summary.tag.internal.suffix // \"$SUMMARY_INTERNAL_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_INTERNAL_COLOR="$(color_to_code "$(yq ".summary.tag.internal.color // \"$SUMMARY_INTERNAL_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.internal.prefix_color // \"$SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.internal.suffix_color // \"$SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    SUMMARY_DEPRECATED_PREFIX="$(yq '.summary.tag.deprecated.prefix // "[!] "' "$theme_to_set")"
-    SUMMARY_DEPRECATED_SUFFIX="$(yq '.summary.tag.deprecated.suffix // ""' "$theme_to_set")"
-    SUMMARY_DEPRECATED_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.color // "cyan"' "$theme_to_set")")"
-    SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.prefix_color // "red"' "$theme_to_set")")"
-    SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "$(yq '.summary.tag.deprecated.suffix_color // "red"' "$theme_to_set")")"
+    SUMMARY_DEPRECATED_PREFIX="$(yq ".summary.tag.deprecated.prefix // \"$SUMMARY_DEPRECATED_PREFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_DEPRECATED_SUFFIX="$(yq ".summary.tag.deprecated.suffix // \"$SUMMARY_DEPRECATED_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    SUMMARY_DEPRECATED_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.color // \"$SUMMARY_DEPRECATED_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.prefix_color // \"$SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.suffix_color // \"$SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_DESCRIPTION_PREFIX="$(yq '.example.description.prefix // "- "' "$theme_to_set")"
-    CODE_DESCRIPTION_SUFFIX="$(yq '.example.description.suffix // ""' "$theme_to_set")"
-    CODE_DESCRIPTION_COLOR="$(color_to_code "$(yq '.example.description.color // "blue"' "$theme_to_set")")"
-    CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.prefix_color // "magenta"' "$theme_to_set")")"
-    CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.suffix_color // "magenta"' "$theme_to_set")")"
+    CODE_DESCRIPTION_PREFIX="$(yq ".example.description.prefix // \"$CODE_DESCRIPTION_PREFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_SUFFIX="$(yq ".example.description.suffix // \"$CODE_DESCRIPTION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_COLOR="$(color_to_code "$(yq ".example.description.color // \"$CODE_DESCRIPTION_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.prefix_color // \"$CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.suffix_color // \"$CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_DESCRIPTION_MNEMONIC_PREFIX="$(yq '.example.description.mnemonic.prefix // "- "' "$theme_to_set")"
-    CODE_DESCRIPTION_MNEMONIC_SUFFIX="$(yq '.example.description.mnemonic.suffix // ""' "$theme_to_set")"
-    CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.color // "light-red"' "$theme_to_set")")"
-    CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.prefix_color // "red"' "$theme_to_set")")"
-    CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.mnemonic.suffix_color // "red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_MNEMONIC_PREFIX="$(yq ".example.description.mnemonic.prefix // \"$CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_MNEMONIC_SUFFIX="$(yq ".example.description.mnemonic.suffix // \"$CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.color // \"$CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.prefix_color // \"$CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.suffix_color // \"$CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_DESCRIPTION_STREAM_PREFIX="$(yq '.example.description.stream.prefix // "- "' "$theme_to_set")"
-    CODE_DESCRIPTION_STREAM_SUFFIX="$(yq '.example.description.stream.suffix // ""' "$theme_to_set")"
-    CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "$(yq '.example.description.stream.color // "light-red"' "$theme_to_set")")"
-    CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "$(yq '.example.description.stream.prefix_color // "red"' "$theme_to_set")")"
-    CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "$(yq '.example.description.stream.suffix_color // "red"' "$theme_to_set")")"
+    CODE_DESCRIPTION_STREAM_PREFIX="$(yq ".example.description.stream.prefix // \"$CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_STREAM_SUFFIX="$(yq ".example.description.stream.suffix // \"$CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "$(yq ".example.description.stream.color // \"$CODE_DESCRIPTION_STREAM_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.stream.prefix_color // \"$CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.stream.suffix_color // \"$CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_EXAMPLE_PREFIX="$(yq '.example.code.prefix // "  "' "$theme_to_set")"
-    CODE_EXAMPLE_SUFFIX="$(yq '.example.code.suffix // ""' "$theme_to_set")"
-    CODE_EXAMPLE_COLOR="$(color_to_code "$(yq '.example.code.color // "blue"' "$theme_to_set")")"
-    CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "$(yq '.example.code.prefix_color // "magenta"' "$theme_to_set")")"
-    CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "$(yq '.example.code.suffix_color // "magenta"' "$theme_to_set")")"
+    CODE_EXAMPLE_PREFIX="$(yq ".example.code.prefix // \"$CODE_EXAMPLE_PREFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_EXAMPLE_SUFFIX="$(yq ".example.code.suffix // \"$CODE_EXAMPLE_SUFFIX_DEFAULT\"" "$theme_to_set")"
+    CODE_EXAMPLE_COLOR="$(color_to_code "$(yq ".example.code.color // \"$CODE_EXAMPLE_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "$(yq ".example.code.prefix_color // \"$CODE_EXAMPLE_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "$(yq ".example.code.suffix_color // \"$CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.required // "red"' "$theme_to_set")")"
-    CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.optional // "green"' "$theme_to_set")")"
-    CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.repeated-required // "blue"' "$theme_to_set")")"
-    CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq '.example.code.placeholder.repeated-optional // "yellow"' "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.required // \"$CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.optional // \"$CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.repeated-required // \"$CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.repeated-optional // \"$CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
 
-    CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "$(yq '.example.code.placeholder.example // "cyan"' "$theme_to_set")")"
+    CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "$(yq ".example.code.placeholder.example // \"$CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT\"" "$theme_to_set")")"
 
     shift 2
   ;;
