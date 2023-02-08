@@ -43,7 +43,7 @@ Output:
 
 ### Theming
 
-[![image](https://img.shields.io/badge/json-schema-cyan)](https://github.com/emilyseville7cfg-better-tldr/prototypes/blob/main/clip-view/theme.json)
+[![image](https://img.shields.io/badge/json-schema-red)](https://github.com/emilyseville7cfg-better-tldr/prototypes/blob/main/clip-view/theme.json)
 
 Input Command Line Interface Page theme with the same page:
 
