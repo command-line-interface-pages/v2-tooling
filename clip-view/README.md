@@ -11,6 +11,8 @@ Render for Command Line Interface Pages.
 
 ### Rendering
 
+Command: `clip-view sed`.
+
 Input Command Line Interface Page:
 
 ```md
@@ -41,6 +43,10 @@ Output:
 
 ![page](./screenshot.jpg)
 
+#### Get page
+
+Run `clip-view sed`.
+
 ### Theming
 
 [![image](https://img.shields.io/badge/json-schema-red)](https://github.com/emilyseville7cfg-better-tldr/prototypes/blob/main/clip-view/theme.json)
@@ -62,3 +68,13 @@ summary:
 Output:
 
 ![page](./theme-screenshot.jpg)
+
+#### Get intellisence
+
+Add to Visual Studio Code settings:
+
+```json
+"yaml.schemas": {
+    "path/to/theme.json": "path/to/file_where_enable_intellisence.yaml"
+}
+```
