@@ -2,71 +2,78 @@
 
 # shellcheck disable=2016,2155,2115
 
+shopt -s extglob
+
 declare -i SUCCESS=0
 declare -i FAIL=1
 
+declare PROGRAM_NAME="$(basename "$0")"
+
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
+declare THEME_CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip-themes}"
 
 color_to_code() {
   declare color="$1"
 
   case "$color" in
-    red)
-      echo -n 31
-      ;;
-    green)
-      echo -n 32
-      ;;
-    yellow)
-      echo -n 33
-      ;;
-    blue)
-      echo -n 34
-      ;;
-    magenta)
-      echo -n 35
-      ;;
-    cyan)
-      echo -n 36
-      ;;
-    light-gray)
-      echo -n 37
-      ;;
-    gray)
-      echo -n 90
-      ;;
-    light-red)
-      echo -n 91
-      ;;
-    light-green)
-      echo -n 92
-      ;;
-    light-yellow)
-      echo -n 93
-      ;;
-    light-blue)
-      echo -n 94
-      ;;
-    light-magenta)
-      echo -n 95
-      ;;
-    light-cyan)
-      echo -n 96
-      ;;
-    white)
-      echo -n 97
-      ;;
-    *)
-      echo -n 0
-      ;;
+  red)
+    echo -n 31
+    ;;
+  green)
+    echo -n 32
+    ;;
+  yellow)
+    echo -n 33
+    ;;
+  blue)
+    echo -n 34
+    ;;
+  magenta)
+    echo -n 35
+    ;;
+  cyan)
+    echo -n 36
+    ;;
+  light-gray)
+    echo -n 37
+    ;;
+  gray)
+    echo -n 90
+    ;;
+  light-red)
+    echo -n 91
+    ;;
+  light-green)
+    echo -n 92
+    ;;
+  light-yellow)
+    echo -n 93
+    ;;
+  light-blue)
+    echo -n 94
+    ;;
+  light-magenta)
+    echo -n 95
+    ;;
+  light-cyan)
+    echo -n 96
+    ;;
+  white)
+    echo -n 97
+    ;;
+  3[0-7] | 9[0-7])
+    echo -n "$color"
+    ;;
+  *)
+    echo -n 0
+    ;;
   esac
 }
 
 # Error colors:
 declare RESET_COLOR="\e[$(color_to_code none)m"
 declare ERROR_COLOR="\e[$(color_to_code red)m"
-
 
 # Help colors:
 declare HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN="\e[40;97mT\e[107;30mxt$RESET_COLOR"
@@ -79,110 +86,201 @@ declare HELP_PLACEHOLDER_COLOR="\e[$(color_to_code cyan)m"
 declare HELP_PUNCTUATION_COLOR="\e[$(color_to_code gray)m"
 declare HELP_ENVIRONMENT_VARIABLE_COLOR="\e[$(color_to_code cyan)m"
 
-
 # Header options:
-declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-Command: }"
-declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX-}"
+## Defaults:
+declare HEADER_COMMAND_PREFIX_DEFAULT="Command: "
+declare HEADER_COMMAND_SUFFIX_DEFAULT=""
 
-declare HEADER_COMMAND_COLOR="$(color_to_code "${HEADER_COMMAND_COLOR-cyan}")"
-declare HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "${HEADER_COMMAND_PREFIX_COLOR-blue}")"
-declare HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "${HEADER_COMMAND_SUFFIX_COLOR-blue}")"
+declare HEADER_COMMAND_COLOR_DEFAULT="$(color_to_code cyan)"
+declare HEADER_COMMAND_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare HEADER_COMMAND_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
 
+## Options:
+declare HEADER_COMMAND_PREFIX="${HEADER_COMMAND_PREFIX-$HEADER_COMMAND_PREFIX_DEFAULT}"
+declare HEADER_COMMAND_SUFFIX="${HEADER_COMMAND_SUFFIX-$HEADER_COMMAND_SUFFIX_DEFAULT}"
+
+declare HEADER_COMMAND_COLOR="${HEADER_COMMAND_COLOR-$HEADER_COMMAND_COLOR_DEFAULT}"
+declare HEADER_COMMAND_PREFIX_COLOR="${HEADER_COMMAND_PREFIX_COLOR-$HEADER_COMMAND_PREFIX_COLOR_DEFAULT}"
+declare HEADER_COMMAND_SUFFIX_COLOR="${HEADER_COMMAND_SUFFIX_COLOR-$HEADER_COMMAND_SUFFIX_COLOR_DEFAULT}"
 
 # Summary options:
-declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-Description: }"
-declare SUMMARY_ALIASES_PREFIX="${SUMMARY_ALIASES_PREFIX-Aliases: }"
-declare SUMMARY_SEE_ALSO_PREFIX="${SUMMARY_SEE_ALSO_PREFIX-Similar commands: }"
-declare SUMMARY_MORE_INFORMATION_PREFIX="${SUMMARY_MORE_INFORMATION_PREFIX-Documentation: }"
-declare SUMMARY_INTERNAL_PREFIX="${SUMMARY_INTERNAL_PREFIX-[!] }"
-declare SUMMARY_DEPRECATED_PREFIX="${SUMMARY_DEPRECATED_PREFIX-[!] }"
-declare SUMMARY_DESCRIPTION_SUFFIX="${SUMMARY_DESCRIPTION_SUFFIX-}"
-declare SUMMARY_ALIASES_SUFFIX="${SUMMARY_ALIASES_SUFFIX-}"
-declare SUMMARY_SEE_ALSO_SUFFIX="${SUMMARY_SEE_ALSO_SUFFIX-}"
-declare SUMMARY_MORE_INFORMATION_SUFFIX="${SUMMARY_MORE_INFORMATION_SUFFIX-}"
-declare SUMMARY_INTERNAL_SUFFIX="${SUMMARY_INTERNAL_SUFFIX-}"
-declare SUMMARY_DEPRECATED_SUFFIX="${SUMMARY_DEPRECATED_SUFFIX-}"
+## Defaults:
+declare SUMMARY_DESCRIPTION_PREFIX_DEFAULT="Description: "
+declare SUMMARY_ALIASES_PREFIX_DEFAULT="Aliases: "
+declare SUMMARY_SEE_ALSO_PREFIX_DEFAULT="Similar commands: "
+declare SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT="Documentation: "
+declare SUMMARY_INTERNAL_PREFIX_DEFAULT="[!] "
+declare SUMMARY_DEPRECATED_PREFIX_DEFAULT="[!] "
+declare SUMMARY_DESCRIPTION_SUFFIX_DEFAULT=""
+declare SUMMARY_ALIASES_SUFFIX_DEFAULT=""
+declare SUMMARY_SEE_ALSO_SUFFIX_DEFAULT=""
+declare SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT=""
+declare SUMMARY_INTERNAL_SUFFIX_DEFAULT=""
+declare SUMMARY_DEPRECATED_SUFFIX_DEFAULT=""
 
-declare SUMMARY_DESCRIPTION_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_COLOR-cyan}")"
-declare SUMMARY_ALIASES_COLOR="$(color_to_code "${SUMMARY_ALIASES_COLOR-cyan}")"
-declare SUMMARY_SEE_ALSO_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_COLOR-cyan}")"
-declare SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_COLOR-cyan}")"
-declare SUMMARY_INTERNAL_COLOR="$(color_to_code "${SUMMARY_INTERNAL_COLOR-cyan}")"
-declare SUMMARY_DEPRECATED_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_COLOR-cyan}")"
+declare SUMMARY_DESCRIPTION_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_ALIASES_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_SEE_ALSO_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_MORE_INFORMATION_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_INTERNAL_COLOR_DEFAULT="$(color_to_code cyan)"
+declare SUMMARY_DEPRECATED_COLOR_DEFAULT="$(color_to_code cyan)"
 
-declare SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_PREFIX_COLOR-blue}")"
-declare SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_PREFIX_COLOR-blue}")"
-declare SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_PREFIX_COLOR-blue}")"
-declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_PREFIX_COLOR-blue}")"
-declare SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_PREFIX_COLOR-red}")"
-declare SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_PREFIX_COLOR-red}")"
+declare SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
 
-declare SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DESCRIPTION_SUFFIX_COLOR-blue}")"
-declare SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "${SUMMARY_ALIASES_SUFFIX_COLOR-blue}")"
-declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "${SUMMARY_SEE_ALSO_SUFFIX_COLOR-blue}")"
-declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-blue}")"
-declare SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "${SUMMARY_INTERNAL_SUFFIX_COLOR-red}")"
-declare SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "${SUMMARY_DEPRECATED_SUFFIX_COLOR-red}")"
+declare SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT="$(color_to_code blue)"
+declare SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
 
+## Options:
+declare SUMMARY_DESCRIPTION_PREFIX="${SUMMARY_DESCRIPTION_PREFIX-$SUMMARY_DESCRIPTION_PREFIX_DEFAULT}"
+declare SUMMARY_ALIASES_PREFIX="${SUMMARY_ALIASES_PREFIX-$SUMMARY_ALIASES_PREFIX_DEFAULT}"
+declare SUMMARY_SEE_ALSO_PREFIX="${SUMMARY_SEE_ALSO_PREFIX-$SUMMARY_SEE_ALSO_PREFIX_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_PREFIX="${SUMMARY_MORE_INFORMATION_PREFIX-$SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT}"
+declare SUMMARY_INTERNAL_PREFIX="${SUMMARY_INTERNAL_PREFIX-$SUMMARY_INTERNAL_PREFIX_DEFAULT}"
+declare SUMMARY_DEPRECATED_PREFIX="${SUMMARY_DEPRECATED_PREFIX-$SUMMARY_DEPRECATED_PREFIX_DEFAULT}"
+declare SUMMARY_DESCRIPTION_SUFFIX="${SUMMARY_DESCRIPTION_SUFFIX-$SUMMARY_DESCRIPTION_SUFFIX_DEFAULT}"
+declare SUMMARY_ALIASES_SUFFIX="${SUMMARY_ALIASES_SUFFIX-$SUMMARY_ALIASES_SUFFIX_DEFAULT}"
+declare SUMMARY_SEE_ALSO_SUFFIX="${SUMMARY_SEE_ALSO_SUFFIX-$SUMMARY_SEE_ALSO_SUFFIX_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_SUFFIX="${SUMMARY_MORE_INFORMATION_SUFFIX-$SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT}"
+declare SUMMARY_INTERNAL_SUFFIX="${SUMMARY_INTERNAL_SUFFIX-$SUMMARY_INTERNAL_SUFFIX_DEFAULT}"
+declare SUMMARY_DEPRECATED_SUFFIX="${SUMMARY_DEPRECATED_SUFFIX-$SUMMARY_DEPRECATED_SUFFIX_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_COLOR="${SUMMARY_DESCRIPTION_COLOR-$SUMMARY_DESCRIPTION_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_COLOR="${SUMMARY_ALIASES_COLOR-$SUMMARY_ALIASES_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_COLOR="${SUMMARY_SEE_ALSO_COLOR-$SUMMARY_SEE_ALSO_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_COLOR="${SUMMARY_MORE_INFORMATION_COLOR-$SUMMARY_MORE_INFORMATION_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_COLOR="${SUMMARY_INTERNAL_COLOR-$SUMMARY_INTERNAL_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_COLOR="${SUMMARY_DEPRECATED_COLOR-$SUMMARY_DEPRECATED_COLOR_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_PREFIX_COLOR="${SUMMARY_DESCRIPTION_PREFIX_COLOR-$SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_PREFIX_COLOR="${SUMMARY_ALIASES_PREFIX_COLOR-$SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_PREFIX_COLOR="${SUMMARY_SEE_ALSO_PREFIX_COLOR-$SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_PREFIX_COLOR="${SUMMARY_MORE_INFORMATION_PREFIX_COLOR-$SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_PREFIX_COLOR="${SUMMARY_INTERNAL_PREFIX_COLOR-$SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_PREFIX_COLOR="${SUMMARY_DEPRECATED_PREFIX_COLOR-$SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT}"
+
+declare SUMMARY_DESCRIPTION_SUFFIX_COLOR="${SUMMARY_DESCRIPTION_SUFFIX_COLOR-$SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_ALIASES_SUFFIX_COLOR="${SUMMARY_ALIASES_SUFFIX_COLOR-$SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_SEE_ALSO_SUFFIX_COLOR="${SUMMARY_SEE_ALSO_SUFFIX_COLOR-$SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="${SUMMARY_MORE_INFORMATION_SUFFIX_COLOR-$SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_INTERNAL_SUFFIX_COLOR="${SUMMARY_INTERNAL_SUFFIX_COLOR-$SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT}"
+declare SUMMARY_DEPRECATED_SUFFIX_COLOR="${SUMMARY_DEPRECATED_SUFFIX_COLOR-$SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT}"
 
 # Code description options:
-declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-- }"
-declare CODE_DESCRIPTION_SUFFIX="${CODE_DESCRIPTION_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_PREFIX_DEFAULT="- "
+declare CODE_DESCRIPTION_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_COLOR="$(color_to_code "${CODE_DESCRIPTION_COLOR-blue}")"
-declare CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_PREFIX_COLOR-magenta}")"
-declare CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_SUFFIX_COLOR-magenta}")"
+declare CODE_DESCRIPTION_COLOR_DEFAULT="$(color_to_code blue)"
+declare CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+declare CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT="$(color_to_code magenta)"
 
+## Options:
+declare CODE_DESCRIPTION_PREFIX="${CODE_DESCRIPTION_PREFIX-$CODE_DESCRIPTION_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_SUFFIX="${CODE_DESCRIPTION_SUFFIX-$CODE_DESCRIPTION_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_COLOR="${CODE_DESCRIPTION_COLOR-$CODE_DESCRIPTION_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_PREFIX_COLOR="${CODE_DESCRIPTION_PREFIX_COLOR-$CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_SUFFIX_COLOR="${CODE_DESCRIPTION_SUFFIX_COLOR-$CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT}"
 
 # Code description mnemonic options:
-declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-}"
-declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT=""
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_COLOR-light-red}")"
-declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR-red}")"
-declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT="$(color_to_code light-red)"
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
 
+## Options:
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX="${CODE_DESCRIPTION_MNEMONIC_PREFIX-$CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX="${CODE_DESCRIPTION_MNEMONIC_SUFFIX-$CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_MNEMONIC_COLOR="${CODE_DESCRIPTION_MNEMONIC_COLOR-$CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="${CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR-$CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="${CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR-$CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT}"
 
 # Code description stream options:
-declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-}"
-declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-}"
+## Defaults:
+declare CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT=""
+declare CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT=""
 
-declare CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_COLOR-light-cyan}")"
-declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_PREFIX_COLOR-red}")"
-declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR-red}")"
+declare CODE_DESCRIPTION_STREAM_COLOR_DEFAULT="$(color_to_code light-cyan)"
+declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT="$(color_to_code red)"
 
+## Options:
+declare CODE_DESCRIPTION_STREAM_PREFIX="${CODE_DESCRIPTION_STREAM_PREFIX-$CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_SUFFIX="${CODE_DESCRIPTION_STREAM_SUFFIX-$CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT}"
+
+declare CODE_DESCRIPTION_STREAM_COLOR="${CODE_DESCRIPTION_STREAM_COLOR-$CODE_DESCRIPTION_STREAM_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_PREFIX_COLOR="${CODE_DESCRIPTION_STREAM_PREFIX_COLOR-$CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT}"
+declare CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR-$CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT}"
 
 # Code example options:
-declare CODE_EXAMPLE_PREFIX="${CODE_EXAMPLE_PREFIX-  }"
-declare CODE_EXAMPLE_SUFFIX="${CODE_EXAMPLE_SUFFIX-}"
+## Defaults:
+declare CODE_EXAMPLE_PREFIX_DEFAULT="  "
+declare CODE_EXAMPLE_SUFFIX_DEFAULT=""
 
-declare CODE_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_COLOR-gray}")"
-declare CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PREFIX_COLOR-magenta}")"
-declare CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_SUFFIX_COLOR-magenta}")"
+declare CODE_EXAMPLE_COLOR_DEFAULT="$(color_to_code gray)"
+declare CODE_EXAMPLE_PREFIX_COLOR_DEFAULT="$(color_to_code magenta)"
+declare CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT="$(color_to_code magenta)"
 
+## Options:
+declare CODE_EXAMPLE_PREFIX="${CODE_EXAMPLE_PREFIX-$CODE_EXAMPLE_PREFIX_DEFAULT}"
+declare CODE_EXAMPLE_SUFFIX="${CODE_EXAMPLE_SUFFIX-$CODE_EXAMPLE_SUFFIX_DEFAULT}"
+
+declare CODE_EXAMPLE_COLOR="${CODE_EXAMPLE_COLOR-$CODE_EXAMPLE_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PREFIX_COLOR="${CODE_EXAMPLE_PREFIX_COLOR-$CODE_EXAMPLE_PREFIX_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_SUFFIX_COLOR="${CODE_EXAMPLE_SUFFIX_COLOR-$CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT}"
 
 # Code example placeholder options:
-declare CODE_EXAMPLE_PLACEHOLDER_PREFIX="${CODE_EXAMPLE_PLACEHOLDER_PREFIX-<}"
-declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX->}"
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_DEFAULT="<"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_DEFAULT=">"
 
-declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR-black}")"
-declare CODE_EXAMPLE_PLACEHOLDER_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_COLOR-black}")"
-declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR-black}")"
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR_DEFAULT="$(color_to_code black)"
+declare CODE_EXAMPLE_PLACEHOLDER_COLOR_DEFAULT="$(color_to_code black)"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR_DEFAULT="$(color_to_code black)"
 
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX="${CODE_EXAMPLE_PLACEHOLDER_PREFIX-$CODE_EXAMPLE_PLACEHOLDER_PREFIX_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX-$CODE_EXAMPLE_PLACEHOLDER_SUFFIX_DEFAULT}"
+
+declare CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR="${CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR-$CODE_EXAMPLE_PLACEHOLDER_PREFIX_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_COLOR="${CODE_EXAMPLE_PLACEHOLDER_COLOR-$CODE_EXAMPLE_PLACEHOLDER_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR="${CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR-$CODE_EXAMPLE_PLACEHOLDER_SUFFIX_COLOR_DEFAULT}"
 
 # Code example placeholder keyword options:
-declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR-red}")"
-declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR-green}")"
-declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR-blue}")" # + quantifier or range beginning with non 0
-declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR-yellow}")" # * quantifier or range beginning with 0
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT="$(color_to_code red)"
+declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT="$(color_to_code green)"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT="$(color_to_code blue)"   # + quantifier or range beginning with non 0
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT="$(color_to_code yellow)" # * quantifier or range beginning with 0
 
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT}"
+declare CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="${CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR-$CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT}"
 
 # Code example placeholder examples options:
-declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-cyan}")"
+## Defaults:
+declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT="$(color_to_code cyan)"
 
+## Options:
+declare CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="${CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR-$CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT}"
 
 help() {
-  declare program_name="$(basename "$0")"
+  declare program_name="$(basename "$PROGRAM_NAME")"
 
   echo -e "${HELP_TEXT_COLOR}Render for Command Line Interface Pages pages.
 
@@ -191,12 +289,15 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-page-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-cpc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $program_name $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--clear-theme-cache$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ctc$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $program_name ${HELP_PUNCTUATION_COLOR}[($HELP_OPTION_COLOR--operating-system$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-os$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<android|linux|osx|sunos|windows>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--render$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-r$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<tldr|tldr-colorful|docopt|docopt-colorful>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR)]
+    [($HELP_OPTION_COLOR--update-theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ut$HELP_PUNCTUATION_COLOR)]
     [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<short>$HELP_PUNCTUATION_COLOR]
-    ($HELP_PLACEHOLDER_COLOR<local-file.md>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
+    [($HELP_OPTION_COLOR--theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-t$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<local-theme.yaml|remote-theme>$HELP_PUNCTUATION_COLOR]
+    ($HELP_PLACEHOLDER_COLOR<local-file.clip>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
 ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
@@ -207,7 +308,7 @@ ${HELP_HEADER_COLOR}  Header:$HELP_TEXT_COLOR
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_PREFIX_COLOR ${HELP_TEXT_COLOR}color for everything before a command name
     $HELP_COLOR_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}HEADER_COMMAND_SUFFIX_COLOR ${HELP_TEXT_COLOR}color for command name and everything after it
 
-${HELP_HEADER_COLOR}  Description:$HELP_TEXT_COLOR
+${HELP_HEADER_COLOR}  Summary:$HELP_TEXT_COLOR
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_PREFIX ${HELP_TEXT_COLOR}everything before a command description
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_PREFIX ${HELP_TEXT_COLOR}everything before 'Aliases' tag
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_PREFIX ${HELP_TEXT_COLOR}everything before 'See also' tag
@@ -215,6 +316,7 @@ ${HELP_HEADER_COLOR}  Description:$HELP_TEXT_COLOR
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_INTERNAL_PREFIX ${HELP_TEXT_COLOR}everything before 'Internal' tag
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DEPRECATED_PREFIX ${HELP_TEXT_COLOR}everything before 'Deprecated' tag
     
+    $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_DESCRIPTION_SUFFIX ${HELP_TEXT_COLOR}everything after a command description
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_ALIASES_SUFFIX ${HELP_TEXT_COLOR}everything after 'Aliases' tag value
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_SEE_ALSO_SUFFIX ${HELP_TEXT_COLOR}everything after 'See also' tag value
     $HELP_TEXT_ENVIRONMENT_VARIABLE_SIGN $HELP_PUNCTUATION_COLOR\$${HELP_ENVIRONMENT_VARIABLE_COLOR}SUMMARY_MORE_INFORMATION_SUFFIX ${HELP_TEXT_COLOR}everything after 'More information' tag value
@@ -292,11 +394,11 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
   * $program_name ${HELP_PUNCTUATION_COLOR}($HELP_OPTION_COLOR--update-page$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-up$HELP_PUNCTUATION_COLOR) ${HELP_PLACEHOLDER_COLOR}sed$HELP_TEXT_COLOR view the latest 'sed' command examples
   * ${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_PREFIX$HELP_TEXT_COLOR=[ ${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_DESCRIPTION_MNEMONIC_SUFFIX$HELP_TEXT_COLOR=] $program_name ${HELP_PLACEHOLDER_COLOR}mkdir$HELP_TEXT_COLOR view 'mkdir' command examples with TlDr-like mnemonics
   * ${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PLACEHOLDER_PREFIX$HELP_TEXT_COLOR= ${HELP_ENVIRONMENT_VARIABLE_COLOR}CODE_EXAMPLE_PLACEHOLDER_SUFFIX$HELP_TEXT_COLOR= $program_name ${HELP_PLACEHOLDER_COLOR}mkdir$HELP_TEXT_COLOR view 'mkdir' command examples with TlDr-like placeholders"
-  
+
 }
 
 version() {
-  echo "1.1" >&2
+  echo "1.2.0" >&2
 }
 
 author() {
@@ -307,19 +409,18 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
-
 # Page layout is already checked in `render` function.
 # Empty lines are already removed.
 header_awk_parsable_name() {
   declare page_content="$1"
-  sed -nE '1 { s/^# +//; s/ +$//; p }' <<< "$page_content"
+  sed -nE '1 { s/^# +//; s/ +$//; p }' <<<"$page_content"
 }
 
 # Page layout is already checked in `render` function.
 # Empty lines are already removed.
 summary_awk_parsable_description() {
   declare page_content="$1"
-  sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p }' <<< "$page_content"
+  sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p }' <<<"$page_content"
 }
 
 # Page layout is already checked in `render` function.
@@ -334,7 +435,7 @@ summary_awk_parsable_tags() {
     s/^more +information/more_information/
     s/^see +also/see_also/
     p
-  }' <<< "$page_content"
+  }' <<<"$page_content"
 }
 
 # Page layout is already checked in `render` function.
@@ -343,21 +444,21 @@ examples_awk_parsable_example() {
   declare page_content="$1"
   declare -i example_number="$2"
 
-  page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\n\1::\2\n/g' <<< "$page_content")"
-  page_content="$(sed -nE '/^[#>]/!p' <<< "$page_content" | sed -n '/^$/!p')"
+  page_content="$(sed -E ':x; N; $! bx; s/\n- +([^\n]+) *:\n` *([^\n]+) *`/\n\1::\2\n/g' <<<"$page_content")"
+  page_content="$(sed -nE '/^[#>]/!p' <<<"$page_content" | sed -n '/^$/!p')"
 
   # 10 is used as 2 auto generated examples can appear here
-  (( example_number < 1 || example_number > 10 )) && return
+  ((example_number < 1 || example_number > 10)) && return
 
-  sed -n "${example_number}p" <<< "$page_content"
+  sed -n "${example_number}p" <<<"$page_content"
 }
 
 term_with_mnemonic() {
   declare term="$1"
   declare option="$2"
 
-  option="$(sed -E 's/^-*//' <<< "$option")"
-  sed -E "s/($option)/[\1]/" <<< "$term"
+  option="$(sed -E 's/^-*//' <<<"$option")"
+  sed -E "s/($option)/[\1]/" <<<"$term"
 }
 
 get_colorized_description() {
@@ -371,9 +472,9 @@ get_colorized_description() {
     declare mnemonic=""
     declare is_last_mnemonic_closed=true
 
-    while [[ "$index" -lt "${#description}" && "${description:index:1}" != "["  ]]; do
+    while [[ "$index" -lt "${#description}" && "${description:index:1}" != "[" ]]; do
       declare character="${description:index:1}"
-      declare next_character="${description:index + 1:1}"
+      declare next_character="${description:index+1:1}"
       if [[ "$character" == "\\" && "$next_character" =~ \[|\] ]]; then
         index+=1
         string_between_mnemonics+="$next_character"
@@ -384,10 +485,10 @@ get_colorized_description() {
     done
 
     ((index++))
-    
+
     while [[ "$index" -lt "${#description}" && "${description:index:1}" != "]" ]]; do
       declare character="${description:index:1}"
-      declare next_character="${description:index + 1:1}"
+      declare next_character="${description:index+1:1}"
 
       [[ "$character" =~ [\ /] ]] && {
         ((index--))
@@ -400,9 +501,9 @@ get_colorized_description() {
       else
         mnemonic+="$character"
       fi
-      
+
       ((index++))
-      
+
       if [[ "$index" -eq "${#description}" && "$character" != "]" ]]; then
         is_last_mnemonic_closed=false
       fi
@@ -419,7 +520,7 @@ get_colorized_description() {
     }
   done
 
-  colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<< "$colorized_description")"
+  colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<<"$colorized_description")"
   echo -n "$colorized_description"
 }
 
@@ -432,7 +533,7 @@ get_placeholder_summary() {
 
   while [[ index -lt "${#placeholder_alternative_content}" && "${placeholder_alternative_content:index:1}" != ":" ]]; do
     declare character="${placeholder_alternative_content:index:1}"
-    declare next_character="${placeholder_alternative_content:index + 1:1}"
+    declare next_character="${placeholder_alternative_content:index+1:1}"
 
     if [[ "$character" == "\\" && "$next_character" == ":" ]]; then
       index+=1
@@ -451,17 +552,17 @@ get_placeholder_summary() {
 get_placeholder_examples() {
   declare placeholder_alternative_content="$1"
 
-  get_placeholder_summary "$placeholder_alternative_content" > /dev/null
+  get_placeholder_summary "$placeholder_alternative_content" >/dev/null
   declare -i index="$(($? + 1))"
 
   declare examples="${placeholder_alternative_content:index}"
-  sed -E 's/^ *//' <<< "$examples"
+  sed -E 's/^ *//' <<<"$examples"
 }
 
 get_placeholder_summary_with_underscores() {
   declare placeholder_alternative_summary="$1"
 
-  sed -E 's/ +/_/g; s/_/ /' <<< "$placeholder_alternative_summary"
+  sed -E 's/ +/_/g; s/_/ /' <<<"$placeholder_alternative_summary"
 }
 
 get_colorized_complex_placeholder_content() {
@@ -475,7 +576,7 @@ get_colorized_complex_placeholder_content() {
 
     while [[ "$index" -lt "${#placeholder_content}" && "${placeholder_content:index:1}" != "|" ]]; do
       declare character="${placeholder_content:index:1}"
-      declare next_character="${placeholder_content:index + 1:1}"
+      declare next_character="${placeholder_content:index+1:1}"
 
       if [[ "$character" == "\\" && "$next_character" == "|" ]]; then
         index+=1
@@ -538,7 +639,7 @@ get_colorized_complex_placeholder_content() {
 
       # broken placeholders
       s/^.+$/\\\\e[${CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR}munsupported placeholder/g
-      " <<< "$placeholder_content_summary")"
+      " <<<"$placeholder_content_summary")"
 
       echo -n "$placeholder_content_summary"
 
@@ -559,9 +660,9 @@ get_colorized_code() {
     declare placeholder=""
     declare is_last_placeholder_closed=true
 
-    while [[ "$index" -lt "${#code}" && "${code:index:1}" != "{"  ]]; do
+    while [[ "$index" -lt "${#code}" && "${code:index:1}" != "{" ]]; do
       declare character="${code:index:1}"
-      declare next_character="${code:index + 1:1}"
+      declare next_character="${code:index+1:1}"
       if [[ "$character" == "\\" && "$next_character" =~ \{|\} ]]; then
         index+=1
         string_between_placeholders+="$next_character"
@@ -575,7 +676,7 @@ get_colorized_code() {
 
     while [[ "$index" -lt "${#code}" && "${code:index:1}" != "}" ]]; do
       declare character="${code:index:1}"
-      declare next_character="${code:index + 1:1}"
+      declare next_character="${code:index+1:1}"
 
       if [[ "$character" == "\\" && "$next_character" =~ \{|\} ]]; then
         ((index++))
@@ -583,9 +684,9 @@ get_colorized_code() {
       else
         placeholder+="$character"
       fi
-      
+
       ((index++))
-      
+
       if [[ "$index" -eq "${#code}" && "$character" != "}" ]]; then
         is_last_placeholder_closed=false
       fi
@@ -609,7 +710,7 @@ get_colorized_code() {
 better_tldr_render() {
   declare page_content="$1"
 
-  page_content="$(sed -nE '/^$/!p' <<< "$page_content")"
+  page_content="$(sed -nE '/^$/!p' <<<"$page_content")"
 
   declare command_name="$(header_awk_parsable_name "$page_content")"
   declare command_description="$(summary_awk_parsable_description "$page_content" | sed '1! s/^/  /')"
@@ -618,13 +719,13 @@ better_tldr_render() {
   echo -e "\e[${SUMMARY_DESCRIPTION_PREFIX_COLOR}m$SUMMARY_DESCRIPTION_PREFIX\e[${SUMMARY_DESCRIPTION_COLOR}m$command_description\e[${SUMMARY_DESCRIPTION_SUFFIX_COLOR}m$SUMMARY_DESCRIPTION_SUFFIX"
 
   declare tags="$(summary_awk_parsable_tags "$page_content")"
-  declare more_information_tag_value="$(sed -n 's/^more_information:://p'<<< "$tags")"
-  declare help_tag_value="$(awk -F :: '/^help/ { print $2 }'<<< "$tags")"
-  declare version_tag_value="$(awk -F :: '/^version/ { print $2 }'<<< "$tags")"
-  declare internal_tag_value="$(awk -F :: '/^internal/ { print $2 }'<<< "$tags")"
-  declare deprecated_tag_value="$(awk -F :: '/^deprecated/ { print $2 }'<<< "$tags")"
-  declare see_also_tag_value="$(awk -F :: '/^see_also/ { print $2 }'<<< "$tags")"
-  declare aliases_tag_value="$(awk -F :: '/^aliases/ { print $2 }'<<< "$tags")"
+  declare more_information_tag_value="$(sed -n 's/^more_information:://p' <<<"$tags")"
+  declare help_tag_value="$(awk -F :: '/^help/ { print $2 }' <<<"$tags")"
+  declare version_tag_value="$(awk -F :: '/^version/ { print $2 }' <<<"$tags")"
+  declare internal_tag_value="$(awk -F :: '/^internal/ { print $2 }' <<<"$tags")"
+  declare deprecated_tag_value="$(awk -F :: '/^deprecated/ { print $2 }' <<<"$tags")"
+  declare see_also_tag_value="$(awk -F :: '/^see_also/ { print $2 }' <<<"$tags")"
+  declare aliases_tag_value="$(awk -F :: '/^aliases/ { print $2 }' <<<"$tags")"
 
   declare internal_tag_message=""
   [[ "$internal_tag_value" == true ]] &&
@@ -635,7 +736,7 @@ better_tldr_render() {
     deprecated_tag_message="This command is deprecated and should not be used"
 
   declare printed_tags=""
-  
+
   [[ -n "$see_also_tag_value" ]] &&
     printed_tags+="\e[${SUMMARY_SEE_ALSO_PREFIX_COLOR}m$SUMMARY_SEE_ALSO_PREFIX\e[${SUMMARY_SEE_ALSO_COLOR}m$see_also_tag_value\e[${SUMMARY_SEE_ALSO_SUFFIX_COLOR}m$SUMMARY_SEE_ALSO_SUFFIX\n"
   [[ -n "$aliases_tag_value" ]] &&
@@ -646,8 +747,8 @@ better_tldr_render() {
     printed_tags+="\e[${SUMMARY_INTERNAL_PREFIX_COLOR}m$SUMMARY_INTERNAL_PREFIX\e[${SUMMARY_INTERNAL_COLOR}m$internal_tag_message\e[${SUMMARY_INTERNAL_SUFFIX_COLOR}m$SUMMARY_INTERNAL_SUFFIX\n"
   [[ -n "$deprecated_tag_message" ]] &&
     printed_tags+="\e[${SUMMARY_DEPRECATED_PREFIX_COLOR}m$SUMMARY_DEPRECATED_PREFIX\e[${SUMMARY_DEPRECATED_COLOR}m$deprecated_tag_message\e[${SUMMARY_DEPRECATED_SUFFIX_COLOR}m$SUMMARY_DEPRECATED_SUFFIX\n"
-  
-  printed_tags="$(sed -E ':x; N; $! bx; s/\n+/\n/g' <<< "$printed_tags")"
+
+  printed_tags="$(sed -E ':x; N; $! bx; s/\n+/\n/g' <<<"$printed_tags")"
   echo -e "$printed_tags"
 
   [[ -n "$help_tag_value" ]] && {
@@ -669,12 +770,12 @@ better_tldr_render() {
   for example_number in {1..10}; do
     declare example="$(examples_awk_parsable_example "$page_content" "$example_number")"
     [[ -z "$example" ]] && return
-    declare description="$(awk -F :: '{ print $1 }'<<< "$example")"
-    declare code="$(awk -F :: '{ print $2 }'<<< "$example")"
+    declare description="$(awk -F :: '{ print $1 }' <<<"$example")"
+    declare code="$(awk -F :: '{ print $2 }' <<<"$example")"
 
     declare colorized_description="$(get_colorized_description "$description")"
     echo -e "\e[${CODE_DESCRIPTION_PREFIX_COLOR}m$CODE_DESCRIPTION_PREFIX\e[${CODE_DESCRIPTION_COLOR}m$colorized_description\e[${CODE_DESCRIPTION_SUFFIX_COLOR}m$CODE_DESCRIPTION_SUFFIX"
-  
+
     declare colorized_code="$(get_colorized_code "$code")"
     echo -e "\e[${CODE_EXAMPLE_PREFIX_COLOR}m$CODE_EXAMPLE_PREFIX\e[${CODE_EXAMPLE_COLOR}m$colorized_code\e[${CODE_EXAMPLE_SUFFIX_COLOR}m$CODE_EXAMPLE_SUFFIX"
 
@@ -684,10 +785,10 @@ better_tldr_render() {
 
 tldr_render() {
   declare page_content="$1"
-  
+
   page_content="$(sed -E '/^`/ {
     s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
-  }' <<< "$page_content")"
+  }' <<<"$page_content")"
 
   echo -e "$(sed -E "/^#/ {
     s/^# (.*)$/\\\\e[${HEADER_COMMAND_COLOR}m\1/
@@ -724,10 +825,10 @@ tldr_render() {
 
 tldr_render_colorful() {
   declare page_content="$1"
-  
+
   page_content="$(sed -E '/^`/ {
     s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
-  }' <<< "$page_content")"
+  }' <<<"$page_content")"
 
   echo -e "$(sed -E "/^#/ {
     s/^# (.*)$/\\\\e[${HEADER_COMMAND_COLOR}m\1/
@@ -789,10 +890,10 @@ tldr_render_colorful() {
 
 docopt_render() {
   declare page_content="$1"
-  
+
   page_content="$(sed -E '/^`/ {
     s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
-  }' <<< "$page_content")"
+  }' <<<"$page_content")"
 
   echo -e "$(sed -E "/^#/ {
     s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
@@ -829,10 +930,10 @@ docopt_render() {
 
 docopt_render_colorful() {
   declare page_content="$1"
-  
+
   page_content="$(sed -E '/^`/ {
     s/\{([^ {}]+ +[^{}:]+):[^{}]+\}/{\1}/g
-  }' <<< "$page_content")"
+  }' <<<"$page_content")"
 
   echo -e "$(sed -E "/^#/ {
     s/^# (.*)$/\\\\e[${HEADER_COMMAND_PREFIX_COLOR}m$HEADER_COMMAND_PREFIX\\\\e[${HEADER_COMMAND_COLOR}m\1\\\\e[${HEADER_COMMAND_SUFFIX_COLOR}m$HEADER_COMMAND_SUFFIX/
@@ -908,43 +1009,167 @@ render() {
 "
 
   is_layout_valid "$page_content" || {
-    echo -e "$0: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
+    echo -e "$PROGRAM_NAME: $page_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
     return "$FAIL"
   }
 
-
   declare -i option_group_number=0
   case "$option_type" in
-    long)
-      option_group_number=1
-      ;;
-    short)
-      option_group_number=2
-      ;;
+  long)
+    option_group_number=1
+    ;;
+  short)
+    option_group_number=2
+    ;;
   esac
 
   page_content="$(sed -E "/^\`/ {
     s/\{option[?+*]? +[^{}:]+: ([^{},]+), *([^{},]+)\}/\\$option_group_number/g
     s/\{option[?+*]?: ([^{},]+), *([^{},]+)\}/\\$option_group_number/g
-  }" <<< "$page_content")"
+  }" <<<"$page_content")"
 
   case "$render" in
-    better-tldr)
-      better_tldr_render "$page_content"
-      ;;
-    tldr)
-      tldr_render "$page_content"
-      ;;
-    tldr-colorful)
-      tldr_render_colorful "$page_content"
-      ;;
-    docopt)
-      docopt_render "$page_content"
-      ;;
-    docopt-colorful)
-      docopt_render_colorful "$page_content"
-      ;;
+  better-tldr)
+    better_tldr_render "$page_content"
+    ;;
+  tldr)
+    tldr_render "$page_content"
+    ;;
+  tldr-colorful)
+    tldr_render_colorful "$page_content"
+    ;;
+  docopt)
+    docopt_render "$page_content"
+    ;;
+  docopt-colorful)
+    docopt_render_colorful "$page_content"
+    ;;
   esac
+}
+
+set_render_options_for_tldr_mode() {
+  HEADER_COMMAND_PREFIX=""
+  HEADER_COMMAND_SUFFIX=""
+
+  SUMMARY_DESCRIPTION_PREFIX=""
+  SUMMARY_DESCRIPTION_SUFFIX=""
+
+  SUMMARY_SEE_ALSO_PREFIX="See also: "
+  SUMMARY_SEE_ALSO_SUFFIX=""
+
+  SUMMARY_ALIASES_PREFIX="Aliases: "
+  SUMMARY_ALIASES_SUFFIX=""
+
+  SUMMARY_MORE_INFORMATION_PREFIX="More information: "
+  SUMMARY_MORE_INFORMATION_SUFFIX=""
+
+  CODE_DESCRIPTION_PREFIX="- "
+  CODE_DESCRIPTION_SUFFIX=":"
+
+  CODE_EXAMPLE_PREFIX="  "
+  CODE_EXAMPLE_SUFFIX=""
+
+  CODE_DESCRIPTION_MNEMONIC_PREFIX="["
+  CODE_DESCRIPTION_MNEMONIC_SUFFIX="]"
+
+  CODE_EXAMPLE_PLACEHOLDER_PREFIX=""
+  CODE_EXAMPLE_PLACEHOLDER_SUFFIX=""
+}
+
+set_render_options_for_docopt_mode() {
+  SUMMARY_DESCRIPTION_PREFIX=""
+
+  CODE_DESCRIPTION_PREFIX="-> "
+
+  CODE_EXAMPLE_PREFIX="   "
+
+  CODE_DESCRIPTION_MNEMONIC_PREFIX="("
+  CODE_DESCRIPTION_MNEMONIC_SUFFIX=")"
+
+  CODE_EXAMPLE_PLACEHOLDER_PREFIX="<"
+  CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
+}
+
+set_render_options_from_theme() {
+  declare theme_to_set="$1"
+
+  yq "$theme_to_set" &> /dev/null || {
+    echo -e "$PROGRAM_NAME: theme: ${ERROR_COLOR}valid yaml layout expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+
+  HEADER_COMMAND_PREFIX="$(yq ".header.prefix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  HEADER_COMMAND_SUFFIX="$(yq ".header.suffix // \"$HEADER_COMMAND_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  HEADER_COMMAND_COLOR="$(color_to_code "$(yq ".header.color // \"$HEADER_COMMAND_COLOR_DEFAULT\"" "$theme_to_set")")"
+  HEADER_COMMAND_PREFIX_COLOR="$(color_to_code "$(yq ".header.prefix_color // \"$HEADER_COMMAND_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  HEADER_COMMAND_SUFFIX_COLOR="$(color_to_code "$(yq ".header.suffix_color // \"$HEADER_COMMAND_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_DESCRIPTION_PREFIX="$(yq ".summary.description.prefix // \"$SUMMARY_DESCRIPTION_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_DESCRIPTION_SUFFIX="$(yq ".summary.description.suffix // \"$SUMMARY_DESCRIPTION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_DESCRIPTION_COLOR="$(color_to_code "$(yq ".summary.description.color // \"$SUMMARY_DESCRIPTION_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq ".summary.description.prefix_color // \"$SUMMARY_DESCRIPTION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.description.suffix_color // \"$SUMMARY_DESCRIPTION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_ALIASES_PREFIX="$(yq ".summary.tag.aliases.prefix // \"$SUMMARY_ALIASES_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_ALIASES_SUFFIX="$(yq ".summary.tag.aliases.suffix // \"$SUMMARY_ALIASES_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_ALIASES_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.color // \"$SUMMARY_ALIASES_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_ALIASES_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.prefix_color // \"$SUMMARY_ALIASES_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_ALIASES_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.aliases.suffix_color // \"$SUMMARY_ALIASES_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_SEE_ALSO_PREFIX="$(yq ".summary.tag.see-also.prefix // \"$SUMMARY_SEE_ALSO_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_SEE_ALSO_SUFFIX="$(yq ".summary.tag.see-also.suffix // \"$SUMMARY_SEE_ALSO_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_SEE_ALSO_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.color // \"$SUMMARY_SEE_ALSO_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_SEE_ALSO_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.prefix_color // \"$SUMMARY_SEE_ALSO_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_SEE_ALSO_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.see-also.suffix_color // \"$SUMMARY_SEE_ALSO_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_MORE_INFORMATION_PREFIX="$(yq ".summary.tag.more-information.prefix // \"$SUMMARY_MORE_INFORMATION_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_MORE_INFORMATION_SUFFIX="$(yq ".summary.tag.more-information.suffix // \"$SUMMARY_MORE_INFORMATION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_MORE_INFORMATION_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.color // \"$SUMMARY_MORE_INFORMATION_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_MORE_INFORMATION_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.prefix_color // \"$SUMMARY_MORE_INFORMATION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_MORE_INFORMATION_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.more-information.suffix_color // \"$SUMMARY_MORE_INFORMATION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_INTERNAL_PREFIX="$(yq ".summary.tag.internal.prefix // \"$SUMMARY_INTERNAL_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_INTERNAL_SUFFIX="$(yq ".summary.tag.internal.suffix // \"$SUMMARY_INTERNAL_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_INTERNAL_COLOR="$(color_to_code "$(yq ".summary.tag.internal.color // \"$SUMMARY_INTERNAL_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_INTERNAL_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.internal.prefix_color // \"$SUMMARY_INTERNAL_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_INTERNAL_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.internal.suffix_color // \"$SUMMARY_INTERNAL_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  SUMMARY_DEPRECATED_PREFIX="$(yq ".summary.tag.deprecated.prefix // \"$SUMMARY_DEPRECATED_PREFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_DEPRECATED_SUFFIX="$(yq ".summary.tag.deprecated.suffix // \"$SUMMARY_DEPRECATED_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  SUMMARY_DEPRECATED_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.color // \"$SUMMARY_DEPRECATED_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_DEPRECATED_PREFIX_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.prefix_color // \"$SUMMARY_DEPRECATED_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  SUMMARY_DEPRECATED_SUFFIX_COLOR="$(color_to_code "$(yq ".summary.tag.deprecated.suffix_color // \"$SUMMARY_DEPRECATED_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_DESCRIPTION_PREFIX="$(yq ".example.description.prefix // \"$CODE_DESCRIPTION_PREFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_SUFFIX="$(yq ".example.description.suffix // \"$CODE_DESCRIPTION_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_COLOR="$(color_to_code "$(yq ".example.description.color // \"$CODE_DESCRIPTION_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.prefix_color // \"$CODE_DESCRIPTION_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.suffix_color // \"$CODE_DESCRIPTION_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_DESCRIPTION_MNEMONIC_PREFIX="$(yq ".example.description.mnemonic.prefix // \"$CODE_DESCRIPTION_MNEMONIC_PREFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_MNEMONIC_SUFFIX="$(yq ".example.description.mnemonic.suffix // \"$CODE_DESCRIPTION_MNEMONIC_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_MNEMONIC_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.color // \"$CODE_DESCRIPTION_MNEMONIC_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.prefix_color // \"$CODE_DESCRIPTION_MNEMONIC_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.mnemonic.suffix_color // \"$CODE_DESCRIPTION_MNEMONIC_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_DESCRIPTION_STREAM_PREFIX="$(yq ".example.description.stream.prefix // \"$CODE_DESCRIPTION_STREAM_PREFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_STREAM_SUFFIX="$(yq ".example.description.stream.suffix // \"$CODE_DESCRIPTION_STREAM_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_DESCRIPTION_STREAM_COLOR="$(color_to_code "$(yq ".example.description.stream.color // \"$CODE_DESCRIPTION_STREAM_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_STREAM_PREFIX_COLOR="$(color_to_code "$(yq ".example.description.stream.prefix_color // \"$CODE_DESCRIPTION_STREAM_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_DESCRIPTION_STREAM_SUFFIX_COLOR="$(color_to_code "$(yq ".example.description.stream.suffix_color // \"$CODE_DESCRIPTION_STREAM_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_EXAMPLE_PREFIX="$(yq ".example.code.prefix // \"$CODE_EXAMPLE_PREFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_EXAMPLE_SUFFIX="$(yq ".example.code.suffix // \"$CODE_EXAMPLE_SUFFIX_DEFAULT\"" "$theme_to_set")"
+  CODE_EXAMPLE_COLOR="$(color_to_code "$(yq ".example.code.color // \"$CODE_EXAMPLE_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_EXAMPLE_PREFIX_COLOR="$(color_to_code "$(yq ".example.code.prefix_color // \"$CODE_EXAMPLE_PREFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_EXAMPLE_SUFFIX_COLOR="$(color_to_code "$(yq ".example.code.suffix_color // \"$CODE_EXAMPLE_SUFFIX_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.required // \"$CODE_EXAMPLE_PLACEHOLDER_REQUIRED_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.optional // \"$CODE_EXAMPLE_PLACEHOLDER_OPTIONAL_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.repeated-required // \"$CODE_EXAMPLE_PLACEHOLDER_REPEATED_REQUIRED_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+  CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR="$(color_to_code "$(yq ".example.code.placeholder.repeated-optional // \"$CODE_EXAMPLE_PLACEHOLDER_REPEATED_OPTIONAL_KEYWORD_COLOR_DEFAULT\"" "$theme_to_set")")"
+
+  CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR="$(color_to_code "$(yq ".example.code.placeholder.example // \"$CODE_EXAMPLE_PLACEHOLDER_EXAMPLE_COLOR_DEFAULT\"" "$theme_to_set")")"
 }
 
 if (($# == 0)); then
@@ -955,6 +1180,7 @@ fi
 declare operating_system=common
 declare render=better-tldr
 declare -i update_cache=1
+declare -i update_theme_cache=1
 declare option_type=long
 
 while [[ -n "$1" ]]; do
@@ -980,118 +1206,130 @@ while [[ -n "$1" ]]; do
     ;;
   --operating-system | -os)
     [[ -z "$value" ]] && {
-        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
-        exit "$FAIL"
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
     }
     operating_system="$value"
     shift 2
     ;;
   --render | -r)
     [[ -z "$value" ]] && {
-        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
-        exit "$FAIL"
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
     }
     [[ "$value" =~ ^(tldr|tldr-colorful|docopt|docopt-colorful)$ ]] || {
-        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
-        exit "$FAIL"
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
     }
     render="$value"
 
     case "$render" in
-      tldr*)
-        HEADER_COMMAND_PREFIX=""
-        HEADER_COMMAND_SUFFIX=""
-        
-        SUMMARY_DESCRIPTION_PREFIX=""
-        SUMMARY_DESCRIPTION_SUFFIX=""
-
-        SUMMARY_SEE_ALSO_PREFIX="See also: "
-        SUMMARY_SEE_ALSO_SUFFIX=""
-
-        SUMMARY_ALIASES_PREFIX="Aliases: "
-        SUMMARY_ALIASES_SUFFIX=""
-
-        SUMMARY_MORE_INFORMATION_PREFIX="More information: "
-        SUMMARY_MORE_INFORMATION_SUFFIX=""
-
-        CODE_DESCRIPTION_PREFIX="- "
-        CODE_DESCRIPTION_SUFFIX=":"
-
-        CODE_EXAMPLE_PREFIX="  "
-        CODE_EXAMPLE_SUFFIX=""
-
-        CODE_DESCRIPTION_MNEMONIC_PREFIX="["
-        CODE_DESCRIPTION_MNEMONIC_SUFFIX="]"
-
-        CODE_EXAMPLE_PLACEHOLDER_PREFIX=""
-        CODE_EXAMPLE_PLACEHOLDER_SUFFIX=""
-        ;;
-      docopt*)
-        SUMMARY_DESCRIPTION_PREFIX=""
-
-        CODE_DESCRIPTION_PREFIX="-> "
-
-        CODE_EXAMPLE_PREFIX="   "
-
-        CODE_DESCRIPTION_MNEMONIC_PREFIX="("
-        CODE_DESCRIPTION_MNEMONIC_SUFFIX=")"
-
-        CODE_EXAMPLE_PLACEHOLDER_PREFIX="<"
-        CODE_EXAMPLE_PLACEHOLDER_SUFFIX=">"
-        ;;
+    tldr*)
+      set_render_options_for_tldr_mode
+      ;;
+    docopt*)
+      set_render_options_for_docopt_mode
+      ;;
     esac
 
     shift 2
     ;;
-  --clear-cache | -cc)
-    rm -rf "$CACHE_DIRECTORY/$page_path"
+  --clear-page-cache | -cpc)
+    rm -rf "$CACHE_DIRECTORY"
+    exit "$SUCCESS"
+    ;;
+  --clear-theme-cache | -ctc)
+    rm -rf "$THEME_CACHE_DIRECTORY"
     exit "$SUCCESS"
     ;;
   --update-page | -up)
     update_cache=0
     shift
     ;;
+  --update-theme | -ut)
+    update_theme_cache=0
+    shift
+    ;;
   --option-type | -ot)
     [[ -z "$value" ]] && {
-        echo -e "$0: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
-        exit "$FAIL"
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
     }
     [[ "$value" != "short" ]] && {
-        echo -e "$0: $option: ${ERROR_COLOR}valid option value expected'$value'$RESET_COLOR" >&2
-        exit "$FAIL"
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected'$value'$RESET_COLOR" >&2
+      exit "$FAIL"
     }
     option_type="$value"
+    shift 2
+    ;;
+  --theme | -t)
+    [[ -z "$value" ]] && {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    declare local_or_remote_theme="$value"
+    declare is_local=1
+
+    declare theme_to_set="$(mktemp "/tmp/clip-XXXXXX")"
+    [[ "$local_or_remote_theme" =~ .yaml$ ]] && is_local=0
+
+    if ((is_local == 0)); then
+      [[ -f "$local_or_remote_theme" ]] || {
+        echo -e "$PROGRAM_NAME: theme: ${ERROR_COLOR}existing theme expected$RESET_COLOR" >&2
+        exit "$FAIL"
+      }
+      cat "$local_or_remote_theme" >"$theme_to_set"
+    else
+      declare theme_path="themes/$local_or_remote_theme.yaml"
+
+      ((update_theme_cache == 0)) && rm -rf "$THEME_CACHE_DIRECTORY/$theme_path"
+
+      if [[ ! -f "$THEME_CACHE_DIRECTORY/$theme_path" ]]; then
+        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
+          echo -e "$PROGRAM_NAME: $theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
+          exit "$FAIL"
+        }
+
+        mkdir -p "$(dirname "$THEME_CACHE_DIRECTORY/$theme_path")"
+        cat "$theme_to_set" >"$THEME_CACHE_DIRECTORY/$theme_path"
+      else
+        cat "$THEME_CACHE_DIRECTORY/$theme_path" >"$theme_to_set"
+      fi
+    fi
+
+    set_render_options_from_theme "$theme_to_set" || exit "$FAIL"
     shift 2
     ;;
   *)
     declare local_file_or_remote_page="$option"
     declare is_local=1
 
-    file_to_render="$(mktemp "/tmp/clip-XXXXXX")"
+    declare file_to_render="$(mktemp "/tmp/clip-XXXXXX")"
     [[ "$local_file_or_remote_page" =~ .clip$ ]] && is_local=0
 
     declare file_to_render
     if ((is_local == 0)); then
       [[ -f "$local_file_or_remote_page" ]] || {
-        echo -e "$0: $page_file: ${ERROR_COLOR}existing page expected$RESET_COLOR" >&2
+        echo -e "$PROGRAM_NAME: $page_file: ${ERROR_COLOR}existing page expected$RESET_COLOR" >&2
         exit "$FAIL"
       }
-      cat "$local_file_or_remote_page" > "$file_to_render"
+      cat "$local_file_or_remote_page" >"$file_to_render"
     else
       declare page_path="$operating_system/$local_file_or_remote_page.clip"
 
       ((update_cache == 0)) && rm -rf "$CACHE_DIRECTORY/$page_path"
 
       if [[ ! -f "$CACHE_DIRECTORY/$page_path" ]]; then
-        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2> /dev/null || {
-          echo -e "$0: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
+        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2>/dev/null || {
+          echo -e "$PROGRAM_NAME: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
         mkdir -p "$(dirname "$CACHE_DIRECTORY/$page_path")"
-        cat "$file_to_render" > "$CACHE_DIRECTORY/$page_path"
+        cat "$file_to_render" >"$CACHE_DIRECTORY/$page_path"
       else
-        cat "$CACHE_DIRECTORY/$page_path" > "$file_to_render"
+        cat "$CACHE_DIRECTORY/$page_path" >"$file_to_render"
       fi
     fi
 
@@ -1102,7 +1340,7 @@ while [[ -n "$1" ]]; do
     rm "$file_to_render"
 
     declare next_argument="$2"
-    [[ -n "$next_argument" ]] && [[ ! "$next_argument" =~ --?.+ ]] && { 
+    [[ -n "$next_argument" ]] && [[ ! "$next_argument" =~ --?.+ ]] && {
       echo
       printf "%.0s- " {1..10}
       echo
