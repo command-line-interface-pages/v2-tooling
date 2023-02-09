@@ -71,6 +71,8 @@ Output:
 
 #### Get intellisence
 
+Prerequisite: [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+
 Add to Visual Studio Code settings:
 
 ```json
