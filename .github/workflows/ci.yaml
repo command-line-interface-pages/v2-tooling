@@ -1,0 +1,15 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-with-shellcheck:
+    name: Lint with `shellcheck`
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          shopt -s globstar
+          shellcheck **/*.sh
