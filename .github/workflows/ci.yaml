@@ -19,4 +19,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          docker run -it bats/bats:latest --version
+          docker run bats/bats:latest --version
