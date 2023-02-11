@@ -1,5 +1,5 @@
-> Android activity manager
-> More information: https://developer.android.com/studio/command-line/adb#am
+> Android activity manager.
+> More information: <https://developer.android.com/studio/command-line/adb#am>
 
 - Start a specific activity:
 
