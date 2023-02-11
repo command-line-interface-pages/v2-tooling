@@ -398,7 +398,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.2.1" >&2
+  echo "1.2.2" >&2
 }
 
 author() {
@@ -457,7 +457,12 @@ term_with_mnemonic() {
   declare term="$1"
   declare option="$2"
 
-  option="$(sed -E 's/^-*//' <<<"$option")"
+  [[ "$option" =~ .*/.* ]] && {
+    echo -n "$term"
+    return
+  }
+
+  option="$(sed -E 's/^[-]*//' <<<"$option")"
   sed -E "s/($option)/[\1]/" <<<"$term"
 }
 
