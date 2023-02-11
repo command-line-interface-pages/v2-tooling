@@ -38,5 +38,5 @@
 
 @test "expect no summary 'See also' conversion error when valid page is passed" {
   declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page_with_see_also.md" | sed -nE '/^> See also:/p')"
-  [[ "$output" == "> See also: command1, command2" ]]
+  [[ "$output" == "> See also: command1, command2." ]]
 }
