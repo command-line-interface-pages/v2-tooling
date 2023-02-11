@@ -19,4 +19,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          docker run bats/bats:latest --version
+          shopt -s globstar
+          docker run bats/bats:latest **/*.bats
