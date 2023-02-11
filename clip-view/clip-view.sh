@@ -398,7 +398,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.2.0" >&2
+  echo "1.2.1" >&2
 }
 
 author() {
