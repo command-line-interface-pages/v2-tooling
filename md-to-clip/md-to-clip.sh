@@ -82,6 +82,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--no-file-save$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-nfs$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
 
 ${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
@@ -93,7 +94,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.5.0" >&2
+  echo "1.5.1" >&2
 }
 
 author() {
@@ -308,6 +309,7 @@ if (($# == 0)); then
 fi
 
 declare output_directory
+declare -i no_file_save=1
 
 while [[ -n "$1" ]]; do
   declare option="$1"
@@ -330,6 +332,10 @@ while [[ -n "$1" ]]; do
     email
     exit
     ;;
+  --no-file-save | -nfs)
+    no_file_save=0
+    shift
+    ;;
   --output-directory | -od)
     [[ -z "$value" ]] && {
       echo -e "$PROGRAM_NAME: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
@@ -341,19 +347,25 @@ while [[ -n "$1" ]]; do
   *)
     declare tldr_file="$option"
     declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
-    if [[ -z "$output_directory" ]]; then
-      clip_file="$(dirname "$tldr_file")/$clip_file"
-    else
-      clip_file="$output_directory/$clip_file"
-    fi
+    ((no_file_save == 1)) && {
+      if [[ -z "$output_directory" ]]; then
+        clip_file="$(dirname "$tldr_file")/$clip_file"
+      else
+        clip_file="$output_directory/$clip_file"
+      fi
+    }
 
     declare clip_content
     clip_content="$(convert "$tldr_file")"
     (($? != 0)) && exit "$FAIL"
 
-    echo "$clip_content" >"$clip_file"
-
-    echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+    if ((no_file_save == 1)); then
+      echo "$clip_content" >"$clip_file"
+      echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+    else
+      echo "$clip_content"
+    fi
+    
     shift
     ;;
   esac
