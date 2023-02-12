@@ -1,15 +1,17 @@
 # PREFIX: sets the installation prefix
 PREFIX?=/home/$(USER)/.local/bin
 
+script=clip-view
+
 .PHONY: install
 install:
-	cp -nv ./clip-view/clip-view.sh $(PREFIX)/clip-view
-	chmod +x $(PREFIX)/clip-view
+	cp -nv ./$(script).sh $(PREFIX)/$(script)
+	chmod +x $(PREFIX)/$(script)
 
 .PHONY: uninstall
 uninstall:
-	rm -v $(PREFIX)/clip-view
+	rm -v $(PREFIX)/$(script)
 
 .PHONY: tests
 tests:
-	env -C md-to-clip bats tests.bats
+	echo No tests available yet.
