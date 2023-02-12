@@ -13,3 +13,13 @@ jobs:
       - run: |
           shopt -s globstar
           shellcheck **/*.sh
+  test-with-batscore:
+    name: Test with `Bats Core`
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.8.2
+      - run: |
+          env -C md-to-clip bats tests.bats

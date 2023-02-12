@@ -1,0 +1,2 @@
+md-to-clip/tests/inputs/invalid/*.clip
+md-to-clip/tests/inputs/valid/*.clip
