@@ -1,11 +1,13 @@
+clip_view_output_path=/home/$(USER)/.local/bin/clip-view
+
 .PHONY: install
 install:
-	cp -nv ./clip-view/clip-view.sh /home/$(USER)/.local/bin/clip-view
+	cp -nv ./clip-view/clip-view.sh $(clip_view_output_path)
 	chmod +x /home/$(USER)/.local/bin/clip-view
 
 .PHONY: uninstall
 uninstall:
-	rm -v /home/$(USER)/.local/bin/clip-view
+	rm -v $(clip_view_output_path)
 
 .PHONY: tests
 tests:
