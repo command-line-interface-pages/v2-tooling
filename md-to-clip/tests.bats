@@ -51,7 +51,7 @@
   [[ "$output" == "> See also: command1, command2" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdin
 @test "expect no stdin stream conversion error when valid page && stream inside backticks passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -63,7 +63,7 @@
   [[ "$output" == "- stdin:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdin
 @test "expect no stdin stream conversion error when valid page && full stream name passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -75,7 +75,7 @@
   [[ "$output" == "- stdin:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdin
 @test "expect no stdin stream conversion error when valid page && full stream name && stream keyword passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -87,7 +87,7 @@
   [[ "$output" == "- stdin:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdout
 @test "expect no stdout stream conversion error when valid page && stream inside backticks passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -99,7 +99,7 @@
   [[ "$output" == "- stdout:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdout
 @test "expect no stdout stream conversion error when valid page && full stream name passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -111,7 +111,7 @@
   [[ "$output" == "- stdout:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stdout
 @test "expect no stdout stream conversion error when valid page && full stream name && stream keyword passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -123,7 +123,7 @@
   [[ "$output" == "- stdout:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stderr
 @test "expect no stderr stream conversion error when valid page && stream inside backticks passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -135,7 +135,7 @@
   [[ "$output" == "- stderr:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stderr
 @test "expect no stderr stream conversion error when valid page && full stream name passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -147,7 +147,7 @@
   [[ "$output" == "- stderr:" ]]
 }
 
-# bats test_tags=example, description, stream
+# bats test_tags=example, description, stream, stderr
 @test "expect no stderr stream conversion error when valid page && full stream name && stream keyword passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
