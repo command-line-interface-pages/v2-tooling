@@ -193,8 +193,8 @@
 
 - Some text:
 
-\`some {{devices}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {file* device}`' ]]
+\`some {{devices}} {{device_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file* device} {file* device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, expandable, singular, relative, device
@@ -205,8 +205,8 @@
 
 - Some text:
 
-\`some {{/devices}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {/file* device}`' ]]
+\`some {{/devices}} {{/device_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file* device} {/file* device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, expandable, singular, relative, device
@@ -217,8 +217,8 @@
 
 - Some text:
 
-\`some {{device}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {file device}`' ]]
+\`some {{device}} {{device_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file device} {file device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, expandable, plural, relative, device
@@ -229,8 +229,8 @@
 
 - Some text:
 
-\`some {{device1 device2 ...}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {file* device}`' ]]
+\`some {{device1 device2 ...}} {{device_name1 device_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file* device} {file* device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, expandable, singular, absolute, device
@@ -241,8 +241,8 @@
 
 - Some text:
 
-\`some {{/device}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {/file device}`' ]]
+\`some {{/device}} {{/device_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file device} {/file device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, expandable, plural, absolute, device
@@ -253,8 +253,8 @@
 
 - Some text:
 
-\`some {{/device1 /device2 ...}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {/file* device}`' ]]
+\`some {{/device1 /device2 ...}} {{/device_name1 /device_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file* device} {/file* device}`' ]]
 }
 
 # bats test_tags=example, code, placeholder, singular, relative, device
