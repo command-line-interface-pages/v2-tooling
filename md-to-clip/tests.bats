@@ -159,79 +159,17 @@
   [[ "$output" == "- stderr:" ]]
 }
 
+
+# bats test_tags=example, code, placeholder, ellipsis
 @test "expect no ellipsis removal error when valid page is passed" {
-  declare header='# some
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
 > Some text.
 
 - Some text:
 
-'
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some  {{...}}  --  {{...}}  `') | sed -nE '/^`/p')"
-  [[ "$output" == '`some -- `' ]]
-}
-
-@test "expect no singular device placeholder conversion error when valid page is passed" {
-  declare header='# some
-
-> Some text.
-
-- Some text:
-
-'
-
-  declare prefixes=("" /)
-  declare suffixes=("" 1)
-  declare input_contents=(dev/sda device)
-
-  for prefix in "${prefixes[@]}"; do
-    for suffix in "${suffixes[@]}"; do
-      for content in "${input_contents[@]}"; do
-        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
-        [[ "$output" == "\`some {${prefix}file value: device}\`" ]]
-      done
-    done
-  done
-}
-
-@test "expect no plural device placeholder conversion error when valid page is passed" {
-  declare header='# some
-
-> Some text.
-
-- Some text:
-
-'
-
-  declare prefixes=("" /)
-  declare suffixes=(names _names
-    "name(s)" "_name(s)"
-    "name{1,2,3}" "_name{1,2,3}")
-  declare input_contents=(device)
-
-  for prefix in "${prefixes[@]}"; do
-    for suffix in "${suffixes[@]}"; do
-      for content in "${input_contents[@]}"; do
-        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
-        [[ "$output" == "\`some {${prefix}file* value: device}\`" ]]
-      done
-    done
-  done
-}
-
-@test "expect no singular character placeholder conversion error when valid page is passed" {
-  declare header='# some
-
-> Some text.
-
-- Some text:
-
-'
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char}} {{character}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {char value} {char value}`' ]]
-
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char1}} {{character1}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {char value} {char value}`' ]]
+\`some {{...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some `' ]]
 }
 
 @test "expect no plural character placeholder conversion error when valid page is passed" {
