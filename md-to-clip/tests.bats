@@ -1,109 +1,161 @@
 #!/usr/bin/env bats
 
+# bats test_tags=layout
 @test "expect layout error when empty page is passed" {
   ! ./md-to-clip.sh "./tests/inputs/invalid/empty_page.md"
 }
 
+# bats test_tags=layout
 @test "expect layout error when page without header is passed" {
   ! ./md-to-clip.sh "./tests/inputs/invalid/page_without_header.md"
 }
 
+# bats test_tags=layout
 @test "expect layout error when page without summary is passed" {
   ! ./md-to-clip.sh "./tests/inputs/invalid/page_without_summary.md"
 }
 
+# bats test_tags=layout
 @test "expect layout error when page without examples is passed" {
   ! ./md-to-clip.sh "./tests/inputs/invalid/page_without_examples.md"
 }
 
-
+# bats test_tags=layout
 @test "expect no layout error when valid page is passed" {
   ./md-to-clip.sh "./tests/inputs/valid/page.md"
 }
 
+
+# bats test_tags=header
 @test "expect no header conversion error when valid page is passed" {
-  declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page.md" | sed -n '1p')"
+  run bash -c "./md-to-clip.sh -nfs './tests/inputs/valid/page.md' | sed -n '1p'"
   [[ "$output" == "# am" ]]
 }
 
+
+# bats test_tags=summary, description
 @test "expect no summary description conversion error when valid page is passed" {
-  declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page.md" | sed -nE '/^> [^:]+$/p')"
+  run bash -c "./md-to-clip.sh -nfs './tests/inputs/valid/page.md' | sed -nE '/^> [^:]+$/p'"
   [[ "$output" == "> Android activity manager" ]]
 }
 
+# bats test_tags=summary, more-information
 @test "expect no summary 'More information' conversion error when valid page is passed" {
-  declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page_with_more_information.md" | sed -nE '/^> More +information:/p')"
+  run bash -c "./md-to-clip.sh -nfs './tests/inputs/valid/page_with_more_information.md' | sed -nE '/^> More +information:/p'"
   [[ "$output" == "> More information: https://some/documentation/url" ]]
 }
 
+# bats test_tags=summary, see-also
 @test "expect no summary 'See also' conversion error when valid page is passed" {
-  declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page_with_see_also.md" | sed -nE '/^> See also:/p')"
+  run bash -c "./md-to-clip.sh -nfs './tests/inputs/valid/page_with_see_also.md' | sed -nE '/^> See also:/p'"
   [[ "$output" == "> See also: command1, command2" ]]
 }
 
-@test "expect no stdin stream conversion error when valid page is passed" {
-  declare header='# some
+# bats test_tags=example, description, stream
+@test "expect no stdin stream conversion error when valid page && stream inside backticks passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
 > Some text.
 
-'
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stdin`:
+- \`stdin\`:
 
-`some`') | sed -nE '/^- /p')"
-  [[ "$output" == "- stdin:" ]]
-
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard input:
-
-`some`') | sed -nE '/^- /p')"
-  [[ "$output" == "- stdin:" ]]
-
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard input stream:
-
-`some`') | sed -nE '/^- /p')"
+\`some\`') | sed -nE '/^- /p'"
   [[ "$output" == "- stdin:" ]]
 }
 
-@test "expect no stdout stream conversion error when valid page is passed" {
-  declare header='# some
+# bats test_tags=example, description, stream
+@test "expect no stdin stream conversion error when valid page && full stream name passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
 > Some text.
 
-'
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stdout`:
+- standard input:
 
-`some`') | sed -nE '/^- /p')"
-  [[ "$output" == "- stdout:" ]]
+\`some\`') | sed -nE '/^- /p'"
+  [[ "$output" == "- stdin:" ]]
+}
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard output:
+# bats test_tags=example, description, stream
+@test "expect no stdin stream conversion error when valid page && full stream name && stream keyword passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
-`some`') | sed -nE '/^- /p')"
-  [[ "$output" == "- stdout:" ]]
+> Some text.
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard output stream:
+- standard input stream:
 
-`some`') | sed -nE '/^- /p')"
+\`some\`') | sed -nE '/^- /p'"
+  [[ "$output" == "- stdin:" ]]
+}
+
+# bats test_tags=example, description, stream
+@test "expect no stdout stream conversion error when valid page && stream inside backticks passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- \`stdout\`:
+
+\`some\`') | sed -nE '/^- /p'"
   [[ "$output" == "- stdout:" ]]
 }
 
-@test "expect no stderr stream conversion error when valid page is passed" {
-  declare header='# some
+# bats test_tags=example, description, stream
+@test "expect no stdout stream conversion error when valid page && full stream name passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
 > Some text.
 
-'
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stderr`:
+- standard output:
 
-`some`') | sed -nE '/^- /p')"
+\`some\`') | sed -nE '/^- /p'"
+  [[ "$output" == "- stdout:" ]]
+}
+
+# bats test_tags=example, description, stream
+@test "expect no stdout stream conversion error when valid page && full stream name && stream keyword passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- standard output stream:
+
+\`some\`') | sed -nE '/^- /p'"
+  [[ "$output" == "- stdout:" ]]
+}
+
+# bats test_tags=example, description, stream
+@test "expect no stderr stream conversion error when valid page && stream inside backticks passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- \`stderr\`:
+
+\`some\`') | sed -nE '/^- /p'"
   [[ "$output" == "- stderr:" ]]
+}
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard error:
+# bats test_tags=example, description, stream
+@test "expect no stderr stream conversion error when valid page && full stream name passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
-`some`') | sed -nE '/^- /p')"
+> Some text.
+
+- standard error:
+
+\`some\`') | sed -nE '/^- /p'"
   [[ "$output" == "- stderr:" ]]
+}
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard error stream:
+# bats test_tags=example, description, stream
+@test "expect no stderr stream conversion error when valid page && full stream name && stream keyword passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
-`some`') | sed -nE '/^- /p')"
+> Some text.
+
+- standard error stream:
+
+\`some\`') | sed -nE '/^- /p'"
   [[ "$output" == "- stderr:" ]]
 }
 
