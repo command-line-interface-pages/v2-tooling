@@ -106,3 +106,15 @@
 `some`') | sed -nE '/^- /p')"
   [[ "$output" == "- stderr:" ]]
 }
+
+@test "expect no ellipsis removal error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some  {{...}}  --  {{...}}  `') | sed -nE '/^`/p')"
+  [[ "$output" == '`some -- `' ]]
+}
