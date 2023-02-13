@@ -191,7 +191,7 @@ convert() {
     s/\{\{(group(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|group_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{group1 group2 ...}}/g
     s/\{\{(url(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|url_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{url1 url2 ...}}/g
     s/\{\{(ip(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|ip_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{ip1 ip2 ...}}/g
-    s/\{\{(db(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|dp_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{database1 database2 ...}}/g
+    s/\{\{(db(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|db_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{database1 database2 ...}}/g
 
     s/\{\{(\/?)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
     s/\{\{(\/?)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g

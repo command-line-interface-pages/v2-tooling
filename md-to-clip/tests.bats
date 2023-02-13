@@ -140,6 +140,20 @@
       done
     done
   done
+
+  suffixes=(names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  input_contents=(device)
+
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file* value: device}\`" ]]
+      done
+    done
+  done
 }
 
 @test "expect no character placeholder conversion error when valid page is passed" {
@@ -155,6 +169,19 @@
 
   output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char1}} {{character1}}`') | sed -nE '/^`/p')"
   [[ "$output" == '`some {char value} {char value}`' ]]
+
+  declare suffixes=(s "(s)" "{1,2,3}"
+    names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  declare input_contents=(char character)
+
+  for suffix in "${suffixes[@]}"; do
+    for content in "${input_contents[@]}"; do
+      declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$content$suffix}}\`") | sed -nE '/^`/p')"
+      [[ "$output" == "\`some {char* value}\`" ]]
+    done
+  done
 }
 
 @test "expect no path placeholder conversion error when valid page is passed" {
@@ -258,6 +285,98 @@
         declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
         [[ "$output" == "\`some {${prefix}directory value}\`" ]]
       done
+    done
+  done
+}
+
+@test "expect no user placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  suffixes=(s "(s)" "{1,2,3}"
+    names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  input_contents=(user)
+
+  for suffix in "${suffixes[@]}"; do
+    for content in "${input_contents[@]}"; do
+      declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$content$suffix}}\`") | sed -nE '/^`/p')"
+      [[ "$output" == "\`some {string* user}\`" ]]
+    done
+  done
+}
+
+@test "expect no group placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  suffixes=(s "(s)" "{1,2,3}"
+    names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  input_contents=(group)
+
+  for suffix in "${suffixes[@]}"; do
+    for content in "${input_contents[@]}"; do
+      declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$content$suffix}}\`") | sed -nE '/^`/p')"
+      [[ "$output" == "\`some {string* group}\`" ]]
+    done
+  done
+}
+
+@test "expect no ip placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  suffixes=(s "(s)" "{1,2,3}"
+    names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  input_contents=(ip)
+
+  for suffix in "${suffixes[@]}"; do
+    for content in "${input_contents[@]}"; do
+      declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$content$suffix}}\`") | sed -nE '/^`/p')"
+      [[ "$output" == "\`some {string* ip}\`" ]]
+    done
+  done
+}
+
+@test "expect no database placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  suffixes=(s "(s)" "{1,2,3}"
+    names _names
+    "name(s)" "_name(s)"
+    "name{1,2,3}" "_name{1,2,3}")
+  input_contents=(db database)
+
+  for suffix in "${suffixes[@]}"; do
+    for content in "${input_contents[@]}"; do
+      declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$content$suffix}}\`") | sed -nE '/^`/p')"
+      [[ "$output" == "\`some {string* database}\`" ]]
     done
   done
 }
