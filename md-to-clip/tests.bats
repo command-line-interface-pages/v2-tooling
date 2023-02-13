@@ -214,11 +214,24 @@
 
 '
 
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{file_or_directory}} {{executable_or_directory}} {{program_or_directory}} {{script_or_directory}} {{source_or_directory}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {path value} {path value} {path value} {path value} {path value}`' ]]
+  declare prefixes=(file "/file"
+    executable "/executable"
+    program "/program"
+    script "/script"
+    source "/source")
+  declare suffixes=("" 1)
+  declare input_contents=(_or_directory)
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{/file_or_directory}} {{/executable_or_directory}} {{/program_or_directory}} {{/script_or_directory}} {{/source_or_directory}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {/path value} {/path value} {/path value} {/path value} {/path value}`' ]]
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
+        declare output_content_prefix=""
+        [[ "$prefix" =~ ^'/' ]] && output_content_prefix=/
+        [[ "$output" == "\`some {${output_content_prefix}path value}\`" ]]
+      done
+    done
+  done
 }
 
 @test "expect no singular file placeholder conversion error when valid page is passed" {
