@@ -173,9 +173,14 @@ convert() {
 
     # Processing device placeholders.
     ## Expansion
+    ### Main expansions
     s|\{\{(\/?)devices[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
     s|\{\{(\/?)device([[:digit:]]*)\}\}|{{\1dev/sda\2}}|g
     s|\{\{(\/?)device[[:digit:]]+ +\1device[[:digit:]]+ +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+
+    ### Additional expansions
+    s|\{\{(\/?)device(\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+    s|\{\{(\/?)device_*name(s\|\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
 
     ## Conversion
     s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
