@@ -119,7 +119,7 @@
   [[ "$output" == '`some -- `' ]]
 }
 
-@test "expect no device placeholder conversion error when valid page is passed" {
+@test "expect no singular device placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -140,11 +140,22 @@
       done
     done
   done
+}
 
-  suffixes=(names _names
+@test "expect no plural device placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  declare prefixes=("" /)
+  declare suffixes=(names _names
     "name(s)" "_name(s)"
     "name{1,2,3}" "_name{1,2,3}")
-  input_contents=(device)
+  declare input_contents=(device)
 
   for prefix in "${prefixes[@]}"; do
     for suffix in "${suffixes[@]}"; do
@@ -156,7 +167,7 @@
   done
 }
 
-@test "expect no character placeholder conversion error when valid page is passed" {
+@test "expect no singular character placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -169,6 +180,16 @@
 
   output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char1}} {{character1}}`') | sed -nE '/^`/p')"
   [[ "$output" == '`some {char value} {char value}`' ]]
+}
+
+@test "expect no plural character placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
 
   declare suffixes=(s "(s)" "{1,2,3}"
     names _names
@@ -184,7 +205,7 @@
   done
 }
 
-@test "expect no path placeholder conversion error when valid page is passed" {
+@test "expect no singular path placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -192,6 +213,7 @@
 - Some text:
 
 '
+
   declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{file_or_directory}} {{executable_or_directory}} {{program_or_directory}} {{script_or_directory}} {{source_or_directory}}`') | sed -nE '/^`/p')"
   [[ "$output" == '`some {path value} {path value} {path value} {path value} {path value}`' ]]
 
@@ -199,7 +221,7 @@
   [[ "$output" == '`some {/path value} {/path value} {/path value} {/path value} {/path value}`' ]]
 }
 
-@test "expect no file placeholder conversion error when valid page is passed" {
+@test "expect no singular file placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -232,7 +254,7 @@
   done
 }
 
-@test "expect no file placeholder with extension conversion error when valid page is passed" {
+@test "expect no singular file placeholder with extension conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -265,7 +287,7 @@
   done
 }
 
-@test "expect no directory placeholder conversion error when valid page is passed" {
+@test "expect no singular directory placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -289,7 +311,7 @@
   done
 }
 
-@test "expect no user placeholder conversion error when valid page is passed" {
+@test "expect no plural user placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -312,7 +334,7 @@
   done
 }
 
-@test "expect no group placeholder conversion error when valid page is passed" {
+@test "expect no plural group placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -335,7 +357,7 @@
   done
 }
 
-@test "expect no ip placeholder conversion error when valid page is passed" {
+@test "expect no plural ip placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
@@ -358,7 +380,7 @@
   done
 }
 
-@test "expect no database placeholder conversion error when valid page is passed" {
+@test "expect no plural database placeholder conversion error when valid page is passed" {
   declare header='# some
 
 > Some text.
