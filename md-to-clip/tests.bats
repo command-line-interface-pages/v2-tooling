@@ -118,3 +118,144 @@
   declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some  {{...}}  --  {{...}}  `') | sed -nE '/^`/p')"
   [[ "$output" == '`some -- `' ]]
 }
+
+@test "expect no device placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{dev/sda}} {{/dev/sda}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{dev/sda1}} {{/dev/sda1}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{device}} {{/device}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{device1}} {{/device1}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+}
+
+@test "expect no character placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char}} {{character}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {char value} {char value}`' ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{char1}} {{character1}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {char value} {char value}`' ]]
+}
+
+@test "expect no path placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{file_or_directory}} {{executable_or_directory}} {{program_or_directory}} {{script_or_directory}} {{source_or_directory}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {path value} {path value} {path value} {path value} {path value}`' ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{/file_or_directory}} {{/executable_or_directory}} {{/program_or_directory}} {{/script_or_directory}} {{/source_or_directory}}`') | sed -nE '/^`/p')"
+  [[ "$output" == '`some {/path value} {/path value} {/path value} {/path value} {/path value}`' ]]
+}
+
+@test "expect no file placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  declare prefixes=("" /)
+  declare suffixes=("" name _name
+    1 name1 _name1)
+  declare input_contents=(file executable program script source)
+
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file value}\`" ]]
+      done
+    done
+  done
+
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{${prefix}image_$content$suffix}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file value: image}\`" ]]
+      done
+    done
+  done
+}
+
+@test "expect no file placeholder with extension conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  declare prefixes=("" /)
+  declare suffixes=("" name _name
+    1 name1 _name1)
+  declare input_contents=(file executable program script source)
+
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix.ext}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file value: sample.ext}\`" ]]
+      done
+    done
+  done
+
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{${prefix}image_$content$suffix.ext}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file value: image.ext}\`" ]]
+      done
+    done
+  done
+}
+
+@test "expect no directory placeholder conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+- Some text:
+
+'
+
+  declare prefixes=("" /)
+  declare suffixes=("" name _name
+    1 name1 _name1)
+  declare input_contents=(dir directory)
+  
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}directory value}\`" ]]
+      done
+    done
+  done
+}
