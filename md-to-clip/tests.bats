@@ -127,17 +127,19 @@
 - Some text:
 
 '
-  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{dev/sda}} {{/dev/sda}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{dev/sda1}} {{/dev/sda1}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+  declare prefixes=("" /)
+  declare suffixes=("" 1)
+  declare input_contents=(dev/sda device)
 
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{device}} {{/device}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
-
-  output="$(./md-to-clip.sh -nfs <(echo "$header"'`some {{device1}} {{/device1}}`') | sed -nE '/^`/p')"
-  [[ "$output" == '`some {file value: device} {/file value: device}`' ]]
+  for prefix in "${prefixes[@]}"; do
+    for suffix in "${suffixes[@]}"; do
+      for content in "${input_contents[@]}"; do
+        declare output="$(./md-to-clip.sh -nfs <(echo "${header}\`some {{$prefix$content$suffix}}\`") | sed -nE '/^`/p')"
+        [[ "$output" == "\`some {${prefix}file value: device}\`" ]]
+      done
+    done
+  done
 }
 
 @test "expect no character placeholder conversion error when valid page is passed" {
