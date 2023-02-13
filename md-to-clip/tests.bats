@@ -40,3 +40,69 @@
   declare output="$(./md-to-clip.sh -nfs "./tests/inputs/valid/page_with_see_also.md" | sed -nE '/^> See also:/p')"
   [[ "$output" == "> See also: command1, command2" ]]
 }
+
+@test "expect no stdin stream conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stdin`:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdin:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard input:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdin:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard input stream:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdin:" ]]
+}
+
+@test "expect no stdout stream conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stdout`:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdout:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard output:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdout:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard output stream:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stdout:" ]]
+}
+
+@test "expect no stderr stream conversion error when valid page is passed" {
+  declare header='# some
+
+> Some text.
+
+'
+  declare output="$(./md-to-clip.sh -nfs <(echo "$header"'- `stderr`:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stderr:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard error:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stderr:" ]]
+
+  output="$(./md-to-clip.sh -nfs <(echo "$header"'- standard error stream:
+
+`some`') | sed -nE '/^- /p')"
+  [[ "$output" == "- stderr:" ]]
+}
