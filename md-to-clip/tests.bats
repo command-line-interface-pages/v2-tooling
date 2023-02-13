@@ -183,3 +183,124 @@
 \`some {{...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some `' ]]
 }
+
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+@test "expect no plural device keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{devices}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file* device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+@test "expect no plural device keyword placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/devices}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file* device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+@test "expect no singular device placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{device}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, device
+@test "expect no plural device placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{device1 device2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file* device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, absolute, device
+@test "expect no singular device placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/device}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, absolute, device
+@test "expect no plural device placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/device1 /device2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file* device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, device
+@test "expect no singular device placeholder conversion error when valid page && dev prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{dev/sda}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, relative, device
+@test "expect no plural device placeholder conversion error when valid page && dev prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{dev/sda1 dev/sda2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {file* device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, absolute, device
+@test "expect no singular device placeholder conversion error when valid page && dev prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/dev/sda}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file device}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, device
+@test "expect no plural device placeholder conversion error when valid page && dev prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/dev/sda1 /dev/sda2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/file* device}`' ]]
+}

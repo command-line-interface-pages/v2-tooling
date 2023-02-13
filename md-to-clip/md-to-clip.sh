@@ -168,9 +168,20 @@ convert() {
   
   # Correcting code examples: fixing some broken placeholders and correcting some placeholders.
   /^`/ {
-    # Removing unfixable placeholders.
+    # Removing broken ellipsis.
     s/ *\{\{\.\.\.\}\} */ /g
 
+    # Processing device placeholders.
+    ## Expansion
+    s|\{\{(\/?)devices[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+    s|\{\{(\/?)device([[:digit:]]*)\}\}|{{\1dev/sda\2}}|g
+    s|\{\{(\/?)device[[:digit:]]+ +\1device[[:digit:]]+ +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+
+    ## Conversion
+    s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
+    s|\{\{(\/?)dev/sd[[:alpha:]]([[:digit:]]+)\}\}|{\1file device \2}|g
+    s|\{\{(\/?)dev/sd[[:alpha:]][[:digit:]]* +\1dev/sd[[:alpha:]][[:digit:]]* +\.\.\.\}\}|{\1file* device}|g
+q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
     s/\{\{char(acter)?([[:digit:]]*)\}\}/{{character\2}}/g
