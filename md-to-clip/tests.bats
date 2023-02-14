@@ -521,6 +521,42 @@
   [[ "$output" == '`some {string* option} {string* option}`' ]]
 }
 
+# bats test_tags=example, code, placeholder, singular, relative, option
+@test "expect no singular example option placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{--version}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {option some description: --version}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, option
+@test "expect no singular example option placeholder conversion error when valid page && value is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{--type jpeg}} {{--type=jpeg}} {{--type:jpeg}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {option some description: --type} {option some description: --type} {option some description: --type}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, option
+@test "expect no plural example option placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{--type jpeg --resize=true --transparent}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {option* some description}`' ]]
+}
+
 
 @test "expect no plural setting keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
