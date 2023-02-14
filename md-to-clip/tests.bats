@@ -673,3 +673,124 @@
 \`some {{extension1 extension2 ...}} {{extension_name1 extension_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* extension} {string* extension}`' ]]
 }
+
+
+# bats test_tags=example, code, placeholder, plural, relative, file_or_directory
+@test "expect no plural file_or_directory keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{files_or_directories}} {{file_names_or_directories}} {{files_or_directory_names}} {{file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, file_or_directory
+@test "expect no plural file_or_directory keyword placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/files_or_directories}} {{/file_names_or_directories}} {{/files_or_directory_names}} {{/file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, file_or_directory
+@test "expect no singular file_or_directory placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{file_or_directory}} {{file_name_or_directory}} {{file_or_directory_name}} {{file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path some description} {path some description} {path some description} {path some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, relative, file_or_directory
+@test "expect no plural file_or_directory placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{file_or_directory1 file_or_directory2 ...}} {{file_name_or_directory1 file_name_or_directory2 ...}} {{file_or_directory_name1 file_or_directory_name2 ...}} {{file_name_or_directory_name1 file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, absolute, file_or_directory
+@test "expect no singular file_or_directory placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/file_or_directory}} {{/file_name_or_directory}} {{/file_or_directory_name}} {{/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path some description} {/path some description} {/path some description} {/path some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, file_or_directory
+@test "expect no plural file_or_directory placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/file_or_directory1 /file_or_directory2 ...}} {{/file_name_or_directory1 /file_name_or_directory2 ...}} {{/file_or_directory_name1 /file_or_directory_name2 ...}} {{/file_name_or_directory_name1 /file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, file_or_directory
+@test "expect no singular file_or_directory placeholder conversion error when valid page && path/to prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{path/to/file_or_directory}} {{path/to/file_name_or_directory}} {{path/to/file_or_directory_name}} {{path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path some description} {path some description} {path some description} {path some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, relative, file_or_directory
+@test "expect no plural file_or_directory placeholder conversion error when valid page && path/to prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{path/to/file_or_directory1 path/to/file_or_directory2 ...}} {{path/to/file_name_or_directory1 path/to/file_name_or_directory2 ...}} {{path/to/file_or_directory_name1 path/to/file_or_directory_name2 ...}} {{path/to/file_name_or_directory_name1 path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, absolute, file_or_directory
+@test "expect no singular file_or_directory placeholder conversion error when valid page && path/to prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/path/to/file_or_directory}} {{/path/to/file_name_or_directory}} {{/path/to/file_or_directory_name}} {{/path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path some description} {/path some description} {/path some description} {/path some description}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, file_or_directory
+@test "expect no plural file_or_directory placeholder conversion error when valid page && path/to prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/path/to/file_or_directory1 /path/to/file_or_directory2 ...}} {{/path/to/file_name_or_directory1 /path/to/file_name_or_directory2 ...}} {{/path/to/file_or_directory_name1 /path/to/file_or_directory_name2 ...}} {{/path/to/file_name_or_directory_name1 /path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
+}

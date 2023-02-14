@@ -287,6 +287,20 @@ convert() {
     s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
     s|\{\{(\/?)dev/sd[[:alpha:]]([[:digit:]]+)\}\}|{\1file device \2}|g
     s|\{\{(\/?)dev/sd[[:alpha:]][[:digit:]]* +\1dev/sd[[:alpha:]][[:digit:]]* +\.\.\.\}\}|{\1file* device}|g
+
+    # Processing file_or_directory like placeholders.
+    ## Expansion
+    s|\{\{(\/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file_or_directory\6}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]+ +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]+ +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+
+    # cases with some prefix like excluded_path_or_directory
+
+
+    ## Conversion
+    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path some description}|g
+    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path some description \2}|g
+    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* some description}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
