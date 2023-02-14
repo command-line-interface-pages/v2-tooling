@@ -341,3 +341,38 @@
   [[ "$output" == '`some {string* user} {string* user}`' ]]
 }
 
+
+@test "expect no plural group keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{groups}} {{group_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* group} {string* group}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, group
+@test "expect no singular group placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{group}} {{group_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string group} {string group}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, group
+@test "expect no plural group placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{group1 group2 ...}} {{group_name1 group_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* group} {string* group}`' ]]
+}

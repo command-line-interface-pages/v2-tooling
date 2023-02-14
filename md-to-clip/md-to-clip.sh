@@ -186,6 +186,17 @@ convert() {
     s|\{\{user([[:digit:]])\}\}|{string user \1}|g
     s|\{\{user[[:digit:]]* +user[[:digit:]]* +\.\.\.\}\}|{string* user}|g
   
+    # Processing group placeholders.
+    ## Expansion
+    s|\{\{(groups\|group_*names)[[:digit:]]*\}\}|{{group1 group2 ...}}|g
+    s|\{\{group_*name?([[:digit:]]*)\}\}|{{group\1}}|g
+    s|\{\{group(_*(name))?[[:digit:]]* +group(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{group1 group2 ...}}|g
+
+    ## Conversion
+    s|\{\{group\}\}|{string group}|g
+    s|\{\{group([[:digit:]])\}\}|{string group \1}|g
+    s|\{\{group[[:digit:]]* +group[[:digit:]]* +\.\.\.\}\}|{string* group}|g
+
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
