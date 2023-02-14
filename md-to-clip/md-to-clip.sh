@@ -197,6 +197,17 @@ convert() {
     s|\{\{group([[:digit:]])\}\}|{string group \1}|g
     s|\{\{group[[:digit:]]* +group[[:digit:]]* +\.\.\.\}\}|{string* group}|g
 
+    # Processing ip placeholders.
+    ## Expansion
+    s|\{\{(ips\|ip_*names)[[:digit:]]*\}\}|{{ip1 ip2 ...}}|g
+    s|\{\{ip_*name?([[:digit:]]*)\}\}|{{ip\1}}|g
+    s|\{\{ip(_*(name))?[[:digit:]]* +ip(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{ip1 ip2 ...}}|g
+
+    ## Conversion
+    s|\{\{ip\}\}|{string ip}|g
+    s|\{\{ip([[:digit:]])\}\}|{string ip \1}|g
+    s|\{\{ip[[:digit:]]* +ip[[:digit:]]* +\.\.\.\}\}|{string* ip}|g
+
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g

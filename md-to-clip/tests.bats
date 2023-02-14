@@ -376,3 +376,39 @@
 \`some {{group1 group2 ...}} {{group_name1 group_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* group} {string* group}`' ]]
 }
+
+
+@test "expect no plural ip keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{ips}} {{ip_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* ip} {string* ip}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, ip
+@test "expect no singular ip placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{ip}} {{ip_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string ip} {string ip}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, ip
+@test "expect no plural ip placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{ip1 ip2 ...}} {{ip_name1 ip_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* ip} {string* ip}`' ]]
+}
