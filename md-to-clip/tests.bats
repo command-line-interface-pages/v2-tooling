@@ -794,3 +794,123 @@
 \`some {{/path/to/file_or_directory1 /path/to/file_or_directory2 ...}} {{/path/to/file_name_or_directory1 /path/to/file_name_or_directory2 ...}} {{/path/to/file_or_directory_name1 /path/to/file_or_directory_name2 ...}} {{/path/to/file_name_or_directory_name1 /path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
 }
+
+# bats test_tags=example, code, placeholder, plural, relative, term_file_or_directory
+@test "expect no plural term_term_file_or_directory keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{excluded_files_or_directories}} {{excluded_file_names_or_directories}} {{excluded_files_or_directory_names}} {{excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, term_file_or_directory
+@test "expect no plural term_file_or_directory keyword placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/excluded_files_or_directories}} {{/excluded_file_names_or_directories}} {{/excluded_files_or_directory_names}} {{/excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, term_file_or_directory
+@test "expect no singular term_file_or_directory placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{excluded_file_or_directory}} {{excluded_file_name_or_directory}} {{excluded_file_or_directory_name}} {{excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path excluded file or directory} {path excluded file or directory} {path excluded file or directory} {path excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, relative, term_file_or_directory
+@test "expect no plural term_file_or_directory placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{excluded_file_or_directory1 excluded_file_or_directory2 ...}} {{excluded_file_name_or_directory1 excluded_file_name_or_directory2 ...}} {{excluded_file_or_directory_name1 excluded_file_or_directory_name2 ...}} {{excluded_file_name_or_directory_name1 excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, absolute, term_file_or_directory
+@test "expect no singular term_file_or_directory placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/excluded_file_or_directory}} {{/excluded_file_name_or_directory}} {{/excluded_file_or_directory_name}} {{/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, term_file_or_directory
+@test "expect no plural term_file_or_directory placeholder conversion error when valid page && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/excluded_file_or_directory1 /excluded_file_or_directory2 ...}} {{/excluded_file_name_or_directory1 /excluded_file_name_or_directory2 ...}} {{/excluded_file_or_directory_name1 /excluded_file_or_directory_name2 ...}} {{/excluded_file_name_or_directory_name1 /excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, relative, term_file_or_directory
+@test "expect no singular term_file_or_directory placeholder conversion error when valid page && path/to prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{path/to/excluded_file_or_directory}} {{path/to/excluded_file_name_or_directory}} {{path/to/excluded_file_or_directory_name}} {{path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path excluded file or directory} {path excluded file or directory} {path excluded file or directory} {path excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, relative, term_file_or_directory
+@test "expect no plural term_file_or_directory placeholder conversion error when valid page && path/to prefix is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{path/to/excluded_file_or_directory1 path/to/excluded_file_or_directory2 ...}} {{path/to/excluded_file_name_or_directory1 path/to/excluded_file_name_or_directory2 ...}} {{path/to/excluded_file_or_directory_name1 path/to/excluded_file_or_directory_name2 ...}} {{path/to/excluded_file_name_or_directory_name1 path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, singular, absolute, term_file_or_directory
+@test "expect no singular term_file_or_directory placeholder conversion error when valid page && path/to prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/path/to/excluded_file_or_directory}} {{/path/to/excluded_file_name_or_directory}} {{/path/to/excluded_file_or_directory_name}} {{/path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, plural, absolute, term_file_or_directory
+@test "expect no plural term_file_or_directory placeholder conversion error when valid page && path/to prefix && forward slash is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{/path/to/excluded_file_or_directory1 /path/to/excluded_file_or_directory2 ...}} {{/path/to/excluded_file_name_or_directory1 /path/to/excluded_file_name_or_directory2 ...}} {{/path/to/excluded_file_or_directory_name1 /path/to/excluded_file_or_directory_name2 ...}} {{/path/to/excluded_file_name_or_directory_name1 /path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
+}
