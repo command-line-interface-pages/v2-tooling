@@ -178,8 +178,8 @@ convert() {
     # Processing user placeholders.
     ## Expansion
     s|\{\{(users\|user_*names)[[:digit:]]*\}\}|{{user1 user2 ...}}|g
-    s|\{\{user_*name?([[:digit:]]*)\}\}|{{user\1}}|g
-    s|\{\{user(_*(name))?[[:digit:]]* +user(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{user1 user2 ...}}|g
+    s|\{\{user(_*name)?([[:digit:]]*)\}\}|{{user\2}}|g
+    s|\{\{user(_*name)?[[:digit:]]* +user(_*name)?[[:digit:]]* +\.\.\.\}\}|{{user1 user2 ...}}|g
 
     ## Conversion
     s|\{\{user\}\}|{string user}|g
@@ -189,8 +189,8 @@ convert() {
     # Processing group placeholders.
     ## Expansion
     s|\{\{(groups\|group_*names)[[:digit:]]*\}\}|{{group1 group2 ...}}|g
-    s|\{\{group_*name?([[:digit:]]*)\}\}|{{group\1}}|g
-    s|\{\{group(_*(name))?[[:digit:]]* +group(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{group1 group2 ...}}|g
+    s|\{\{group(_*name)?([[:digit:]]*)\}\}|{{group\2}}|g
+    s|\{\{group(_*name)?[[:digit:]]* +group(_*name)?[[:digit:]]* +\.\.\.\}\}|{{group1 group2 ...}}|g
 
     ## Conversion
     s|\{\{group\}\}|{string group}|g
@@ -200,8 +200,8 @@ convert() {
     # Processing ip placeholders.
     ## Expansion
     s|\{\{(ips\|ip_*names)[[:digit:]]*\}\}|{{ip1 ip2 ...}}|g
-    s|\{\{ip_*name?([[:digit:]]*)\}\}|{{ip\1}}|g
-    s|\{\{ip(_*(name))?[[:digit:]]* +ip(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{ip1 ip2 ...}}|g
+    s|\{\{ip(_*name)?([[:digit:]]*)\}\}|{{ip\2}}|g
+    s|\{\{ip(_*name)?[[:digit:]]* +ip(_*name)?[[:digit:]]* +\.\.\.\}\}|{{ip1 ip2 ...}}|g
 
     ## Conversion
     s|\{\{ip\}\}|{string ip}|g
@@ -211,8 +211,8 @@ convert() {
     # Processing database placeholders.
     ## Expansion
     s|\{\{(databases\|database_*names)[[:digit:]]*\}\}|{{database1 database2 ...}}|g
-    s|\{\{database_*name?([[:digit:]]*)\}\}|{{database\1}}|g
-    s|\{\{database(_*(name))?[[:digit:]]* +database(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{database1 database2 ...}}|g
+    s|\{\{database(_*name)?([[:digit:]]*)\}\}|{{database\2}}|g
+    s|\{\{database(_*name)?[[:digit:]]* +database(_*name)?[[:digit:]]* +\.\.\.\}\}|{{database1 database2 ...}}|g
 
     ## Conversion
     s|\{\{database\}\}|{string database}|g
@@ -222,8 +222,8 @@ convert() {
     # Processing argument placeholders.
     ## Expansion
     s|\{\{(arguments\|argument_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
-    s|\{\{argument_*name?([[:digit:]]*)\}\}|{{argument\1}}|g
-    s|\{\{argument(_*(name))?[[:digit:]]* +argument(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
+    s|\{\{argument(_*name)?([[:digit:]]*)\}\}|{{argument\2}}|g
+    s|\{\{argument(_*name)?[[:digit:]]* +argument(_*name)?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
 
     ## Conversion
     s|\{\{argument\}\}|{any argument}|g
@@ -233,8 +233,8 @@ convert() {
     # Processing option placeholders.
     ## Expansion
     s|\{\{(options\|option_*names)[[:digit:]]*\}\}|{{option1 option2 ...}}|g
-    s|\{\{option_*name?([[:digit:]]*)\}\}|{{option\1}}|g
-    s|\{\{option(_*(name))?[[:digit:]]* +option(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{option1 option2 ...}}|g
+    s|\{\{option(_*name)?([[:digit:]]*)\}\}|{{option\2}}|g
+    s|\{\{option(_*name)?[[:digit:]]* +option(_*name)?[[:digit:]]* +\.\.\.\}\}|{{option1 option2 ...}}|g
 
     ## Conversion
     s|\{\{option\}\}|{string option}|g
@@ -247,8 +247,8 @@ convert() {
     # Processing setting placeholders.
     ## Expansion
     s|\{\{(settings\|setting_*names)[[:digit:]]*\}\}|{{setting1 setting2 ...}}|g
-    s|\{\{setting_*name?([[:digit:]]*)\}\}|{{setting\1}}|g
-    s|\{\{setting(_*(name))?[[:digit:]]* +setting(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{setting1 setting2 ...}}|g
+    s|\{\{setting(_*name)?([[:digit:]]*)\}\}|{{setting\2}}|g
+    s|\{\{setting(_*name)?[[:digit:]]* +setting(_*name)?[[:digit:]]* +\.\.\.\}\}|{{setting1 setting2 ...}}|g
 
     ## Conversion
     s|\{\{setting\}\}|{string setting}|g
@@ -258,8 +258,8 @@ convert() {
     # Processing subcommand placeholders.
     ## Expansion
     s|\{\{(subcommands\|subcommand_*names)[[:digit:]]*\}\}|{{subcommand1 subcommand2 ...}}|g
-    s|\{\{subcommand_*name?([[:digit:]]*)\}\}|{{subcommand\1}}|g
-    s|\{\{subcommand(_*(name))?[[:digit:]]* +subcommand(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{subcommand1 subcommand2 ...}}|g
+    s|\{\{subcommand(_*name)?([[:digit:]]*)\}\}|{{subcommand\2}}|g
+    s|\{\{subcommand(_*name)?[[:digit:]]* +subcommand(_*name)?[[:digit:]]* +\.\.\.\}\}|{{subcommand1 subcommand2 ...}}|g
 
     ## Conversion
     s|\{\{subcommand\}\}|{command subcommand}|g
@@ -269,8 +269,8 @@ convert() {
     # Processing extension placeholders.
     ## Expansion
     s|\{\{(extensions\|extension_*names)[[:digit:]]*\}\}|{{extension1 extension2 ...}}|g
-    s|\{\{extension_*name?([[:digit:]]*)\}\}|{{extension\1}}|g
-    s|\{\{extension(_*(name))?[[:digit:]]* +extension(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{extension1 extension2 ...}}|g
+    s|\{\{extension(_*name)?([[:digit:]]*)\}\}|{{extension\2}}|g
+    s|\{\{extension(_*name)?[[:digit:]]* +extension(_*name)?[[:digit:]]* +\.\.\.\}\}|{{extension1 extension2 ...}}|g
 
     ## Conversion
     s|\{\{extension\}\}|{string extension}|g
@@ -280,8 +280,8 @@ convert() {
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
-    s|\{\{(\/?)device(_*(name))?([[:digit:]]*)\}\}|{{\1dev/sda\4}}|g
-    s|\{\{(\/?)device(_*(name))?[[:digit:]]+ +\1device(_*(name))?[[:digit:]]+ +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+    s|\{\{(\/?)device(_*name)?([[:digit:]]*)\}\}|{{\1dev/sda\3}}|g
+    s|\{\{(\/?)device(_*name)?[[:digit:]]+ +\1device(_*name)?[[:digit:]]+ +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
 
     ## Conversion
     s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
