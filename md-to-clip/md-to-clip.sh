@@ -171,6 +171,10 @@ convert() {
     # Removing broken ellipsis.
     s/ *\{\{\.\.\.\}\} */ /g
 
+    # Process brace expansions and (s).
+    ## Expansion
+    s|\{\{([^{}]+)(\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\11 \12 ...}}|g
+    
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
