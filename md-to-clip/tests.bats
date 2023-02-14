@@ -185,7 +185,7 @@
 }
 
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+# bats test_tags=example, code, placeholder, plural, relative, device
 @test "expect no plural device keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -197,7 +197,7 @@
   [[ "$output" == '`some {file* device} {file* device}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+# bats test_tags=example, code, placeholder, plural, absolute, device
 @test "expect no plural device keyword placeholder conversion error when valid page && forward slash is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -209,7 +209,7 @@
   [[ "$output" == '`some {/file* device} {/file* device}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, device
+# bats test_tags=example, code, placeholder, singular, relative, device
 @test "expect no singular device placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -221,7 +221,7 @@
   [[ "$output" == '`some {file device} {file device}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, device
+# bats test_tags=example, code, placeholder, plural, relative, device
 @test "expect no plural device placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -233,7 +233,7 @@
   [[ "$output" == '`some {file* device} {file* device}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, absolute, device
+# bats test_tags=example, code, placeholder, singular, absolute, device
 @test "expect no singular device placeholder conversion error when valid page && forward slash is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -245,7 +245,7 @@
   [[ "$output" == '`some {/file device} {/file device}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, absolute, device
+# bats test_tags=example, code, placeholder, plural, absolute, device
 @test "expect no plural device placeholder conversion error when valid page && forward slash is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -306,6 +306,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, user
 @test "expect no plural user keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -317,7 +318,7 @@
   [[ "$output" == '`some {string* user} {string* user}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, user
+# bats test_tags=example, code, placeholder, singular, user
 @test "expect no singular user placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -329,7 +330,7 @@
   [[ "$output" == '`some {string user} {string user}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, user
+# bats test_tags=example, code, placeholder, plural, user
 @test "expect no plural user placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -342,6 +343,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, group
 @test "expect no plural group keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -353,7 +355,7 @@
   [[ "$output" == '`some {string* group} {string* group}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, group
+# bats test_tags=example, code, placeholder, singular, group
 @test "expect no singular group placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -365,7 +367,7 @@
   [[ "$output" == '`some {string group} {string group}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, group
+# bats test_tags=example, code, placeholder, plural, group
 @test "expect no plural group placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -378,6 +380,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, ip
 @test "expect no plural ip keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -389,7 +392,7 @@
   [[ "$output" == '`some {string* ip} {string* ip}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, ip
+# bats test_tags=example, code, placeholder, singular, ip
 @test "expect no singular ip placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -401,7 +404,7 @@
   [[ "$output" == '`some {string ip} {string ip}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, ip
+# bats test_tags=example, code, placeholder, plural, ip
 @test "expect no plural ip placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -414,6 +417,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, database
 @test "expect no plural database keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -425,7 +429,7 @@
   [[ "$output" == '`some {string* database} {string* database}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, database
+# bats test_tags=example, code, placeholder, singular, database
 @test "expect no singular database placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -437,7 +441,7 @@
   [[ "$output" == '`some {string database} {string database}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, database
+# bats test_tags=example, code, placeholder, plural, database
 @test "expect no plural database placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -450,6 +454,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, argument
 @test "expect no plural argument keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -461,7 +466,7 @@
   [[ "$output" == '`some {any* argument} {any* argument}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, argument
+# bats test_tags=example, code, placeholder, singular, argument
 @test "expect no singular argument placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -473,7 +478,7 @@
   [[ "$output" == '`some {any argument} {any argument}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, argument
+# bats test_tags=example, code, placeholder, plural, argument
 @test "expect no plural argument placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -486,6 +491,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, option
 @test "expect no plural option keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -497,7 +503,7 @@
   [[ "$output" == '`some {string* option} {string* option}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, option
+# bats test_tags=example, code, placeholder, singular, option
 @test "expect no singular option placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -509,7 +515,7 @@
   [[ "$output" == '`some {string option} {string option}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, option
+# bats test_tags=example, code, placeholder, plural, option
 @test "expect no plural option placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -521,7 +527,7 @@
   [[ "$output" == '`some {string* option} {string* option}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, singular, relative, option
+# bats test_tags=example, code, placeholder, singular, option
 @test "expect no singular example option placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -533,7 +539,7 @@
   [[ "$output" == '`some {option some description: --version}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, singular, relative, option
+# bats test_tags=example, code, placeholder, singular, option
 @test "expect no singular example option placeholder conversion error when valid page && value is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -545,7 +551,7 @@
   [[ "$output" == '`some {option some description: --type} {option some description: --type} {option some description: --type}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, singular, relative, option
+# bats test_tags=example, code, placeholder, plural, option
 @test "expect no plural example option placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -558,6 +564,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, setting
 @test "expect no plural setting keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -569,7 +576,7 @@
   [[ "$output" == '`some {string* setting} {string* setting}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, setting
+# bats test_tags=example, code, placeholder, singular, setting
 @test "expect no singular setting placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -581,7 +588,7 @@
   [[ "$output" == '`some {string setting} {string setting}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, setting
+# bats test_tags=example, code, placeholder, plural, setting
 @test "expect no plural setting placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -594,6 +601,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, subcommand
 @test "expect no plural subcommand keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -605,7 +613,7 @@
   [[ "$output" == '`some {command* subcommand} {command* subcommand}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, subcommand
+# bats test_tags=example, code, placeholder, singular, subcommand
 @test "expect no singular subcommand placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -617,7 +625,7 @@
   [[ "$output" == '`some {command subcommand} {command subcommand}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, subcommand
+# bats test_tags=example, code, placeholder, plural, subcommand
 @test "expect no plural subcommand placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -630,6 +638,7 @@
 }
 
 
+# bats test_tags=example, code, placeholder, plural, extension
 @test "expect no plural extension keyword placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -641,7 +650,7 @@
   [[ "$output" == '`some {string* extension} {string* extension}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, singular, relative, extension
+# bats test_tags=example, code, placeholder, singular, extension
 @test "expect no singular extension placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
@@ -653,7 +662,7 @@
   [[ "$output" == '`some {string extension} {string extension}`' ]]
 }
 
-# bats test_tags=example, code, placeholder, expandable, plural, relative, extension
+# bats test_tags=example, code, placeholder, plural, extension
 @test "expect no plural extension placeholder conversion error when valid page is passed" {
   run bash -c "./md-to-clip.sh -nfs <(echo '# some
 
