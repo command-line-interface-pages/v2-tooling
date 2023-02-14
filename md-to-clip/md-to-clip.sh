@@ -179,7 +179,7 @@ convert() {
     ## Expansion
     s|\{\{(users\|user_*names)[[:digit:]]*\}\}|{{user1 user2 ...}}|g
     s|\{\{user_*name?([[:digit:]]*)\}\}|{{user\1}}|g
-    s|\{\{user_*name?[[:digit:]]* +user_*name?[[:digit:]]* +\.\.\.\}\}|{{user1 user2 ...}}|g
+    s|\{\{user(_*(name))?[[:digit:]]* +user(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{user1 user2 ...}}|g
 
     ## Conversion
     s|\{\{user\}\}|{string user}|g
