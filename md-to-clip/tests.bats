@@ -229,7 +229,8 @@
 
 - Some text:
 
-\`some {{device1 device2 ...}} {{device_name1 device_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{device1 device2 ...}} \
+{{device_name1 device_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {file* device} {file* device}`' ]]
 }
 
@@ -253,7 +254,8 @@
 
 - Some text:
 
-\`some {{/device1 /device2 ...}} {{/device_name1 /device_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{/device1 /device2 ...}} \
+{{/device_name1 /device_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/file* device} {/file* device}`' ]]
 }
 
@@ -338,7 +340,8 @@
 
 - Some text:
 
-\`some {{user1 user2 ...}} {{user_name1 user_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{user1 user2 ...}} \
+{{user_name1 user_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* user} {string* user}`' ]]
 }
 
@@ -375,7 +378,8 @@
 
 - Some text:
 
-\`some {{group1 group2 ...}} {{group_name1 group_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{group1 group2 ...}} \
+{{group_name1 group_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* group} {string* group}`' ]]
 }
 
@@ -412,7 +416,8 @@
 
 - Some text:
 
-\`some {{ip1 ip2 ...}} {{ip_name1 ip_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{ip1 ip2 ...}} \
+{{ip_name1 ip_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* ip} {string* ip}`' ]]
 }
 
@@ -449,7 +454,8 @@
 
 - Some text:
 
-\`some {{database1 database2 ...}} {{database_name1 database_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{database1 database2 ...}} \
+{{database_name1 database_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* database} {string* database}`' ]]
 }
 
@@ -486,7 +492,8 @@
 
 - Some text:
 
-\`some {{argument1 argument2 ...}} {{argument_name1 argument_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{argument1 argument2 ...}} \
+{{argument_name1 argument_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {any* argument} {any* argument}`' ]]
 }
 
@@ -523,7 +530,8 @@
 
 - Some text:
 
-\`some {{option1 option2 ...}} {{option_name1 option_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{option1 option2 ...}} \
+{{option_name1 option_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* option} {string* option}`' ]]
 }
 
@@ -596,7 +604,8 @@
 
 - Some text:
 
-\`some {{setting1 setting2 ...}} {{setting_name1 setting_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{setting1 setting2 ...}} \
+{{setting_name1 setting_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* setting} {string* setting}`' ]]
 }
 
@@ -633,7 +642,8 @@
 
 - Some text:
 
-\`some {{subcommand1 subcommand2 ...}} {{subcommand_name1 subcommand_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{subcommand1 subcommand2 ...}} \
+{{subcommand_name1 subcommand_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {command* subcommand} {command* subcommand}`' ]]
 }
 
@@ -670,7 +680,8 @@
 
 - Some text:
 
-\`some {{extension1 extension2 ...}} {{extension_name1 extension_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{extension1 extension2 ...}} \
+{{extension_name1 extension_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* extension} {string* extension}`' ]]
 }
 
@@ -683,7 +694,10 @@
 
 - Some text:
 
-\`some {{files_or_directories}} {{file_names_or_directories}} {{files_or_directory_names}} {{file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+\`some {{files_or_directories}} \
+{{file_names_or_directories}} \
+{{files_or_directory_names}} \
+{{file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
 }
 
@@ -695,7 +709,10 @@
 
 - Some text:
 
-\`some {{/files_or_directories}} {{/file_names_or_directories}} {{/files_or_directory_names}} {{/file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+\`some {{/files_or_directories}} \
+{{/file_names_or_directories}} \
+{{/files_or_directory_names}} \
+{{/file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
 }
 
@@ -707,7 +724,10 @@
 
 - Some text:
 
-\`some {{file_or_directory}} {{file_name_or_directory}} {{file_or_directory_name}} {{file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{file_or_directory}} \
+{{file_name_or_directory}} \
+{{file_or_directory_name}} \
+{{file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path some description} {path some description} {path some description} {path some description}`' ]]
 }
 
@@ -719,7 +739,10 @@
 
 - Some text:
 
-\`some {{file_or_directory1 file_or_directory2 ...}} {{file_name_or_directory1 file_name_or_directory2 ...}} {{file_or_directory_name1 file_or_directory_name2 ...}} {{file_name_or_directory_name1 file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{file_or_directory1 file_or_directory2 ...}} \
+{{file_name_or_directory1 file_name_or_directory2 ...}} \
+{{file_or_directory_name1 file_or_directory_name2 ...}} \
+{{file_name_or_directory_name1 file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
 }
 
@@ -731,7 +754,10 @@
 
 - Some text:
 
-\`some {{/file_or_directory}} {{/file_name_or_directory}} {{/file_or_directory_name}} {{/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{/file_or_directory}} \
+{{/file_name_or_directory}} \
+{{/file_or_directory_name}} \
+{{/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path some description} {/path some description} {/path some description} {/path some description}`' ]]
 }
 
@@ -743,7 +769,10 @@
 
 - Some text:
 
-\`some {{/file_or_directory1 /file_or_directory2 ...}} {{/file_name_or_directory1 /file_name_or_directory2 ...}} {{/file_or_directory_name1 /file_or_directory_name2 ...}} {{/file_name_or_directory_name1 /file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{/file_or_directory1 /file_or_directory2 ...}} \
+{{/file_name_or_directory1 /file_name_or_directory2 ...}} \
+{{/file_or_directory_name1 /file_or_directory_name2 ...}} \
+{{/file_name_or_directory_name1 /file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
 }
 
@@ -755,7 +784,10 @@
 
 - Some text:
 
-\`some {{path/to/file_or_directory}} {{path/to/file_name_or_directory}} {{path/to/file_or_directory_name}} {{path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{path/to/file_or_directory}} \
+{{path/to/file_name_or_directory}} \
+{{path/to/file_or_directory_name}} \
+{{path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path some description} {path some description} {path some description} {path some description}`' ]]
 }
 
@@ -767,7 +799,10 @@
 
 - Some text:
 
-\`some {{path/to/file_or_directory1 path/to/file_or_directory2 ...}} {{path/to/file_name_or_directory1 path/to/file_name_or_directory2 ...}} {{path/to/file_or_directory_name1 path/to/file_or_directory_name2 ...}} {{path/to/file_name_or_directory_name1 path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{path/to/file_or_directory1 path/to/file_or_directory2 ...}} \
+{{path/to/file_name_or_directory1 path/to/file_name_or_directory2 ...}} \
+{{path/to/file_or_directory_name1 path/to/file_or_directory_name2 ...}} \
+{{path/to/file_name_or_directory_name1 path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* some description} {path* some description} {path* some description} {path* some description}`' ]]
 }
 
@@ -779,7 +814,10 @@
 
 - Some text:
 
-\`some {{/path/to/file_or_directory}} {{/path/to/file_name_or_directory}} {{/path/to/file_or_directory_name}} {{/path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{/path/to/file_or_directory}} \
+{{/path/to/file_name_or_directory}} \
+{{/path/to/file_or_directory_name}} \
+{{/path/to/file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path some description} {/path some description} {/path some description} {/path some description}`' ]]
 }
 
@@ -791,7 +829,10 @@
 
 - Some text:
 
-\`some {{/path/to/file_or_directory1 /path/to/file_or_directory2 ...}} {{/path/to/file_name_or_directory1 /path/to/file_name_or_directory2 ...}} {{/path/to/file_or_directory_name1 /path/to/file_or_directory_name2 ...}} {{/path/to/file_name_or_directory_name1 /path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{/path/to/file_or_directory1 /path/to/file_or_directory2 ...}} \
+{{/path/to/file_name_or_directory1 /path/to/file_name_or_directory2 ...}} \
+{{/path/to/file_or_directory_name1 /path/to/file_or_directory_name2 ...}} \
+{{/path/to/file_name_or_directory_name1 /path/to/file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* some description} {/path* some description} {/path* some description} {/path* some description}`' ]]
 }
 
@@ -803,7 +844,10 @@
 
 - Some text:
 
-\`some {{excluded_files_or_directories}} {{excluded_file_names_or_directories}} {{excluded_files_or_directory_names}} {{excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+\`some {{excluded_files_or_directories}} \
+{{excluded_file_names_or_directories}} \
+{{excluded_files_or_directory_names}} \
+{{excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
 }
 
@@ -815,7 +859,10 @@
 
 - Some text:
 
-\`some {{/excluded_files_or_directories}} {{/excluded_file_names_or_directories}} {{/excluded_files_or_directory_names}} {{/excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
+\`some {{/excluded_files_or_directories}} \
+{{/excluded_file_names_or_directories}} \
+{{/excluded_files_or_directory_names}} \
+{{/excluded_file_names_or_directory_names}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
 }
 
@@ -827,7 +874,10 @@
 
 - Some text:
 
-\`some {{excluded_file_or_directory}} {{excluded_file_name_or_directory}} {{excluded_file_or_directory_name}} {{excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{excluded_file_or_directory}} \
+{{excluded_file_name_or_directory}} \
+{{excluded_file_or_directory_name}} \
+{{excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path excluded file or directory} {path excluded file or directory} {path excluded file or directory} {path excluded file or directory}`' ]]
 }
 
@@ -839,7 +889,10 @@
 
 - Some text:
 
-\`some {{excluded_file_or_directory1 excluded_file_or_directory2 ...}} {{excluded_file_name_or_directory1 excluded_file_name_or_directory2 ...}} {{excluded_file_or_directory_name1 excluded_file_or_directory_name2 ...}} {{excluded_file_name_or_directory_name1 excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{excluded_file_or_directory1 excluded_file_or_directory2 ...}} \
+{{excluded_file_name_or_directory1 excluded_file_name_or_directory2 ...}} \
+{{excluded_file_or_directory_name1 excluded_file_or_directory_name2 ...}} \
+{{excluded_file_name_or_directory_name1 excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
 }
 
@@ -851,7 +904,10 @@
 
 - Some text:
 
-\`some {{/excluded_file_or_directory}} {{/excluded_file_name_or_directory}} {{/excluded_file_or_directory_name}} {{/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{/excluded_file_or_directory}} \
+{{/excluded_file_name_or_directory}} \
+{{/excluded_file_or_directory_name}} \
+{{/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory}`' ]]
 }
 
@@ -863,7 +919,10 @@
 
 - Some text:
 
-\`some {{/excluded_file_or_directory1 /excluded_file_or_directory2 ...}} {{/excluded_file_name_or_directory1 /excluded_file_name_or_directory2 ...}} {{/excluded_file_or_directory_name1 /excluded_file_or_directory_name2 ...}} {{/excluded_file_name_or_directory_name1 /excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{/excluded_file_or_directory1 /excluded_file_or_directory2 ...}} \
+{{/excluded_file_name_or_directory1 /excluded_file_name_or_directory2 ...}} \
+{{/excluded_file_or_directory_name1 /excluded_file_or_directory_name2 ...}} \
+{{/excluded_file_name_or_directory_name1 /excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
 }
 
@@ -875,7 +934,10 @@
 
 - Some text:
 
-\`some {{path/to/excluded_file_or_directory}} {{path/to/excluded_file_name_or_directory}} {{path/to/excluded_file_or_directory_name}} {{path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{path/to/excluded_file_or_directory}} \
+{{path/to/excluded_file_name_or_directory}} \
+{{path/to/excluded_file_or_directory_name}} \
+{{path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path excluded file or directory} {path excluded file or directory} {path excluded file or directory} {path excluded file or directory}`' ]]
 }
 
@@ -887,7 +949,10 @@
 
 - Some text:
 
-\`some {{path/to/excluded_file_or_directory1 path/to/excluded_file_or_directory2 ...}} {{path/to/excluded_file_name_or_directory1 path/to/excluded_file_name_or_directory2 ...}} {{path/to/excluded_file_or_directory_name1 path/to/excluded_file_or_directory_name2 ...}} {{path/to/excluded_file_name_or_directory_name1 path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{path/to/excluded_file_or_directory1 path/to/excluded_file_or_directory2 ...}} \
+{{path/to/excluded_file_name_or_directory1 path/to/excluded_file_name_or_directory2 ...}} \
+{{path/to/excluded_file_or_directory_name1 path/to/excluded_file_or_directory_name2 ...}} \
+{{path/to/excluded_file_name_or_directory_name1 path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory} {path* excluded file or directory}`' ]]
 }
 
@@ -899,7 +964,10 @@
 
 - Some text:
 
-\`some {{/path/to/excluded_file_or_directory}} {{/path/to/excluded_file_name_or_directory}} {{/path/to/excluded_file_or_directory_name}} {{/path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
+\`some {{/path/to/excluded_file_or_directory}} \
+{{/path/to/excluded_file_name_or_directory}} \
+{{/path/to/excluded_file_or_directory_name}} \
+{{/path/to/excluded_file_name_or_directory_name}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory} {/path excluded file or directory}`' ]]
 }
 
@@ -911,6 +979,9 @@
 
 - Some text:
 
-\`some {{/path/to/excluded_file_or_directory1 /path/to/excluded_file_or_directory2 ...}} {{/path/to/excluded_file_name_or_directory1 /path/to/excluded_file_name_or_directory2 ...}} {{/path/to/excluded_file_or_directory_name1 /path/to/excluded_file_or_directory_name2 ...}} {{/path/to/excluded_file_name_or_directory_name1 /path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
+\`some {{/path/to/excluded_file_or_directory1 /path/to/excluded_file_or_directory2 ...}} \
+{{/path/to/excluded_file_name_or_directory1 /path/to/excluded_file_name_or_directory2 ...}} \
+{{/path/to/excluded_file_or_directory_name1 /path/to/excluded_file_or_directory_name2 ...}} \
+{{/path/to/excluded_file_name_or_directory_name1 /path/to/excluded_file_name_or_directory_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory} {/path* excluded file or directory}`' ]]
 }
