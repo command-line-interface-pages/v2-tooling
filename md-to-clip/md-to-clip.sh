@@ -208,6 +208,17 @@ convert() {
     s|\{\{ip([[:digit:]])\}\}|{string ip \1}|g
     s|\{\{ip[[:digit:]]* +ip[[:digit:]]* +\.\.\.\}\}|{string* ip}|g
 
+    # Processing database placeholders.
+    ## Expansion
+    s|\{\{(databases\|database_*names)[[:digit:]]*\}\}|{{database1 database2 ...}}|g
+    s|\{\{database_*name?([[:digit:]]*)\}\}|{{database\1}}|g
+    s|\{\{database(_*(name))?[[:digit:]]* +database(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{database1 database2 ...}}|g
+
+    ## Conversion
+    s|\{\{database\}\}|{string database}|g
+    s|\{\{database([[:digit:]])\}\}|{string database \1}|g
+    s|\{\{database[[:digit:]]* +database[[:digit:]]* +\.\.\.\}\}|{string* database}|g
+
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g

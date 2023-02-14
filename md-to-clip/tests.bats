@@ -412,3 +412,39 @@
 \`some {{ip1 ip2 ...}} {{ip_name1 ip_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* ip} {string* ip}`' ]]
 }
+
+
+@test "expect no plural database keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{databases}} {{database_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* database} {string* database}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, database
+@test "expect no singular database placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{database}} {{database_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string database} {string database}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, database
+@test "expect no plural database placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{database1 database2 ...}} {{database_name1 database_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* database} {string* database}`' ]]
+}
