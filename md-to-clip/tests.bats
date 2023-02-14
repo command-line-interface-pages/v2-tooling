@@ -304,3 +304,40 @@
 \`some {{/dev/sda1 /dev/sda2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {/file* device}`' ]]
 }
+
+
+@test "expect no plural user keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{users}} {{user_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* user} {string* user}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, user
+@test "expect no singular user placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{user}} {{user_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string user} {string user}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, user
+@test "expect no plural user placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{user1 user2 ...}} {{user_name1 user_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* user} {string* user}`' ]]
+}
+
