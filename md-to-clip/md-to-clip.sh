@@ -219,6 +219,61 @@ convert() {
     s|\{\{database([[:digit:]])\}\}|{string database \1}|g
     s|\{\{database[[:digit:]]* +database[[:digit:]]* +\.\.\.\}\}|{string* database}|g
 
+    # Processing argument placeholders.
+    ## Expansion
+    s|\{\{(arguments\|argument_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
+    s|\{\{argument_*name?([[:digit:]]*)\}\}|{{argument\1}}|g
+    s|\{\{argument(_*(name))?[[:digit:]]* +argument(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
+
+    ## Conversion
+    s|\{\{argument\}\}|{any argument}|g
+    s|\{\{argument([[:digit:]])\}\}|{any argument \1}|g
+    s|\{\{argument[[:digit:]]* +argument[[:digit:]]* +\.\.\.\}\}|{any* argument}|g
+
+    # Processing option placeholders.
+    ## Expansion
+    s|\{\{(options\|option_*names)[[:digit:]]*\}\}|{{option1 option2 ...}}|g
+    s|\{\{option_*name?([[:digit:]]*)\}\}|{{option\1}}|g
+    s|\{\{option(_*(name))?[[:digit:]]* +option(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{option1 option2 ...}}|g
+
+    ## Conversion
+    s|\{\{option\}\}|{string option}|g
+    s|\{\{option([[:digit:]])\}\}|{string option \1}|g
+    s|\{\{option[[:digit:]]* +option[[:digit:]]* +\.\.\.\}\}|{string* option}|g
+
+    # Processing setting placeholders.
+    ## Expansion
+    s|\{\{(settings\|setting_*names)[[:digit:]]*\}\}|{{setting1 setting2 ...}}|g
+    s|\{\{setting_*name?([[:digit:]]*)\}\}|{{setting\1}}|g
+    s|\{\{setting(_*(name))?[[:digit:]]* +setting(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{setting1 setting2 ...}}|g
+
+    ## Conversion
+    s|\{\{setting\}\}|{string setting}|g
+    s|\{\{setting([[:digit:]])\}\}|{string setting \1}|g
+    s|\{\{setting[[:digit:]]* +setting[[:digit:]]* +\.\.\.\}\}|{string* setting}|g
+
+    # Processing subcommand placeholders.
+    ## Expansion
+    s|\{\{(subcommands\|subcommand_*names)[[:digit:]]*\}\}|{{subcommand1 subcommand2 ...}}|g
+    s|\{\{subcommand_*name?([[:digit:]]*)\}\}|{{subcommand\1}}|g
+    s|\{\{subcommand(_*(name))?[[:digit:]]* +subcommand(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{subcommand1 subcommand2 ...}}|g
+
+    ## Conversion
+    s|\{\{subcommand\}\}|{command subcommand}|g
+    s|\{\{subcommand([[:digit:]])\}\}|{command subcommand \1}|g
+    s|\{\{subcommand[[:digit:]]* +subcommand[[:digit:]]* +\.\.\.\}\}|{command* subcommand}|g
+
+    # Processing extension placeholders.
+    ## Expansion
+    s|\{\{(extensions\|extension_*names)[[:digit:]]*\}\}|{{extension1 extension2 ...}}|g
+    s|\{\{extension_*name?([[:digit:]]*)\}\}|{{extension\1}}|g
+    s|\{\{extension(_*(name))?[[:digit:]]* +extension(_*(name))?[[:digit:]]* +\.\.\.\}\}|{{extension1 extension2 ...}}|g
+
+    ## Conversion
+    s|\{\{extension\}\}|{string extension}|g
+    s|\{\{extension([[:digit:]])\}\}|{string extension \1}|g
+    s|\{\{extension[[:digit:]]* +extension[[:digit:]]* +\.\.\.\}\}|{string* extension}|g
+
     # Processing device placeholders.
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g

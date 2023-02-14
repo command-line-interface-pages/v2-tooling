@@ -448,3 +448,183 @@
 \`some {{database1 database2 ...}} {{database_name1 database_name2 ...}}\`') | sed -nE '/^\`/p'"
   [[ "$output" == '`some {string* database} {string* database}`' ]]
 }
+
+
+@test "expect no plural argument keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{arguments}} {{argument_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {any* argument} {any* argument}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, argument
+@test "expect no singular argument placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{argument}} {{argument_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {any argument} {any argument}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, argument
+@test "expect no plural argument placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{argument1 argument2 ...}} {{argument_name1 argument_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {any* argument} {any* argument}`' ]]
+}
+
+
+@test "expect no plural option keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{options}} {{option_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* option} {string* option}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, option
+@test "expect no singular option placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{option}} {{option_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string option} {string option}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, option
+@test "expect no plural option placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{option1 option2 ...}} {{option_name1 option_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* option} {string* option}`' ]]
+}
+
+
+@test "expect no plural setting keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{settings}} {{setting_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* setting} {string* setting}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, setting
+@test "expect no singular setting placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{setting}} {{setting_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string setting} {string setting}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, setting
+@test "expect no plural setting placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{setting1 setting2 ...}} {{setting_name1 setting_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* setting} {string* setting}`' ]]
+}
+
+
+@test "expect no plural subcommand keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{subcommands}} {{subcommand_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {command* subcommand} {command* subcommand}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, subcommand
+@test "expect no singular subcommand placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{subcommand}} {{subcommand_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {command subcommand} {command subcommand}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, subcommand
+@test "expect no plural subcommand placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{subcommand1 subcommand2 ...}} {{subcommand_name1 subcommand_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {command* subcommand} {command* subcommand}`' ]]
+}
+
+
+@test "expect no plural extension keyword placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{extensions}} {{extension_names}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* extension} {string* extension}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, singular, relative, extension
+@test "expect no singular extension placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{extension}} {{extension_name}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string extension} {string extension}`' ]]
+}
+
+# bats test_tags=example, code, placeholder, expandable, plural, relative, extension
+@test "expect no plural extension placeholder conversion error when valid page is passed" {
+  run bash -c "./md-to-clip.sh -nfs <(echo '# some
+
+> Some text.
+
+- Some text:
+
+\`some {{extension1 extension2 ...}} {{extension_name1 extension_name2 ...}}\`') | sed -nE '/^\`/p'"
+  [[ "$output" == '`some {string* extension} {string* extension}`' ]]
+}
