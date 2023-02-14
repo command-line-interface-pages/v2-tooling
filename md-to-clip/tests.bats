@@ -560,7 +560,7 @@
 - Some text:
 
 \`some {{--type jpeg --resize=true --transparent}}\`') | sed -nE '/^\`/p'"
-  [[ "$output" == '`some {option* some description}`' ]]
+  [[ "$output" == '`some {option* some description: --type jpeg --resize=true --transparent}`' ]]
 }
 
 
