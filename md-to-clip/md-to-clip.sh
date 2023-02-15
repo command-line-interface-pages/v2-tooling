@@ -352,7 +352,7 @@ convert() {
     ### Cases with optional extensions
     s|\{\{(\/?)path/to/file\[(\.[^{}| ]+)\]\}\}|{\1file file with optional \2 extensions}|g
     s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.[^{}| ]+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
 
     ### Cases with mandatory extension
     s|\{\{(\/?)path/to/file(\.[^{}| ]+)\}\}|{\1file file with mandatory \2 extension}|g
