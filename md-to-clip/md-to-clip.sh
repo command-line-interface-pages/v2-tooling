@@ -323,6 +323,11 @@ convert() {
     s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
     s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
 
+    ### Cases with optional extensions
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.[^{} ]+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.[^{} ]+)\]\}\}|{{\1path/to/file\4[\5]}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.[^{} ]+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+
     ## Conversion
     ### General cases
     s|\{\{(\/?)path/to/file\}\}|{\1file some description}|g
@@ -333,6 +338,11 @@ convert() {
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\}\}|{\1file \2 file \3}|g
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]* +\1path/to/\2_+file[[:digit:]]* +\.\.\.\}\}|{\1file* \2 file}|g
+
+    ### Cases with optional extensions
+    s|\{\{(\/?)path/to/file\[(\.[^{} ]+)\]\}\}|{\1file file with optional \2 extensions}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.[^{} ]+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.[^{} ]+)\] +\1path/to/+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
