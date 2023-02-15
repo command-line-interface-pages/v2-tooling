@@ -281,7 +281,7 @@ convert() {
     ## Expansion
     s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
     s|\{\{(\/?)device(_*name)?([[:digit:]]*)\}\}|{{\1dev/sda\3}}|g
-    s|\{\{(\/?)device(_*name)?[[:digit:]]+ +\1device(_*name)?[[:digit:]]+ +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+    s|\{\{(\/?)device(_*name)?[[:digit:]]* +\1device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
 
     ## Conversion
     s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
@@ -293,7 +293,7 @@ convert() {
     ### General cases
     s|\{\{(\/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
     s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file_or_directory\6}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]+ +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]+ +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
 
     ### Cases with prefix like excluded_path_or_directory
     s|\{\{(\/?)(path/to/)?([^{}_ ]+)_(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
