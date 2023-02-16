@@ -519,6 +519,11 @@ convert() {
     s|\{\{([^{}_ ]+)_+string\}\}|{string \1 string}|g
     s|\{\{([^{}_ ]+)_+string([[:digit:]])\}\}|{string \1 string \2}|g
     s|\{\{([^{}_ ]+)_+string[[:digit:]]* +\1_+string[[:digit:]]* +\.\.\.\}\}|{string* \1 string}|g
+
+    # Processing file placeholders with sample values.
+    ## Conversion
+    ### General cases
+    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file some description: \1}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
