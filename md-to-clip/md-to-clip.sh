@@ -269,14 +269,14 @@ convert() {
 
     # Processing argument placeholders.
     ## Expansion
-    s|\{\{(arguments\|argument_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
-    s|\{\{argument(_*name)?([[:digit:]]*)\}\}|{{argument\2}}|g
-    s|\{\{argument(_*name)?[[:digit:]]* +argument(_*name)?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
+    s|\{\{(arg(ument)?s\|arg(ument)?_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
+    s|\{\{arg(ument)?(_*name)?([[:digit:]]*)\}\}|{{argument\3}}|g
+    s|\{\{arg(ument)?(_*name)?[[:digit:]]* +arg(ument)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
 
     ## Conversion
-    s|\{\{argument\}\}|{any argument}|g
-    s|\{\{argument([[:digit:]])\}\}|{any argument \1}|g
-    s|\{\{argument[[:digit:]]* +argument[[:digit:]]* +\.\.\.\}\}|{any* argument}|g
+    s|\{\{arg(ument)?\}\}|{any argument}|g
+    s|\{\{arg(ument)?([[:digit:]])\}\}|{any argument \2}|g
+    s|\{\{arg(ument)?[[:digit:]]* +arg(ument)?[[:digit:]]* +\.\.\.\}\}|{any* argument}|g
 
     # Processing option placeholders.
     ## Expansion
