@@ -431,12 +431,23 @@ convert() {
     s|\{\{bool(ean)?(_*value)?([[:digit:]]*)\}\}|{{boolean\3}}|g
     s|\{\{bool(ean)?(_*value)?[[:digit:]]* +bool(ean)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{boolean1 boolean2 ...}}|g
 
+    ### Cases with prefix like default_boolean
+    s|\{\{([^{}_ ]+)_+(bool(ean)?s\|bool(ean)?_*values)[[:digit:]]*\}\}|{{\1_boolean1 \1_boolean2 ...}}|g
+    s|\{\{([^{}_ ]+)_+bool(ean)?(_*value)?([[:digit:]]*)\}\}|{{\1_boolean\4}}|g
+    s|\{\{([^{}_ ]+)_+bool(ean)?(_*value)?[[:digit:]]* +\1_+bool(ean)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_boolean1 \1_boolean2 ...}}|g
+
     ## Conversion
+    # General cases
     s|\{\{boolean\}\}|{bool some description}|g
     s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
     s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
     s|\{\{(true\|false\|yes\|no)\}\}|{bool some description: \1}|g
     s/\{\{(true|false|yes|no)\|(true|false|yes|no)\}\}/{bool some description: \1, \2}/g
+
+    ### Cases with prefix like default_boolean
+    s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
+    s|\{\{([^{}_ ]+)_+boolean([[:digit:]])\}\}|{bool \1 boolean \2}|g
+    s|\{\{([^{}_ ]+)_+boolean[[:digit:]]* +\1_+boolean[[:digit:]]* +\.\.\.\}\}|{bool* \1 boolean}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
