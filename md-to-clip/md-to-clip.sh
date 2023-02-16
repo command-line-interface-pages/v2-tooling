@@ -243,6 +243,30 @@ convert() {
     s|\{\{([^{}_ ]+)_+integer([[:digit:]])\}\}|{int \1 integer \2}|g
     s|\{\{([^{}_ ]+)_+integer[[:digit:]]* +\1_+integer[[:digit:]]* +\.\.\.\}\}|{int* \1 integer}|g
 
+    # Processing float placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(float?s\|float?_*values)[[:digit:]]*\}\}|{{float1 float2 ...}}|g
+    s|\{\{float?(_*value)?([[:digit:]]*)\}\}|{{float\2}}|g
+    s|\{\{float?(_*value)?[[:digit:]]* +float?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{float1 float2 ...}}|g
+
+    ### Cases with prefix like positive_float
+    s|\{\{([^{}_ ]+)_+(float?s\|float?_*values)[[:digit:]]*\}\}|{{\1_float1 \1_float2 ...}}|g
+    s|\{\{([^{}_ ]+)_+float?(_*value)?([[:digit:]]*)\}\}|{{\1_float\3}}|g
+    s|\{\{([^{}_ ]+)_+float?(_*value)?[[:digit:]]* +\1_+float?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_float1 \1_float2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{float\}\}|{float some description}|g
+    s|\{\{float([[:digit:]])\}\}|{float some description \1}|g
+    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* some description}|g
+    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float some description: \1}|g
+
+    ### Cases with prefix like positive_float
+    s|\{\{([^{}_ ]+)_+float\}\}|{float \1 float}|g
+    s|\{\{([^{}_ ]+)_+float([[:digit:]])\}\}|{float \1 float \2}|g
+    s|\{\{([^{}_ ]+)_+float[[:digit:]]* +\1_+float[[:digit:]]* +\.\.\.\}\}|{float* \1 float}|g
+
     # Processing argument placeholders.
     ## Expansion
     s|\{\{(arguments\|argument_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
