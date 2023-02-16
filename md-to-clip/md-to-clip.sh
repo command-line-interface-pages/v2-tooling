@@ -400,6 +400,19 @@ convert() {
     s|\{\{(\/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
     s|\{\{(\/?)path/to/([^{}_ ]+)_+directory([[:digit:]]+)\}\}|{\1directory \2 directory \3}|g
     s|\{\{(\/?)path/to/([^{}_ ]+)_+directory[[:digit:]]* +\1path/to/\2_+directory[[:digit:]]* +\.\.\.\}\}|{\1directory* \2 directory}|g
+
+    # Processing boolean placeholders.
+    ## Expansion
+    s|\{\{(bool(ean)?s\|bool(ean)?_*values)[[:digit:]]*\}\}|{{boolean1 boolean2 ...}}|g
+    s|\{\{bool(ean)?(_*value)?([[:digit:]]*)\}\}|{{boolean\3}}|g
+    s|\{\{bool(ean)?(_*value)?[[:digit:]]* +bool(ean)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{boolean1 boolean2 ...}}|g
+
+    ## Conversion
+    s|\{\{boolean\}\}|{bool some description}|g
+    s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
+    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
+    s|\{\{(true\|false\|yes\|no)\}\}|{bool some description: \1}|g
+    s/\{\{(true|false|yes|no)\|(true|false|yes|no)\}\}/{bool some description: \1, \2}/g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
