@@ -496,6 +496,29 @@ convert() {
     s|\{\{([^{}_ ]+)_+character\}\}|{char \1 character}|g
     s|\{\{([^{}_ ]+)_+character([[:digit:]])\}\}|{char \1 character \2}|g
     s|\{\{([^{}_ ]+)_+character[[:digit:]]* +\1_+character[[:digit:]]* +\.\.\.\}\}|{char* \1 character}|g
+
+    # Processing string placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(str(ing)?s\|str(ing)?_*values)[[:digit:]]*\}\}|{{string1 string2 ...}}|g
+    s|\{\{str(ing)?(_*value)?([[:digit:]]*)\}\}|{{string\3}}|g
+    s|\{\{str(ing)?(_*value)?[[:digit:]]* +str(ing)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{string1 string2 ...}}|g
+
+    ### Cases with prefix like default_string
+    s|\{\{([^{}_ ]+)_+(str(ing)?s\|str(ing)?_*values)[[:digit:]]*\}\}|{{\1_string1 \1_string2 ...}}|g
+    s|\{\{([^{}_ ]+)_+str(ing)?(_*value)?([[:digit:]]*)\}\}|{{\1_string\4}}|g
+    s|\{\{([^{}_ ]+)_+str(ing)?(_*value)?[[:digit:]]* +\1_+str(ing)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_string1 \1_string2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{string\}\}|{string some description}|g
+    s|\{\{string([[:digit:]])\}\}|{string some description \1}|g
+    s|\{\{string[[:digit:]]* +string[[:digit:]]* +\.\.\.\}\}|{string* some description}|g
+
+    ### Cases with prefix like default_string
+    s|\{\{([^{}_ ]+)_+string\}\}|{string \1 string}|g
+    s|\{\{([^{}_ ]+)_+string([[:digit:]])\}\}|{string \1 string \2}|g
+    s|\{\{([^{}_ ]+)_+string[[:digit:]]* +\1_+string[[:digit:]]* +\.\.\.\}\}|{string* \1 string}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
