@@ -538,6 +538,7 @@ convert() {
 
     # Processing all remaining placeholders.
     ## Conversion
+    s|\{\{([^{}]+)([[:digit:]]+)\}\}|{string some description \2: \1}|g
     s|\{\{([^{}]+)\}\}|{string some description: \1}|g
   }' <<<"$file_content"
 }
