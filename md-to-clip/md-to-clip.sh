@@ -221,15 +221,27 @@ convert() {
 
     # Processing integer placeholders.
     ## Expansion
+    ### General cases
     s|\{\{(int(eger)?s\|int(eger)?_*values)[[:digit:]]*\}\}|{{integer1 integer2 ...}}|g
     s|\{\{int(eger)?(_*value)?([[:digit:]]*)\}\}|{{integer\3}}|g
     s|\{\{int(eger)?(_*value)?[[:digit:]]* +int(eger)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{integer1 integer2 ...}}|g
 
+    ### Cases with prefix like positive_integer
+    s|\{\{([^{}_ ]+)_+(int(eger)?s\|int(eger)?_*values)[[:digit:]]*\}\}|{{\1_integer1 \1_integer2 ...}}|g
+    s|\{\{([^{}_ ]+)_+int(eger)?(_*value)?([[:digit:]]*)\}\}|{{\1_integer\4}}|g
+    s|\{\{([^{}_ ]+)_+int(eger)?(_*value)?[[:digit:]]* +\1_+int(eger)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_integer1 \1_integer2 ...}}|g
+
     ## Conversion
+    ### General cases
     s|\{\{integer\}\}|{int some description}|g
     s|\{\{integer([[:digit:]])\}\}|{int some description \1}|g
     s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* some description}|g
     s|\{\{([-+]?[[:digit:]]+)\}\}|{int some description: \1}|g
+
+    ### Cases with prefix like positive_integer
+    s|\{\{([^{}_ ]+)_+integer\}\}|{int \1 integer}|g
+    s|\{\{([^{}_ ]+)_+integer([[:digit:]])\}\}|{int \1 integer \2}|g
+    s|\{\{([^{}_ ]+)_+integer[[:digit:]]* +\1_+integer[[:digit:]]* +\.\.\.\}\}|{int* \1 integer}|g
 
     # Processing argument placeholders.
     ## Expansion
