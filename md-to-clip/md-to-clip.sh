@@ -476,8 +476,8 @@ convert() {
     s|\{\{boolean\}\}|{bool some description}|g
     s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
     s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
-    s|\{\{(true\|false\|yes\|no)\}\}|{bool some description: \1}|g
-    s/\{\{(true|false|yes|no)\|(true|false|yes|no)\}\}/{bool some description: \1, \2}/g
+    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool some description: \1}|g
+    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool some description: \1, \2}/g
 
     ### Cases with prefix like default_boolean
     s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
