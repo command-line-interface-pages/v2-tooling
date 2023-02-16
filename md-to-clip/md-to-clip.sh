@@ -219,6 +219,18 @@ convert() {
     s|\{\{database([[:digit:]])\}\}|{string database \1}|g
     s|\{\{database[[:digit:]]* +database[[:digit:]]* +\.\.\.\}\}|{string* database}|g
 
+    # Processing integer placeholders.
+    ## Expansion
+    s|\{\{(int(eger)?s\|int(eger)?_*values)[[:digit:]]*\}\}|{{integer1 integer2 ...}}|g
+    s|\{\{int(eger)?(_*value)?([[:digit:]]*)\}\}|{{integer\3}}|g
+    s|\{\{int(eger)?(_*value)?[[:digit:]]* +int(eger)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{integer1 integer2 ...}}|g
+
+    ## Conversion
+    s|\{\{integer\}\}|{int some description}|g
+    s|\{\{integer([[:digit:]])\}\}|{int some description \1}|g
+    s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* some description}|g
+    s|\{\{([-+]?[[:digit:]]+)\}\}|{int some description: \1}|g
+
     # Processing argument placeholders.
     ## Expansion
     s|\{\{(arguments\|argument_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
