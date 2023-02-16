@@ -327,14 +327,25 @@ convert() {
 
     # Processing device placeholders.
     ## Expansion
-    s|\{\{(\/?)(devices\|device_*names)[[:digit:]]*\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
-    s|\{\{(\/?)device(_*name)?([[:digit:]]*)\}\}|{{\1dev/sda\3}}|g
-    s|\{\{(\/?)device(_*name)?[[:digit:]]* +\1device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1dev/sda1 \1dev/sda2 ...}}|g
+    ### General cases
+    s|\{\{(\/?)(path/to/\|/dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
+
+    ### Cases with prefix like drive_device
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
 
     ## Conversion
-    s|\{\{(\/?)dev/sd[[:alpha:]]\}\}|{\1file device}|g
-    s|\{\{(\/?)dev/sd[[:alpha:]]([[:digit:]]+)\}\}|{\1file device \2}|g
-    s|\{\{(\/?)dev/sd[[:alpha:]][[:digit:]]* +\1dev/sd[[:alpha:]][[:digit:]]* +\.\.\.\}\}|{\1file* device}|g
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])\}\}|{\1file device}|g
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])([[:digit:]]+)\}\}|{\1file device \3}|g
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])[[:digit:]]* +\1(device\|dev/sd[[:alpha:]])[[:digit:]]* +\.\.\.\}\}|{\1file* device}|g
+
+    ### Cases with prefix like drive_device
+    s|\{\{(\/?)([^{}_ ]+)_+device\}\}|{\1file \2 device}|g
+    s|\{\{(\/?)([^{}_ ]+)_+device([[:digit:]]+)\}\}|{\1file \2 device \3}|g
+    s|\{\{(\/?)([^{}_ ]+)_+device[[:digit:]]* +\1\2_+device[[:digit:]]* +\.\.\.\}\}|{\1file* \2 device}|g
 
     # Processing file_or_directory like placeholders.
     ## Expansion
