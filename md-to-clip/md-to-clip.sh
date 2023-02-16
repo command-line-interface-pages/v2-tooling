@@ -472,6 +472,30 @@ convert() {
     s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
     s|\{\{([^{}_ ]+)_+boolean([[:digit:]])\}\}|{bool \1 boolean \2}|g
     s|\{\{([^{}_ ]+)_+boolean[[:digit:]]* +\1_+boolean[[:digit:]]* +\.\.\.\}\}|{bool* \1 boolean}|g
+
+    # Processing char placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(char(acter)?s\|char(acter)?_*values)[[:digit:]]*\}\}|{{character1 character2 ...}}|g
+    s|\{\{char(acter)?(_*value)?([[:digit:]]*)\}\}|{{character\3}}|g
+    s|\{\{char(acter)?(_*value)?[[:digit:]]* +char(acter)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{character1 character2 ...}}|g
+
+    ### Cases with prefix like default_character
+    s|\{\{([^{}_ ]+)_+(char(acter)?s\|char(acter)?_*values)[[:digit:]]*\}\}|{{\1_character1 \1_character2 ...}}|g
+    s|\{\{([^{}_ ]+)_+char(acter)?(_*value)?([[:digit:]]*)\}\}|{{\1_character\4}}|g
+    s|\{\{([^{}_ ]+)_+char(acter)?(_*value)?[[:digit:]]* +\1_+char(acter)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_character1 \1_character2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{character\}\}|{char some description}|g
+    s|\{\{character([[:digit:]])\}\}|{char some description \1}|g
+    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* some description}|g
+    s|\{\{([^0-9])\}\}|{char some description: \1}|g
+
+    ### Cases with prefix like default_character
+    s|\{\{([^{}_ ]+)_+character\}\}|{char \1 character}|g
+    s|\{\{([^{}_ ]+)_+character([[:digit:]])\}\}|{char \1 character \2}|g
+    s|\{\{([^{}_ ]+)_+character[[:digit:]]* +\1_+character[[:digit:]]* +\.\.\.\}\}|{char* \1 character}|g
 q
     # Expanding singular placeholders without /path/to prefix for futher processing.
     s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
