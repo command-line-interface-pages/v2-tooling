@@ -285,9 +285,9 @@ convert() {
     s|\{\{option(_*name)?[[:digit:]]* +option(_*name)?[[:digit:]]* +\.\.\.\}\}|{{option1 option2 ...}}|g
 
     ## Conversion
-    s|\{\{option\}\}|{string option}|g
-    s|\{\{option([[:digit:]])\}\}|{string option \1}|g
-    s|\{\{option[[:digit:]]* +option[[:digit:]]* +\.\.\.\}\}|{string* option}|g
+    s|\{\{option\}\}|{option option}|g
+    s|\{\{option([[:digit:]])\}\}|{option option \1}|g
+    s|\{\{option[[:digit:]]* +option[[:digit:]]* +\.\.\.\}\}|{option* option}|g
     s|\{\{(--?[^{}=: ]+)\}\}|{option some description: \1}|g
     s|\{\{(--?[^{}=: ]+(([:=]\| +)[^{} ]*)?( +--?[^{}=: ]+(([:=]\| +)[^{} ]*)?)+)\}\}|{option* some description: \1}|g
     s|\{\{(--?[^{}=: ]+)([:=]\| +)[^{} ]*\}\}|{option some description: \1}|g
