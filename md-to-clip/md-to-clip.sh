@@ -94,7 +94,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.5.1" >&2
+  echo "2.0.0" >&2
 }
 
 author() {
@@ -168,137 +168,378 @@ convert() {
   
   # Correcting code examples: fixing some broken placeholders and correcting some placeholders.
   /^`/ {
-    # Removing unfixable placeholders.
+    # Removing broken ellipsis.
     s/ *\{\{\.\.\.\}\} */ /g
 
-    # Expanding singular placeholders without /path/to prefix for futher processing.
-    s/\{\{(\/?)dev\/sd.([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
-    s/\{\{char(acter)?([[:digit:]]*)\}\}/{{character\2}}/g
-
-    s/\{\{(\/?)device([[:digit:]]*)\}\}/{{\1path\/to\/device_file\2}}/g
-    s/\{\{(\/?)(file|executable|program|script|source)_or_directory([[:digit:]]*)\}\}/{{\1path\/to\/file_or_directory\3}}/g
-
-    s/\{\{(\/?)(file|executable|program|script|source)_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file\4\5}}/g
-    s/\{\{(\/?)dir(ectory)?_?(name)?([[:digit:]]*)\}\}/{{\1path\/to\/directory\4}}/g
-
-    s/\{\{(\/?)(([^{}/]+)_)(file|executable|program|script|source)_?(name)?([[:digit:]]*)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file\6\7}}/g
-    s/\{\{(\/?)(([^{}/]+)_)dir(ectory)?_?(name)?([[:digit:]]*)\}\}/{{\1path\/to\/\3_directory\6}}/g
-
-    # Expanding plural placeholders without path/to prefix for futher processing.
-    s/\{\{(char(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|char_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|character(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|character_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{character1 character2 ...}}/g
-    s/\{\{(\/?)(device(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|device_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{\1path\/to\/device_file1 \1path\/to\/device_file2 ...}}/g
-    s/\{\{(user(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|user_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{user1 user2 ...}}/g
-    s/\{\{(group(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|group_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{group1 group2 ...}}/g
-    s/\{\{(url(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|url_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{url1 url2 ...}}/g
-    s/\{\{(ip(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|ip_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{ip1 ip2 ...}}/g
-    s/\{\{(db(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|dp_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})|database_?name(s|\(s\)|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}))\}\}/{{database1 database2 ...}}/g
-
-    s/\{\{(\/?)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-
-    s/\{\{(\/?)(([^{}/]+)_)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
-
-
-    s/\{\{(\/?)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-
-    s/\{\{(\/?)(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
-
-
-    s/\{\{(\/?)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-
-    s/\{\{(\/?)(([^{}/]+)_)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)(([^{}/]+)_)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
-
-    # Expanding plural placeholders with path/to prefix for futher processing.
-    s/\{\{(\/?)path\/to\/(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)path\/to\/(dirs|directories|directory_?names)\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
+    # Process brace expansions and (s).
+    ## Expansion
+    s|\{\{([^{}]+)(\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\11 \12 ...}}|g
     
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(files|file_?names|executables|executable_?names|programs|program_?names|scripts|script_?names|sources|source_?names)((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dirs|directories|directory_?names)\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+    # Processing user placeholders.
+    ## Expansion
+    s|\{\{(users\|user_*names)[[:digit:]]*\}\}|{{user1 user2 ...}}|g
+    s|\{\{user(_*name)?([[:digit:]]*)\}\}|{{user\2}}|g
+    s|\{\{user(_*name)?[[:digit:]]* +user(_*name)?[[:digit:]]* +\.\.\.\}\}|{{user1 user2 ...}}|g
 
+    ## Conversion
+    s|\{\{user\}\}|{string user}|g
+    s|\{\{user([[:digit:]])\}\}|{string user \1}|g
+    s|\{\{user[[:digit:]]* +user[[:digit:]]* +\.\.\.\}\}|{string* user}|g
+  
+    # Processing group placeholders.
+    ## Expansion
+    s|\{\{(groups\|group_*names)[[:digit:]]*\}\}|{{group1 group2 ...}}|g
+    s|\{\{group(_*name)?([[:digit:]]*)\}\}|{{group\2}}|g
+    s|\{\{group(_*name)?[[:digit:]]* +group(_*name)?[[:digit:]]* +\.\.\.\}\}|{{group1 group2 ...}}|g
 
-    s/\{\{(\/?)path\/to\/(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)path\/to\/(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-    
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file\(s\)|file_?name\(s\)|executable\(s\)|executable_?name\(s\)|program\(s\)|program_?name\(s\)|script\(s\)|script_?name\(s\)|source\(s\)|source_?name\(s\))((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dir\(s\)|directory\(s\)|directory_?name\(s\))\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+    ## Conversion
+    s|\{\{group\}\}|{string group}|g
+    s|\{\{group([[:digit:]])\}\}|{string group \1}|g
+    s|\{\{group[[:digit:]]* +group[[:digit:]]* +\.\.\.\}\}|{string* group}|g
 
+    # Processing ip placeholders.
+    ## Expansion
+    s|\{\{(ips\|ip_*names)[[:digit:]]*\}\}|{{ip1 ip2 ...}}|g
+    s|\{\{ip(_*name)?([[:digit:]]*)\}\}|{{ip\2}}|g
+    s|\{\{ip(_*name)?[[:digit:]]* +ip(_*name)?[[:digit:]]* +\.\.\.\}\}|{{ip1 ip2 ...}}|g
 
-    s/\{\{(\/?)path\/to\/(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/file1\3 \1path\/to\/file2\3 ...}}/g
-    s/\{\{(\/?)path\/to\/(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/directory1 \1path\/to\/directory2 ...}}/g
-    
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|file_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|executable_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|program_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|script_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|source_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})((\.[^.{}]+)?)\}\}/{{\1path\/to\/\3_file1\5 \1path\/to\/\3_file2\5 ...}}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(dir\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\}|directory_?name\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}/{{\1path\/to\/\3_directory1 \1path\/to\/\3_directory2 ...}}/g
+    ## Conversion
+    s|\{\{ip\}\}|{string ip}|g
+    s|\{\{ip([[:digit:]])\}\}|{string ip \1}|g
+    s|\{\{ip[[:digit:]]* +ip[[:digit:]]* +\.\.\.\}\}|{string* ip}|g
 
-    # Converting singular boolean placeholders.
-    s/\{\{(true|false|yes|no)[[:digit:]]*\}\}/{bool flag: \1}/g
+    # Processing database placeholders.
+    ## Expansion
+    s|\{\{(databases\|database_*names)[[:digit:]]*\}\}|{{database1 database2 ...}}|g
+    s|\{\{database(_*name)?([[:digit:]]*)\}\}|{{database\2}}|g
+    s|\{\{database(_*name)?[[:digit:]]* +database(_*name)?[[:digit:]]* +\.\.\.\}\}|{{database1 database2 ...}}|g
 
-    # Converting singular int/float placeholders.
-    s/\{\{([-+]?[[:digit:]]+)\}\}/{int value: \1}/g
-    s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float value: \1}/g
+    ## Conversion
+    s|\{\{database\}\}|{string database}|g
+    s|\{\{database([[:digit:]])\}\}|{string database \1}|g
+    s|\{\{database[[:digit:]]* +database[[:digit:]]* +\.\.\.\}\}|{string* database}|g
 
-    # Converting singular character placeholders.
-    s/\{\{character[[:digit:]]*\}\}/{char value}/g
+    # Processing integer placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(int(eger)?s\|int(eger)?_*values)[[:digit:]]*\}\}|{{integer1 integer2 ...}}|g
+    s|\{\{int(eger)?(_*value)?([[:digit:]]*)\}\}|{{integer\3}}|g
+    s|\{\{int(eger)?(_*value)?[[:digit:]]* +int(eger)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{integer1 integer2 ...}}|g
 
-    # Converting plural character placeholders.
-    s/\{\{character[[:digit:]]+ +character[[:digit:]]+ +\.\.\.\}\}/{char* value}/g
+    ### Cases with prefix like positive_integer
+    s|\{\{([^{}_ ]+)_+(int(eger)?s\|int(eger)?_*values)[[:digit:]]*\}\}|{{\1_integer1 \1_integer2 ...}}|g
+    s|\{\{([^{}_ ]+)_+int(eger)?(_*value)?([[:digit:]]*)\}\}|{{\1_integer\4}}|g
+    s|\{\{([^{}_ ]+)_+int(eger)?(_*value)?[[:digit:]]* +\1_+int(eger)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_integer1 \1_integer2 ...}}|g
 
-    # Converting paired option placeholders.
-    s/\{\{(--[^{} =:|]+)\|(-[^{} =:|]+)\}\}/{option flag: \1, \2}/g
-    s/\{\{(-[^{} =:|]+)\|(--[^{} =:|]+)\}\}/{option flag: \2, \1}/g
+    ## Conversion
+    ### General cases
+    s|\{\{integer\}\}|{int some description}|g
+    s|\{\{integer([[:digit:]])\}\}|{int some description \1}|g
+    s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* some description}|g
+    s|\{\{([-+]?[[:digit:]]+)\}\}|{int some description: \1}|g
 
-    # Converting singular option placeholders.
-    s/\{\{(--?[^{} =:]+)\}\}/{option flag: \1}/g
+    ### Cases with prefix like positive_integer
+    s|\{\{([^{}_ ]+)_+integer\}\}|{int \1 integer}|g
+    s|\{\{([^{}_ ]+)_+integer([[:digit:]])\}\}|{int \1 integer \2}|g
+    s|\{\{([^{}_ ]+)_+integer[[:digit:]]* +\1_+integer[[:digit:]]* +\.\.\.\}\}|{int* \1 integer}|g
 
-    # Converting singular range placeholders.
-    s/\{\{([-+]?[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+)\}\}/{int range: \1..\3}/g
-    s/\{\{([-+]?[[:digit:]]+\.[[:digit:]]+)(\.\.|-)([-+]?[[:digit:]]+\.[[:digit:]]+)\}\}/{float range: \1..\3}/g
+    # Processing float placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(float?s\|float?_*values)[[:digit:]]*\}\}|{{float1 float2 ...}}|g
+    s|\{\{float?(_*value)?([[:digit:]]*)\}\}|{{float\2}}|g
+    s|\{\{float?(_*value)?[[:digit:]]* +float?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{float1 float2 ...}}|g
 
-    # Converting singular special placeholders.
-    s/\{\{user_?(name)?[[:digit:]]*\}\}/{string user}/g
-    s/\{\{group_?(name)?[[:digit:]]*\}\}/{string group}/g
-    s/\{\{url_?(name)?[[:digit:]]*\}\}/{string url}/g
-    s/\{\{ip_?(name)?[[:digit:]]*\}\}/{string ip}/g
-    s/\{\{db_?(name)?[[:digit:]]*\}\}/{string database}/g
+    ### Cases with prefix like positive_float
+    s|\{\{([^{}_ ]+)_+(float?s\|float?_*values)[[:digit:]]*\}\}|{{\1_float1 \1_float2 ...}}|g
+    s|\{\{([^{}_ ]+)_+float?(_*value)?([[:digit:]]*)\}\}|{{\1_float\3}}|g
+    s|\{\{([^{}_ ]+)_+float?(_*value)?[[:digit:]]* +\1_+float?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_float1 \1_float2 ...}}|g
 
-    # Converting plural special placeholders.
-    s/\{\{user[[:digit:]]+ +user[[:digit:]]+ +\.\.\.\}\}/{string* user}/g
-    s/\{\{group[[:digit:]]+ +group[[:digit:]]+ +\.\.\.\}\}/{string* group}/g
-    s/\{\{url[[:digit:]]+ +url[[:digit:]]+ +\.\.\.\}\}/{string* url}/g
-    s/\{\{ip[[:digit:]]+ +ip[[:digit:]]+ +\.\.\.\}\}/{string* ip}/g
-    s/\{\{database[[:digit:]]+ +database[[:digit:]]+ +\.\.\.\}\}/{string* database}/g
+    ## Conversion
+    ### General cases
+    s|\{\{float\}\}|{float some description}|g
+    s|\{\{float([[:digit:]])\}\}|{float some description \1}|g
+    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* some description}|g
+    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float some description: \1}|g
 
-    # Converting singular path placeholders.
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_or_directory[[:digit:]]*\}\}/{\1path value}/g
+    ### Cases with prefix like positive_float
+    s|\{\{([^{}_ ]+)_+float\}\}|{float \1 float}|g
+    s|\{\{([^{}_ ]+)_+float([[:digit:]])\}\}|{float \1 float \2}|g
+    s|\{\{([^{}_ ]+)_+float[[:digit:]]* +\1_+float[[:digit:]]* +\.\.\.\}\}|{float* \1 float}|g
 
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]*\}\}/{\1file value}/g
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]*(\.[^.{}]+)\}\}/{\1file value: sample\4}/g
-    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?[[:digit:]]*\}\}/{\1directory value}/g
+    # Processing argument placeholders.
+    ## Expansion
+    s|\{\{(arg(ument)?s\|arg(ument)?_*names)[[:digit:]]*\}\}|{{argument1 argument2 ...}}|g
+    s|\{\{arg(ument)?(_*name)?([[:digit:]]*)\}\}|{{argument\3}}|g
+    s|\{\{arg(ument)?(_*name)?[[:digit:]]* +arg(ument)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{argument1 argument2 ...}}|g
 
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file|executable|program|script|source)_?(name)?[[:digit:]]*((\.[^.{}]+)?)\}\}/{\1file value: \3\6}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)?dir(ectory)?_?(name)?[[:digit:]]*\}\}/{\1directory value: \3}/g
+    ## Conversion
+    s|\{\{arg(ument)?\}\}|{any argument}|g
+    s|\{\{arg(ument)?([[:digit:]])\}\}|{any argument \2}|g
+    s|\{\{arg(ument)?[[:digit:]]* +arg(ument)?[[:digit:]]* +\.\.\.\}\}|{any* argument}|g
 
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_or_directory[[:digit:]]+ +\1path\/to\/\2_or_directory[[:digit:]]+ +\.\.\.\}\}/{\1path* value}/g
+    # Processing option placeholders.
+    ## Expansion
+    s|\{\{(options\|option_*names)[[:digit:]]*\}\}|{{option1 option2 ...}}|g
+    s|\{\{option(_*name)?([[:digit:]]*)\}\}|{{option\2}}|g
+    s|\{\{option(_*name)?[[:digit:]]* +option(_*name)?[[:digit:]]* +\.\.\.\}\}|{{option1 option2 ...}}|g
 
-    # Converting plural path placeholders.
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]+ +\1path\/to\/\2_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1file* value}/g
-    s/\{\{(\/?)path\/to\/(file|executable|program|script|source)_?(name)?[[:digit:]]+(\.[^.{}]+) +\1path\/to\/\2_?(name)?[[:digit:]]+\4 +\.\.\.\}\}/{\1file* value: sample\4}/g
-    s/\{\{(\/?)path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\1path\/to\/dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value}/g
+    ## Conversion
+    s|\{\{option\}\}|{string option}|g
+    s|\{\{option([[:digit:]])\}\}|{string option \1}|g
+    s|\{\{option[[:digit:]]* +option[[:digit:]]* +\.\.\.\}\}|{string* option}|g
+    s|\{\{(--?[^{}=: ]+)\}\}|{option some description: \1}|g
+    s|\{\{(--?[^{}=: ]+(([:=]\| +)[^{} ]*)?( +--?[^{}=: ]+(([:=]\| +)[^{} ]*)?)+)\}\}|{option* some description: \1}|g
+    s|\{\{(--?[^{}=: ]+)([:=]\| +)[^{} ]*\}\}|{option some description: \1}|g
 
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)(file|executable|program|script|source)_?(name)?[[:digit:]]+((\.[^.{}]+)?) \1path\/to\/\2\4_?(name)?[[:digit:]]+\6 +\.\.\.\}\}/{\1file* value: \3\6}/g
-    s/\{\{(\/?)path\/to\/(([^{}/]+)_)dir(ectory)?_?(name)?[[:digit:]]+ \1path\/to\/\2dir(ectory)?_?(name)?[[:digit:]]+ +\.\.\.\}\}/{\1directory* value: \3}/g
+    # Processing setting placeholders.
+    ## Expansion
+    s|\{\{(settings\|setting_*names)[[:digit:]]*\}\}|{{setting1 setting2 ...}}|g
+    s|\{\{setting(_*name)?([[:digit:]]*)\}\}|{{setting\2}}|g
+    s|\{\{setting(_*name)?[[:digit:]]* +setting(_*name)?[[:digit:]]* +\.\.\.\}\}|{{setting1 setting2 ...}}|g
 
-    # Omptimizing Better TlDr placeholders
-    s/\{(\/?)([^ {}:]+) +([^:{}]+)\} +\{\1\2\*\ \3}/{\1\2+ \3}/g
-    s/\{(\/?)([^ {}:]+) +([^:{}]+):( +[^{}]+)\} +\{\1\2\*\ \3:\4}/{\1\2+ \3:\4}/g
+    ## Conversion
+    s|\{\{setting\}\}|{string setting}|g
+    s|\{\{setting([[:digit:]])\}\}|{string setting \1}|g
+    s|\{\{setting[[:digit:]]* +setting[[:digit:]]* +\.\.\.\}\}|{string* setting}|g
 
+    # Processing subcommand placeholders.
+    ## Expansion
+    s|\{\{(subcommands\|subcommand_*names)[[:digit:]]*\}\}|{{subcommand1 subcommand2 ...}}|g
+    s|\{\{subcommand(_*name)?([[:digit:]]*)\}\}|{{subcommand\2}}|g
+    s|\{\{subcommand(_*name)?[[:digit:]]* +subcommand(_*name)?[[:digit:]]* +\.\.\.\}\}|{{subcommand1 subcommand2 ...}}|g
 
-    s/\{\{([^{}]+)\}\}/{string value: \1}/g
+    ## Conversion
+    s|\{\{subcommand\}\}|{command subcommand}|g
+    s|\{\{subcommand([[:digit:]])\}\}|{command subcommand \1}|g
+    s|\{\{subcommand[[:digit:]]* +subcommand[[:digit:]]* +\.\.\.\}\}|{command* subcommand}|g
 
+    # Processing extension placeholders.
+    ## Expansion
+    s|\{\{(extensions\|extension_*names)[[:digit:]]*\}\}|{{extension1 extension2 ...}}|g
+    s|\{\{extension(_*name)?([[:digit:]]*)\}\}|{{extension\2}}|g
+    s|\{\{extension(_*name)?[[:digit:]]* +extension(_*name)?[[:digit:]]* +\.\.\.\}\}|{{extension1 extension2 ...}}|g
+
+    ## Conversion
+    s|\{\{extension\}\}|{string extension}|g
+    s|\{\{extension([[:digit:]])\}\}|{string extension \1}|g
+    s|\{\{extension[[:digit:]]* +extension[[:digit:]]* +\.\.\.\}\}|{string* extension}|g
+
+    # Processing device placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(\/?)(path/to/\|/dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
+
+    ### Cases with prefix like drive_device
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
+    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+
+    ## Conversion
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])\}\}|{\1file device}|g
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])([[:digit:]]+)\}\}|{\1file device \3}|g
+    s|\{\{(\/?)(device\|dev/sd[[:alpha:]])[[:digit:]]* +\1(device\|dev/sd[[:alpha:]])[[:digit:]]* +\.\.\.\}\}|{\1file* device}|g
+
+    ### Cases with prefix like drive_device
+    s|\{\{(\/?)([^{}_ ]+)_+device\}\}|{\1file \2 device}|g
+    s|\{\{(\/?)([^{}_ ]+)_+device([[:digit:]]+)\}\}|{\1file \2 device \3}|g
+    s|\{\{(\/?)([^{}_ ]+)_+device[[:digit:]]* +\1\2_+device[[:digit:]]* +\.\.\.\}\}|{\1file* \2 device}|g
+
+    # Processing file_or_directory like placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(\/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file_or_directory\6}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+
+    ### Cases with prefix like excluded_path_or_directory
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file_or_directory\7}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path some description}|g
+    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path some description \2}|g
+    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* some description}|g
+
+    ### Cases with prefix like excluded_path_or_directory
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory([[:digit:]]+)\}\}|{\1path \2 file or directory \3}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory[[:digit:]]* +\1path/to/\2_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* \2 file or directory}|g
+
+    # Processing file placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file\4}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
+
+    ### Cases with prefix like excluded_file
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+
+    ### Cases with optional extensions
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.[^{}| ]+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.[^{}| ]+)\]\}\}|{{\1path/to/file\4[\5]}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.[^{}| ]+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+
+    ### Cases with mandatory extension
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*(\.[^{}| ]+)\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)(\.[^{}| ]+)\}\}|{{\1path/to/file\4\5}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*(\.[^{}| ]+) +\1(path/to/)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+
+    ### Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\[(\.[^{}| ]+)\]\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\[(\.[^{}| ]+)\]\}\}|{{\1path/to/\3_file\5[\6]}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*\[(\.[^{}| ]+)\] +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+
+    ### Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*(\.[^{}| ]+)\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)(\.[^{}| ]+)\}\}|{{\1path/to/\3_file\5\6}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*(\.[^{}| ]+) +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{(\/?)path/to/file\}\}|{\1file some description}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file some description \2}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* some description}|g
+
+    ### Cases with prefix like excluded_file
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\}\}|{\1file \2 file \3}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]* +\1path/to/\2_+file[[:digit:]]* +\.\.\.\}\}|{\1file* \2 file}|g
+
+    ### Cases with optional extensions
+    s|\{\{(\/?)path/to/file\[(\.[^{}| ]+)\]\}\}|{\1file file with optional \2 extensions}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.[^{}| ]+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
+
+    ### Cases with mandatory extension
+    s|\{\{(\/?)path/to/file(\.[^{}| ]+)\}\}|{\1file file with mandatory \2 extension}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)(\.[^{}| ]+)\}\}|{\1file file \2 with mandatory \3 extension}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*(\.[^{}| ]+) +\1path/to/+file[[:digit:]]*\2 +\.\.\.\}\}|{\1file* file with mandatory \2 extension}|g
+
+    ### Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\[(\.[^{}| ]+)\]\}\}|{\1file \2 file with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\[(\.[^{}| ]+)\]\}\}|{\1file \2 file \3 with optional \4 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/\2_+file[[:digit:]]*\[\3\] +\.\.\.\}\}|{\1file* \2 file with optional \3 extensions}|g
+
+    ### Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file(\.[^{}| ]+)\}\}|{\1file \2 file with mandatory \3 extension}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)(\.[^{}| ]+)\}\}|{\1file \2 file \3 with mandatory \4 extension}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*(\.[^{}| ]+) +\1path/to/\2_+file[[:digit:]]*\3 +\.\.\.\}\}|{\1file* \2 file with mandatory \3 extension}|g
+
+    # Processing directory placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(\/?)(path/to/)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/directory\5}}|g
+    s|\{\{(\/?)(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
+
+    ### Cases with prefix like excluded_file
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_directory\6}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{(\/?)path/to/directory\}\}|{\1directory some description}|g
+    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory some description \2}|g
+    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* some description}|g
+
+    ### Cases with prefix like excluded_file
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory([[:digit:]]+)\}\}|{\1directory \2 directory \3}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory[[:digit:]]* +\1path/to/\2_+directory[[:digit:]]* +\.\.\.\}\}|{\1directory* \2 directory}|g
+
+    # Processing boolean placeholders.
+    ## Expansion
+    s|\{\{(bool(ean)?s\|bool(ean)?_*values)[[:digit:]]*\}\}|{{boolean1 boolean2 ...}}|g
+    s|\{\{bool(ean)?(_*value)?([[:digit:]]*)\}\}|{{boolean\3}}|g
+    s|\{\{bool(ean)?(_*value)?[[:digit:]]* +bool(ean)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{boolean1 boolean2 ...}}|g
+
+    ### Cases with prefix like default_boolean
+    s|\{\{([^{}_ ]+)_+(bool(ean)?s\|bool(ean)?_*values)[[:digit:]]*\}\}|{{\1_boolean1 \1_boolean2 ...}}|g
+    s|\{\{([^{}_ ]+)_+bool(ean)?(_*value)?([[:digit:]]*)\}\}|{{\1_boolean\4}}|g
+    s|\{\{([^{}_ ]+)_+bool(ean)?(_*value)?[[:digit:]]* +\1_+bool(ean)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_boolean1 \1_boolean2 ...}}|g
+
+    ## Conversion
+    # General cases
+    s|\{\{boolean\}\}|{bool some description}|g
+    s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
+    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
+    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool some description: \1}|g
+    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool some description: \1, \2}/g
+
+    ### Cases with prefix like default_boolean
+    s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
+    s|\{\{([^{}_ ]+)_+boolean([[:digit:]])\}\}|{bool \1 boolean \2}|g
+    s|\{\{([^{}_ ]+)_+boolean[[:digit:]]* +\1_+boolean[[:digit:]]* +\.\.\.\}\}|{bool* \1 boolean}|g
+
+    # Processing char placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(char(acter)?s\|char(acter)?_*values)[[:digit:]]*\}\}|{{character1 character2 ...}}|g
+    s|\{\{char(acter)?(_*value)?([[:digit:]]*)\}\}|{{character\3}}|g
+    s|\{\{char(acter)?(_*value)?[[:digit:]]* +char(acter)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{character1 character2 ...}}|g
+
+    ### Cases with prefix like default_character
+    s|\{\{([^{}_ ]+)_+(char(acter)?s\|char(acter)?_*values)[[:digit:]]*\}\}|{{\1_character1 \1_character2 ...}}|g
+    s|\{\{([^{}_ ]+)_+char(acter)?(_*value)?([[:digit:]]*)\}\}|{{\1_character\4}}|g
+    s|\{\{([^{}_ ]+)_+char(acter)?(_*value)?[[:digit:]]* +\1_+char(acter)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_character1 \1_character2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{character\}\}|{char some description}|g
+    s|\{\{character([[:digit:]])\}\}|{char some description \1}|g
+    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* some description}|g
+    s|\{\{([^0-9])\}\}|{char some description: \1}|g
+
+    ### Cases with prefix like default_character
+    s|\{\{([^{}_ ]+)_+character\}\}|{char \1 character}|g
+    s|\{\{([^{}_ ]+)_+character([[:digit:]])\}\}|{char \1 character \2}|g
+    s|\{\{([^{}_ ]+)_+character[[:digit:]]* +\1_+character[[:digit:]]* +\.\.\.\}\}|{char* \1 character}|g
+
+    # Processing string placeholders.
+    ## Expansion
+    ### General cases
+    s|\{\{(str(ing)?s\|str(ing)?_*values)[[:digit:]]*\}\}|{{string1 string2 ...}}|g
+    s|\{\{str(ing)?(_*value)?([[:digit:]]*)\}\}|{{string\3}}|g
+    s|\{\{str(ing)?(_*value)?[[:digit:]]* +str(ing)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{string1 string2 ...}}|g
+
+    ### Cases with prefix like default_string
+    s|\{\{([^{}_ ]+)_+(str(ing)?s\|str(ing)?_*values)[[:digit:]]*\}\}|{{\1_string1 \1_string2 ...}}|g
+    s|\{\{([^{}_ ]+)_+str(ing)?(_*value)?([[:digit:]]*)\}\}|{{\1_string\4}}|g
+    s|\{\{([^{}_ ]+)_+str(ing)?(_*value)?[[:digit:]]* +\1_+str(ing)?(_*value)?[[:digit:]]* +\.\.\.\}\}|{{\1_string1 \1_string2 ...}}|g
+
+    ## Conversion
+    ### General cases
+    s|\{\{string\}\}|{string some description}|g
+    s|\{\{string([[:digit:]])\}\}|{string some description \1}|g
+    s|\{\{string[[:digit:]]* +string[[:digit:]]* +\.\.\.\}\}|{string* some description}|g
+
+    ### Cases with prefix like default_string
+    s|\{\{([^{}_ ]+)_+string\}\}|{string \1 string}|g
+    s|\{\{([^{}_ ]+)_+string([[:digit:]])\}\}|{string \1 string \2}|g
+    s|\{\{([^{}_ ]+)_+string[[:digit:]]* +\1_+string[[:digit:]]* +\.\.\.\}\}|{string* \1 string}|g
+
+    # Processing file placeholders with sample values.
+    ## Conversion
+    ### General cases
+    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file some description: \1}|g
+
+    # Processing all remaining placeholders.
+    ## Conversion
+    s|\{\{([^{}]+)([[:digit:]]+)\}\}|{string some description \2: \1}|g
+    s|\{\{([^{}]+)\}\}|{string some description: \1}|g
   }' <<<"$file_content"
 }
 
