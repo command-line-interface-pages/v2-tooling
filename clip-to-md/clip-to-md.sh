@@ -10,7 +10,7 @@ declare ERROR_COLOR="\e[31m"
 declare SUCCESS_COLOR="\e[32m"
 
 help() {
-  echo "Converter from Better TlDr format to TlDr format.
+  echo "Converter from Command Line Interface Pages format to TlDr format.
 
 Usage:
   $0 (--help|-h)
@@ -58,7 +58,7 @@ convert() {
   }
   
   /^`/ {
-    # converting Better TlDr placeholders to TlDr placeholders
+    # converting Command Line Interface Pages placeholders to TlDr placeholders
     s/\{bool\?? +[^{}:]+\}/{{boolean}}/g
     s/\{bool +[^{}:]+: *([^,{}]+) +(,[^{}]+)?\}/{{\1}}/g
     s/\{bool\?? +[^{}:]+: *([^,{}]+)(,[^{}]+)?\}/{{\1}}/g
@@ -118,21 +118,21 @@ while [[ -n "$1" ]]; do
     shift 2
     ;;
   *)
-    declare btldr_file="$option"
-    declare tldr_file="$(sed -E 's/.*\///; s/\.btldr$/.md/' <<< "$btldr_file")"
+    declare clip_file="$option"
+    declare tldr_file="$(sed -E 's/.*\///; s/\.clip$/.md/' <<< "$clip_file")"
     if [[ -z "$output_directory" ]]; then
-      tldr_file="$(dirname "$btldr_file")/$tldr_file"
+      tldr_file="$(dirname "$clip_file")/$tldr_file"
     else
       tldr_file="$output_directory/$tldr_file"
     fi
 
     declare tldr_content
-    tldr_content="$(convert "$btldr_file")"
+    tldr_content="$(convert "$clip_file")"
     (($? != 0)) && exit "$FAIL"
 
     echo "$tldr_content" > "$tldr_file"
 
-    echo -e "$0: $btldr_file: ${SUCCESS_COLOR}converted to $tldr_file$RESET_COLOR" >&2
+    echo -e "$0: $clip_file: ${SUCCESS_COLOR}converted to $tldr_file$RESET_COLOR" >&2
     shift
     ;;
   esac

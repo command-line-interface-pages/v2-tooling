@@ -1,10 +1,10 @@
-# Placeholder explanator
+# Placeholder explanator for Command Line Interface Pages
 
-Placeholder explanator for Better TlDr placeholders.
+Placeholder explanator for Command Line Interface Pages placeholders.
 
 ## Example
 
-Input placeholder content:
+Input Command Line Interface Page placeholder content:
 
 ```md
 /directory? images folder
