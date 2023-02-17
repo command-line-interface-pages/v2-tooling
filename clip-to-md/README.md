@@ -1,10 +1,10 @@
-# Better TlDr to Markdown format converter
+# Command Line Interface Pages to Markdown format converter
 
-Converter from Better TlDr format to TlDr format.
+Converter from Command Line Interface Pages format to TlDr format.
 
 ## Example
 
-Input Better TlDr page:
+Input Command Line Interface Page:
 
 ```md
 # mkdir
@@ -48,8 +48,8 @@ Output TlDr page:
 
 ## Notes
 
-- All TlDr placeholders are required even the corresponding Better TlDr ones are
+- All TlDr placeholders are required even the corresponding Command Line Interface Pages ones are
   optional as there is no special syntax to present optional placeholders in TlDr pages.
 - All TlDr repeated placeholders allow 0 or more arguments to be substituted even
-  the corresponding Better TlDr ones specify repetition count as there is no special
+  the corresponding Command Line Interface Pages ones specify repetition count as there is no special
   syntax to present placeholders requiring other argument count in TlDr pages.
