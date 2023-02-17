@@ -1,0 +1,164 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "placeholder-type": {
+            "description": "A result type for the current conversion",
+            "type": "string",
+            "enum": [
+                "bool",
+                "int",
+                "float",
+                "char",
+                "string",
+                "command",
+                "option",
+                "file",
+                "directory",
+                "path"
+            ]
+        }
+    },
+    "title": "conversions",
+    "description": "Conversions",
+    "type": "array",
+    "uniqueItems": true,
+    "items": {
+        "title": "conversion",
+        "description": "A conversion",
+        "type": "object",
+        "properties": {
+            "from": {
+                "title": "conversion source",
+                "description": "A source for the current conversion",
+                "type": "object",
+                "required": [
+                    "content"
+                ],
+                "properties": {
+                    "prefix": {
+                        "title": "source prefix",
+                        "description": "A source prefix for the current conversion",
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "description": "A prefix content for the current conversion",
+                                "type": "string",
+                                "minLength": 1,
+                                "pattern": "^\\w*$"
+                            },
+                            "is-required": {
+                                "description": "Whether a prefix content is required for the current conversion",
+                                "type": "boolean",
+                                "default": "false"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "suffix": {
+                        "title": "source suffix",
+                        "description": "A source suffix for the current conversion",
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "description": "A suffix content for the current conversion",
+                                "type": "string",
+                                "minLength": 1,
+                                "pattern": "^\\w*$"
+                            },
+                            "is-required": {
+                                "description": "Whether a suffix content is required for the current conversion",
+                                "type": "boolean",
+                                "default": "false"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "content": {
+                        "description": "A source content for the current conversion",
+                        "type": "string",
+                        "minLength": 1,
+                        "pattern": "^\\w*$"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "to": {
+                "title": "conversion result",
+                "description": "A result for the current conversion",
+                "type": "object",
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "$ref": "#/definitions/placeholder-type"
+                    },
+                    "path-options": {
+                        "title": "path options",
+                        "description": "Path options for the current conversion",
+                        "type": "object",
+                        "required": [
+                            "type"
+                        ],
+                        "properties": {
+                            "type": {
+                                "description": "A path type for the current conversion",
+                                "type": "string",
+                                "enum": [
+                                    "relative",
+                                    "absolute",
+                                    "any"
+                                ],
+                                "default": "any"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "quantity-options": {
+                        "title": "quantity options",
+                        "description": "Quantity options for the current conversion",
+                        "type": "object",
+                        "required": [
+                            "type"
+                        ],
+                        "properties": {
+                            "type": {
+                                "description": "A quantity type for the current conversion",
+                                "type": "string",
+                                "enum": [
+                                    "one",
+                                    "optional",
+                                    "one-or-more",
+                                    "zero-or-more",
+                                    "range"
+                                ],
+                                "default": "one"
+                            },
+                            "range": {
+                                "title": "quantity range",
+                                "description": "A quantity range for the current conversion",
+                                "type": "object",
+                                "properties": {
+                                    "from": {
+                                        "description": "A range low border for the current conversion",
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "to": {
+                                        "description": "A range high border for the current conversion",
+                                        "type": "integer",
+                                        "minimum": 0
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "additionalProperties": false
+                }
+            }
+        },
+        "additionalProperties": false
+    }
+}
