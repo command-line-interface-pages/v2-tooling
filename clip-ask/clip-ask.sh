@@ -10,7 +10,7 @@ declare ERROR_COLOR="\e[31m"
 declare SUCCESS_COLOR="\e[32m"
 
 help() {
-    echo "Placeholder explanator for Better TlDr.
+    echo "Placeholder explanator for Command Line Interface Pages.
 
 Usage:
   $0 (--help|-h)
