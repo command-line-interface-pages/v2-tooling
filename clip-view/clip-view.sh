@@ -297,6 +297,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
     [($HELP_OPTION_COLOR--update-theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ut$HELP_PUNCTUATION_COLOR)]
     [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<short>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-t$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<local-theme.yaml|remote-theme>$HELP_PUNCTUATION_COLOR]
+    [($HELP_OPTION_COLOR--repository$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-R$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<repository-url>$HELP_PUNCTUATION_COLOR]
     ($HELP_PLACEHOLDER_COLOR<local-file.clip>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
@@ -1187,6 +1188,7 @@ declare render=better-tldr
 declare -i update_cache=1
 declare -i update_theme_cache=1
 declare option_type=long
+declare repository="command-line-interface-pages/cli-pages"
 
 while [[ -n "$1" ]]; do
   declare option="$1"
@@ -1291,8 +1293,8 @@ while [[ -n "$1" ]]; do
       ((update_theme_cache == 0)) && rm -rf "$THEME_CACHE_DIRECTORY/$theme_path"
 
       if [[ ! -f "$THEME_CACHE_DIRECTORY/$theme_path" ]]; then
-        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
-          echo -e "$PROGRAM_NAME: $theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
+        wget "https://raw.githubusercontent.com/$repository/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
+          echo -e "$PROGRAM_NAME: $repository/$theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
@@ -1304,6 +1306,20 @@ while [[ -n "$1" ]]; do
     fi
 
     set_render_options_from_theme "$theme_to_set" || exit "$FAIL"
+    shift 2
+    ;;
+  --repository | -R)
+    [[ -z "$value" ]] && {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    [[ "$value" =~ ^[-[:alnum:]_]+/[-[:alnum:]_]+$ ]] || {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    repository="$value"
     shift 2
     ;;
   *)
@@ -1326,8 +1342,8 @@ while [[ -n "$1" ]]; do
       ((update_cache == 0)) && rm -rf "$CACHE_DIRECTORY/$page_path"
 
       if [[ ! -f "$CACHE_DIRECTORY/$page_path" ]]; then
-        wget "https://raw.githubusercontent.com/emilyseville7cfg-better-tldr/cli-pages/main/$page_path" -O "$file_to_render" 2>/dev/null || {
-          echo -e "$PROGRAM_NAME: $page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
+        wget "https://raw.githubusercontent.com/$repository/main/$page_path" -O "$file_to_render" 2>/dev/null || {
+          echo -e "$PROGRAM_NAME: $repository/$page_path: ${ERROR_COLOR}existing remote page expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
