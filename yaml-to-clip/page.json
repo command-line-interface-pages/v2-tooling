@@ -9,7 +9,8 @@
                 "Install specific packages",
                 "Upgrade specific packages",
                 "Remove specific packages",
-                "List all installed packages"
+                "List all installed packages",
+                "Store specific files"
             ]
         }
     },
@@ -171,7 +172,12 @@
                             "file": {
                                 "description": "An example file",
                                 "type": "string",
-                                "minLength": 1
+                                "minLength": 1,
+                                "examples": [
+                                    "cat",
+                                    "chgrp",
+                                    "chmod"
+                                ]
                             }
                         },
                         "additionalProperties": false
