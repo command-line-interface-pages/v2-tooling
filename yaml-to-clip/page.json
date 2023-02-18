@@ -1,5 +1,18 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "example-description": {
+            "description": "An example description/directory",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+                "Install specific packages",
+                "Upgrade specific packages",
+                "Remove specific packages",
+                "List all installed packages"
+            ]
+        }
+    },
     "title": "page",
     "description": "A page",
     "type": "object",
@@ -10,13 +23,13 @@
     ],
     "properties": {
         "name": {
-            "description": "A name for the current command",
+            "description": "A name for the current command/directory",
             "type": "string",
             "minLength": 1
         },
         "summary": {
             "title": "summary",
-            "description": "A summary for the current command",
+            "description": "A summary for the current command/directory",
             "type": "object",
             "required": [
                 "description",
@@ -24,12 +37,12 @@
             ],
             "properties": {
                 "description": {
-                    "description": "A description for the current command",
+                    "description": "A description for the current command/directory",
                     "type": "string",
                     "minLength": 1
                 },
                 "more-information": {
-                    "description": "A documentation link for the current command",
+                    "description": "A documentation link for the current command/directory",
                     "type": "string",
                     "minLength": 1,
                     "examples": [
@@ -38,17 +51,17 @@
                     ]
                 },
                 "internal": {
-                    "description": "Whether treat the current command as internal",
+                    "description": "Whether treat the current command/directory as internal",
                     "type": "boolean",
                     "default": false
                 },
                 "deprecated": {
-                    "description": "Whether treat the current command as deprecated",
+                    "description": "Whether treat the current command/directory as deprecated",
                     "type": "boolean",
                     "default": false
                 },
                 "see-also": {
-                    "description": "Similar commands for the current command",
+                    "description": "Similar commands for the current command/directory",
                     "type": "array",
                     "uniqueItems": true,
                     "items": {
@@ -57,7 +70,7 @@
                     }
                 },
                 "aliases": {
-                    "description": "Command aliases for the current command",
+                    "description": "Command aliases for the current command/directory",
                     "type": "array",
                     "uniqueItems": true,
                     "items": {
@@ -100,46 +113,70 @@
                             "-v"
                         ]
                     }
+                },
+                "structure-compatible": {
+                    "description": "Directories compatible by structure with the current directory",
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
                 }
             }
         },
         "examples": {
-            "description": "Examples for the current command",
+            "description": "Examples for the current command/directory",
             "type": "array",
             "uniqueItems": true,
             "items": {
                 "title": "example",
-                "description": "An example for the current command",
+                "description": "An example for the current command/directory",
                 "type": "object",
-                "required": [
-                    "description",
-                    "code"
-                ],
-                "properties": {
-                    "description": {
-                        "description": "An example description",
-                        "type": "string",
-                        "minLength": 1,
-                        "examples": [
-                            "Install specific packages",
-                            "Upgrade specific packages",
-                            "Remove specific packages",
-                            "List all installed packages"
-                        ]
+                "oneOf": [
+                    {
+                        "title": "command example",
+                        "required": [
+                            "description",
+                            "code"
+                        ],
+                        "properties": {
+                            "description": {
+                                "$ref": "#/definitions/example-description"
+                            },
+                            "code": {
+                                "description": "An example code",
+                                "type": "string",
+                                "minLength": 1,
+                                "examples": [
+                                    "COMMAND install {string+ package}",
+                                    "COMMAND upgrade {string+ package}",
+                                    "COMMAND remove {string+ package}",
+                                    "COMMAND list"
+                                ]
+                            }
+                        },
+                        "additionalProperties": false
                     },
-                    "code": {
-                        "description": "An example code",
-                        "type": "string",
-                        "minLength": 1,
-                        "examples": [
-                            "COMMAND install {string+ package}",
-                            "COMMAND upgrade {string+ package}",
-                            "COMMAND remove {string+ package}",
-                            "COMMAND list"
-                        ]
+                    {
+                        "title": "file example",
+                        "required": [
+                            "description",
+                            "file"
+                        ],
+                        "properties": {
+                            "description": {
+                                "$ref": "#/definitions/example-description"
+                            },
+                            "file": {
+                                "description": "An example file",
+                                "type": "string",
+                                "minLength": 1
+                            }
+                        },
+                        "additionalProperties": false
                     }
-                },
-                "additionalProperties": false
+                ]
             }
         }
     },
