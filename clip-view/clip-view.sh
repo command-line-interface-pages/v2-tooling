@@ -11,7 +11,7 @@ declare PROGRAM_NAME="$(basename "$0")"
 
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
-declare THEME_CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip-themes}"
+declare THEME_CACHE_DIRECTORY="${THEME_CACHE_DIRECTORY:-$HOME/.clip-themes}"
 
 color_to_code() {
   declare color="$1"
