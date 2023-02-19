@@ -11,7 +11,7 @@ declare PROGRAM_NAME="$(basename "$0")"
 
 # Cache options:
 declare CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip}"
-declare THEME_CACHE_DIRECTORY="${CACHE_DIRECTORY:-$HOME/.clip-themes}"
+declare THEME_CACHE_DIRECTORY="${THEME_CACHE_DIRECTORY:-$HOME/.clip-themes}"
 
 color_to_code() {
   declare color="$1"
@@ -298,6 +298,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
     [($HELP_OPTION_COLOR--option-type$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-ot$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<short>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--theme$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-t$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<local-theme.yaml|remote-theme>$HELP_PUNCTUATION_COLOR]
     [($HELP_OPTION_COLOR--repository$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-R$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<repository-url>$HELP_PUNCTUATION_COLOR]
+    [($HELP_OPTION_COLOR--theme-repository$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-tr$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<repository-url>$HELP_PUNCTUATION_COLOR]
     ($HELP_PLACEHOLDER_COLOR<local-file.clip>$HELP_PUNCTUATION_COLOR|$HELP_PLACEHOLDER_COLOR<remote-page>$HELP_PUNCTUATION_COLOR)...
 
 ${HELP_HEADER_COLOR}Environment variables:$HELP_TEXT_COLOR
@@ -399,7 +400,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.2.2" >&2
+  echo "1.3.2" >&2
 }
 
 author() {
@@ -1189,6 +1190,7 @@ declare -i update_cache=1
 declare -i update_theme_cache=1
 declare option_type=long
 declare repository="command-line-interface-pages/cli-pages"
+declare theme_repository="command-line-interface-pages/themes"
 
 while [[ -n "$1" ]]; do
   declare option="$1"
@@ -1288,13 +1290,13 @@ while [[ -n "$1" ]]; do
       }
       cat "$local_or_remote_theme" >"$theme_to_set"
     else
-      declare theme_path="themes/$local_or_remote_theme.yaml"
+      declare theme_path="$local_or_remote_theme/theme.yaml"
 
       ((update_theme_cache == 0)) && rm -rf "$THEME_CACHE_DIRECTORY/$theme_path"
 
       if [[ ! -f "$THEME_CACHE_DIRECTORY/$theme_path" ]]; then
-        wget "https://raw.githubusercontent.com/$repository/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
-          echo -e "$PROGRAM_NAME: $repository/$theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
+        wget "https://raw.githubusercontent.com/$theme_repository/main/$theme_path" -O "$theme_to_set" 2>/dev/null || {
+          echo -e "$PROGRAM_NAME: $theme_repository/$theme_path: ${ERROR_COLOR}existing remote theme expected$RESET_COLOR" >&2
           exit "$FAIL"
         }
 
@@ -1320,6 +1322,20 @@ while [[ -n "$1" ]]; do
     }
 
     repository="$value"
+    shift 2
+    ;;
+  --theme-repository | -tr)
+    [[ -z "$value" ]] && {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    [[ "$value" =~ ^[-[:alnum:]_]+/[-[:alnum:]_]+$ ]] || {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option value expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    theme_repository="$value"
     shift 2
     ;;
   *)
