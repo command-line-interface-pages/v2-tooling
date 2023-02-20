@@ -584,9 +584,11 @@ convert() {
   file_content="$(convert_code_examples_remove_broken_ellipsis "$file_content")"
   file_content="$(convert_code_examples_expand_plural_placeholders "$file_content")"
 
-  declare -i special_placeholder_count="$(yq 'length' "$special_placeholder_config")"
-  for ((i=0; i < special_placeholder_count; i++)); do
-    declare special_placeholder="$(yq ".[$i]" "$in_special_placeholder_config")"
+  declare special_placeholder_file_content="$(yq '.' "$special_placeholder_config")"
+  declare -i special_placeholder_count="$(yq 'length' <<<"$special_placeholder_file_content")"
+  
+  for ((i = 0; i < special_placeholder_count; i++)); do
+    declare special_placeholder="$(yq ".[$i]" <<<"$special_placeholder_file_content")"
     
     declare in_placeholder="$(yq '.in-placeholder' <<<"$special_placeholder")"
     declare out_type="$(yq '.out-type' <<<"$special_placeholder")"
@@ -599,7 +601,7 @@ convert() {
     declare convert_args=(-ik "$in_placeholder"
       -rk "$out_type"
       -opsi "$in_index")
-    
+
     ((in_allow_prefix == 0)) && convert_args+=(-ap)
     convert_args+=(-dk "$out_description")
     ((out_is_name == 0)) || convert_args+=(-iv)
