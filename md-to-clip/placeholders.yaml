@@ -11,6 +11,7 @@
 - in-placeholder: ip
   in-allow-prefix: true
   out-type: string
+  out-is-name: true
 
 - in-placeholder: database
   in-allow-prefix: true
