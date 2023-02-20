@@ -83,7 +83,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--no-file-save$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-nfs$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--special-placeholder-config$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-spc$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<file.yaml>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
 
 ${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
   - Command summary and tag simplification
@@ -186,33 +186,33 @@ convert_code_examples_convert_special_placeholders() {
     declare option="$1"
 
     case "$option" in
-      --in-keyword | -ik)
-        in_keyword="$2"
-        shift 2
-        ;;
-      --result-keyword | -rk)
-        in_result_keyword="$2"
-        shift 2
-        ;;
-      --description-keyword | -dk)
-        in_description_keyword="$2"
-        shift 2
-        ;;
-      --option-part-start-index | -opsi)
-        in_option_part_start_index="$2"
-        shift 2
-        ;;
-      --is-value | -iv)
-        in_suffix=value
-        shift
-        ;;
-      --allow-prefix | -ap)
-        allow_prefix=true
-        shift
-        ;;
-      *)
-        return "$FAIL"
-        ;;
+    --in-keyword | -ik)
+      in_keyword="$2"
+      shift 2
+      ;;
+    --result-keyword | -rk)
+      in_result_keyword="$2"
+      shift 2
+      ;;
+    --description-keyword | -dk)
+      in_description_keyword="$2"
+      shift 2
+      ;;
+    --option-part-start-index | -opsi)
+      in_option_part_start_index="$2"
+      shift 2
+      ;;
+    --is-value | -iv)
+      in_suffix=value
+      shift
+      ;;
+    --allow-prefix | -ap)
+      allow_prefix=true
+      shift
+      ;;
+    *)
+      return "$FAIL"
+      ;;
     esac
   done
 
@@ -226,7 +226,7 @@ convert_code_examples_convert_special_placeholders() {
     in_keyword="${in_keyword:0:in_option_part_start_index}(${in_keyword:in_option_part_start_index})?"
     group_multiplier=1
   }
-  
+
   if [[ "$allow_prefix" == true ]]; then
     sed -E "/^\`/ {
       # Expansion
@@ -559,6 +559,7 @@ convert_code_examples_convert_character_placeholders() {
 
 convert() {
   declare in_file="$1"
+  declare in_special_placeholder_config="$2"
 
   declare file_content="$(cat "$in_file")"
   declare program_name="$(basename "$PROGRAM_NAME")"
@@ -573,22 +574,37 @@ convert() {
     return "$FAIL"
   }
 
+  [[ -f "$in_special_placeholder_config" ]] || {
+    echo -e "$program_name: $in_special_placeholder_config: ${ERROR_COLOR}existing special placeholder config expected$RESET_COLOR" >&2
+    return "$FAIL"
+  }
+
   file_content="$(convert_summary "$file_content")"
   file_content="$(convert_code_descriptions "$file_content")"
   file_content="$(convert_code_examples_remove_broken_ellipsis "$file_content")"
   file_content="$(convert_code_examples_expand_plural_placeholders "$file_content")"
 
-  placeholder_in_keywords=(user group ip database argument setting subcommand extension string)
-  placeholder_out_keywords=(string string string string any string command string string)
-  placeholder_optional_part_start_indixes=(0 0 0 0 3 0 0 3 3)
-  
-  for ((index=0; index < ${#placeholder_in_keywords[@]}; index++)); do
-    file_content="$(convert_code_examples_convert_special_placeholders "$file_content" \
-      -ik "${placeholder_in_keywords[index]}" \
-      -rk "${placeholder_out_keywords[index]}" \
-      -opsi "${placeholder_optional_part_start_indixes[index]}" \
-      -ap
-      )"
+  declare -i special_placeholder_count="$(yq 'length' "$special_placeholder_config")"
+  for ((i=0; i < special_placeholder_count; i++)); do
+    declare special_placeholder="$(yq ".[$i]" "$in_special_placeholder_config")"
+    
+    declare in_placeholder="$(yq '.in-placeholder' <<<"$special_placeholder")"
+    declare out_type="$(yq '.out-type' <<<"$special_placeholder")"
+
+    declare -i in_index="$(yq '.in-index // 0' <<<"$special_placeholder")"
+    declare -i in_allow_prefix="$(yq '.in-allow-prefix // 1' <<<"$special_placeholder")"
+    declare out_description="$(yq '.out-description // ""' <<<"$special_placeholder")"
+    declare -i out_is_name="$(yq '.out-is-name // 1' <<<"$special_placeholder")"
+
+    declare convert_args=(-ik "$in_placeholder"
+      -rk "$out_type"
+      -opsi "$in_index")
+    
+    ((in_allow_prefix == 0)) && convert_args+=(-ap)
+    convert_args+=(-dk "$out_description")
+    ((out_is_name == 0)) || convert_args+=(-iv)
+
+    file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
 
   file_content="$(convert_code_examples_convert_integer_placeholders "$file_content")"
@@ -600,7 +616,7 @@ convert() {
   file_content="$(convert_code_examples_convert_directory_placeholders "$file_content")"
   file_content="$(convert_code_examples_convert_boolean_placeholders "$file_content")"
   file_content="$(convert_code_examples_convert_character_placeholders "$file_content")"
-  
+
   sed -E '/^`/ {
     # Processing file placeholders with sample values.
     ## Conversion
@@ -621,6 +637,7 @@ if (($# == 0)); then
 fi
 
 declare output_directory
+declare special_placeholder_config="$HOME/.md-to-clip.yaml"
 declare -i no_file_save=1
 
 while [[ -n "$1" ]]; do
@@ -650,10 +667,20 @@ while [[ -n "$1" ]]; do
     ;;
   --output-directory | -od)
     [[ -z "$value" ]] && {
-      echo -e "$PROGRAM_NAME: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
       exit "$FAIL"
     }
+
     output_directory="$value"
+    shift 2
+    ;;
+  --special-placeholder-config | -spc)
+    [[ -z "$value" ]] && {
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}config expected$RESET_COLOR" >&2
+      exit "$FAIL"
+    }
+
+    special_placeholder_config="$value"
     shift 2
     ;;
   *)
@@ -668,7 +695,7 @@ while [[ -n "$1" ]]; do
     }
 
     declare clip_content
-    clip_content="$(convert "$tldr_file")"
+    clip_content="$(convert "$tldr_file" "$special_placeholder_config")"
     (($? != 0)) && exit "$FAIL"
 
     if ((no_file_save == 1)); then
@@ -677,7 +704,7 @@ while [[ -n "$1" ]]; do
     else
       echo "$clip_content"
     fi
-    
+
     shift
     ;;
   esac
