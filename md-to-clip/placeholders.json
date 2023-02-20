@@ -7,6 +7,10 @@
         "title": "conversion",
         "description": "A conversion",
         "type": "object",
+        "required": [
+            "in-placeholder",
+            "out-type"
+        ],
         "properties": {
             "in-placeholder": {
                 "description": "An input TlDr placeholder content for the current conversion\nContrary to `description` key this one can contain human readable word or a contraction like 'arg'",
