@@ -1,0 +1,40 @@
+- in-placeholder: user
+  in-allow-prefix: true
+  out-type: string
+  out-is-name: true
+
+- in-placeholder: group
+  in-allow-prefix: true
+  out-type: string
+  out-is-name: true
+
+- in-placeholder: ip
+  in-allow-prefix: true
+  out-type: string
+
+- in-placeholder: database
+  in-allow-prefix: true
+  out-type: string
+  out-is-name: true
+
+- in-placeholder: argument
+  in-index: 3
+  out-type: any
+  out-is-name: true
+
+- in-placeholder: setting
+  out-type: string
+  out-is-name: true
+
+- in-placeholder: subcommand
+  out-type: command
+  out-is-name: true
+
+- in-placeholder: extension
+  in-index: 3
+  out-type: string
+  out-is-name: true
+
+- in-placeholder: string
+  in-index: 3
+  out-type: string
