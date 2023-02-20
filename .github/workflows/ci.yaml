@@ -22,4 +22,5 @@ jobs:
         with:
           bats-version: 1.8.2
       - run: |
+          env -C md-to-clip make install
           env -C md-to-clip bats tests.bats
