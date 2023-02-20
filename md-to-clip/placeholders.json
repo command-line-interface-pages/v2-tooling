@@ -8,7 +8,7 @@
         "description": "A conversion",
         "type": "object",
         "properties": {
-            "in": {
+            "in-placeholder": {
                 "description": "An input TlDr placeholder content for the current conversion\nContrary to `description` key this one can contain human readable word or a contraction like 'arg'",
                 "type": "string",
                 "minLength": 1,
@@ -17,7 +17,7 @@
                     "arg"
                 ]
             },
-            "type": {
+            "out-type": {
                 "description": "An output Command Line Interface Page placeholder type for the current conversion",
                 "type": "string",
                 "enum": [
@@ -50,7 +50,7 @@
                     "remote-any"
                 ]
             },
-            "description": {
+            "out-description": {
                 "description": "An output Command Line Interface Page placeholder description for the current conversion\nContrary to `in` key this one should contain human readable word, not a contraction like 'arg'",
                 "type": "string",
                 "pattern": "^\\w*$",
@@ -58,7 +58,7 @@
                     "argument"
                 ]
             },
-            "index": {
+            "in-index": {
                 "description": "A starting index of an optional part of TlDr placeholder content for the current conversion\nIt should not exceed TlDr placeholder content length minus 1",
                 "type": "integer",
                 "minimum": 0,
@@ -66,12 +66,12 @@
                     3
                 ]
             },
-            "is-name": {
+            "out-is-name": {
                 "description": "Whether to allow name/names suffix for a TlDr placeholder content\nWhen false value/values is used instead of name/names",
                 "type": "boolean",
                 "default": false
             },
-            "allow-prefix": {
+            "in-allow-prefix": {
                 "description": "Whether to allow one word prefix for a TlDr placeholder content",
                 "type": "boolean",
                 "default": false
