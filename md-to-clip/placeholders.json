@@ -13,7 +13,7 @@
         ],
         "properties": {
             "in-placeholder": {
-                "description": "An input TlDr placeholder content for the current conversion\nContrary to `description` key this one can contain human readable word or a contraction like 'arg'",
+                "description": "An input TlDr placeholder content for the current conversion\nContrary to `out-description` key this one can contain human readable word or a contraction like 'arg'",
                 "type": "string",
                 "minLength": 1,
                 "pattern": "^\\w*$",
@@ -55,7 +55,7 @@
                 ]
             },
             "out-description": {
-                "description": "An output Command Line Interface Page placeholder description for the current conversion\nContrary to `in` key this one should contain human readable word, not a contraction like 'arg'",
+                "description": "An output Command Line Interface Page placeholder description for the current conversion\nContrary to `in-placeholder` key this one should contain human readable word, not a contraction like 'arg'\nWhen omitted it's equal to `in-placeholder`",
                 "type": "string",
                 "pattern": "^\\w*$",
                 "examples": [
