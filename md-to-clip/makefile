@@ -16,6 +16,9 @@ uninstall:
 	rm -v $(PREFIX)/$(script)
 	rm -v $(HOME)/$(output_config)
 
+.PHONY: reinstall
+reinstall: uninstall install
+
 .PHONY: tests
 tests:
 	bats tests.bats
