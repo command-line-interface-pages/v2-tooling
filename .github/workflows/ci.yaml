@@ -23,5 +23,4 @@ jobs:
           bats-version: 1.8.2
       - run: |
           mkdir -p ~/.local/bin/
-          env -C md-to-clip make install
           env -C md-to-clip bats tests.bats
