@@ -631,6 +631,30 @@ convert() {
   }' <<<"$file_content"
 }
 
+handle_page() {
+  declare in_tldr_file="$option"
+
+  declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$in_tldr_file")"
+  ((no_file_save == 1)) && {
+    if [[ -z "$output_directory" ]]; then
+      clip_file="$(dirname "$in_tldr_file")/$clip_file"
+    else
+      clip_file="$output_directory/$clip_file"
+    fi
+  }
+
+  declare clip_content
+  clip_content="$(convert "$in_tldr_file" "$special_placeholder_config")"
+  (($? != 0)) && exit "$FAIL"
+
+  if ((no_file_save == 1)); then
+    echo "$clip_content" >"$clip_file"
+    print_message "$in_tldr_file" "converted to '$clip_file'"
+  else
+    echo "$clip_content"
+  fi
+}
+
 parse_options() {
   declare output_directory
   declare special_placeholder_config="$HOME/.md-to-clip.yaml"
@@ -679,27 +703,7 @@ parse_options() {
       throw_error "$option" "valid option expected"
       ;;
     *)
-      declare tldr_file="$option"
-      declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
-      ((no_file_save == 1)) && {
-        if [[ -z "$output_directory" ]]; then
-          clip_file="$(dirname "$tldr_file")/$clip_file"
-        else
-          clip_file="$output_directory/$clip_file"
-        fi
-      }
-
-      declare clip_content
-      clip_content="$(convert "$tldr_file" "$special_placeholder_config")"
-      (($? != 0)) && exit "$FAIL"
-
-      if ((no_file_save == 1)); then
-        echo "$clip_content" >"$clip_file"
-        print_message "$tldr_file" "converted to '$clip_file'"
-      else
-        echo "$clip_content"
-      fi
-
+      handle_page "$option"
       shift
       ;;
     esac
