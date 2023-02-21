@@ -7,6 +7,11 @@ declare -i FAIL=1
 
 declare PROGRAM_NAME="$(basename "$0")"
 
+# Options
+declare output_directory
+declare special_placeholder_config="$HOME/.md-to-clip.yaml"
+declare -i no_file_save=1
+
 color_to_code() {
   declare color="$1"
 
@@ -143,6 +148,12 @@ check_page_is_alias() {
 convert_summary() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^>/ {
     s/\.$//
     s/More +information: <(.*)>$/More information: \1/
@@ -157,6 +168,12 @@ convert_summary() {
 convert_code_descriptions() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^-/ {
     s/`(std(in|out|err))`/\1/g
     s/standard +input( +stream)?/stdin/g
@@ -170,6 +187,12 @@ convert_code_descriptions() {
 convert_code_examples_remove_broken_ellipsis() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     s/ *\{\{\.\.\.\}\} */ /g
   }' <<<"$in_file_content"
@@ -178,6 +201,12 @@ convert_code_examples_remove_broken_ellipsis() {
 convert_code_examples_expand_plural_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     s|\{\{([^{}]+)(\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\11 \12 ...}}|g
   }' <<<"$in_file_content"
@@ -185,6 +214,12 @@ convert_code_examples_expand_plural_placeholders() {
 
 convert_code_examples_convert_special_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   declare in_keyword=
   declare in_result_keyword=
@@ -281,6 +316,12 @@ convert_code_examples_convert_special_placeholders() {
 convert_code_examples_convert_integer_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -309,6 +350,12 @@ convert_code_examples_convert_integer_placeholders() {
 
 convert_code_examples_convert_float_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -339,6 +386,12 @@ convert_code_examples_convert_float_placeholders() {
 convert_code_examples_convert_option_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     s|\{\{(options\|option_*names)[[:digit:]]*\}\}|{{option1 option2 ...}}|g
@@ -357,6 +410,12 @@ convert_code_examples_convert_option_placeholders() {
 
 convert_code_examples_convert_device_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -385,6 +444,12 @@ convert_code_examples_convert_device_placeholders() {
 convert_code_examples_convert_path_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -412,6 +477,12 @@ convert_code_examples_convert_path_placeholders() {
 
 convert_code_examples_convert_file_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -481,6 +552,12 @@ convert_code_examples_convert_file_placeholders() {
 convert_code_examples_convert_directory_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -513,6 +590,12 @@ convert_code_examples_convert_directory_placeholders() {
 convert_code_examples_convert_boolean_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -543,6 +626,12 @@ convert_code_examples_convert_boolean_placeholders() {
 convert_code_examples_convert_character_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -571,17 +660,17 @@ convert_code_examples_convert_character_placeholders() {
 
 convert() {
   declare in_file="$1"
-  declare in_special_placeholder_config="$2"
 
   declare file_content="$(cat "$in_file")"
 
   check_layout_correctness "$file_content" || throw_error "$in_file" "valid layout expected"
   check_page_is_alias "$file_content" && throw_error "$in_file" "non-alias page expected"
 
-  file_content="$(convert_summary "$file_content")"
-  file_content="$(convert_code_descriptions "$file_content")"
-  file_content="$(convert_code_examples_remove_broken_ellipsis "$file_content")"
-  file_content="$(convert_code_examples_expand_plural_placeholders "$file_content")"
+  # shellcheck disable=SC2119
+  file_content="$(echo "$file_content" | convert_summary |
+    convert_code_descriptions |
+    convert_code_examples_remove_broken_ellipsis |
+    convert_code_examples_expand_plural_placeholders)"
 
   declare special_placeholder_file_content="$(yq '.' "$special_placeholder_config")"
   declare -i special_placeholder_count="$(yq 'length' <<<"$special_placeholder_file_content")"
@@ -608,15 +697,16 @@ convert() {
     file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
 
-  file_content="$(convert_code_examples_convert_integer_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_float_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_option_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_device_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_path_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_file_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_directory_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_boolean_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_character_placeholders "$file_content")"
+  # shellcheck disable=SC2119
+  file_content="$(echo "$file_content" | convert_code_examples_convert_integer_placeholders |
+    convert_code_examples_convert_float_placeholders |
+    convert_code_examples_convert_option_placeholders |
+    convert_code_examples_convert_device_placeholders |
+    convert_code_examples_convert_path_placeholders |
+    convert_code_examples_convert_file_placeholders |
+    convert_code_examples_convert_directory_placeholders |
+    convert_code_examples_convert_boolean_placeholders |
+    convert_code_examples_convert_character_placeholders)"
 
   sed -E '/^`/ {
     # Processing file placeholders with sample values.
@@ -644,7 +734,7 @@ handle_page() {
   }
 
   declare clip_content
-  clip_content="$(convert "$in_tldr_file" "$special_placeholder_config")"
+  clip_content="$(convert "$in_tldr_file")"
   (($? != 0)) && exit "$FAIL"
 
   if ((no_file_save == 1)); then
@@ -656,10 +746,6 @@ handle_page() {
 }
 
 parse_options() {
-  declare output_directory
-  declare special_placeholder_config="$HOME/.md-to-clip.yaml"
-  declare -i no_file_save=1
-
   while [[ -n "$1" ]]; do
     declare option="$1"
     declare value="$2"
