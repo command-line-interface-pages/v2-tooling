@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=2016,2155,2181,1087
+# shellcheck disable=2016,2155,2181,1087,2120
 
 declare -i SUCCESS=0
 declare -i FAIL=1
