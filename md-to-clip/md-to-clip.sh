@@ -685,6 +685,10 @@ while [[ -n "$1" ]]; do
     special_placeholder_config="$value"
     shift 2
     ;;
+  --* | -*)
+    echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option expected$RESET_COLOR" >&2
+    exit
+    ;;
   *)
     declare tldr_file="$option"
     declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
