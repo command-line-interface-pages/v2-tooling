@@ -67,6 +67,21 @@ declare RESET_COLOR="\e[$(color_to_code none)m"
 declare ERROR_COLOR="\e[$(color_to_code red)m"
 declare SUCCESS_COLOR="\e[$(color_to_code green)m"
 
+print_message() {
+  declare source="$1"
+  declare message="$2"
+
+  echo -e "$PROGRAM_NAME: $source: ${SUCCESS_COLOR}$message$RESET_COLOR" >&2
+}
+
+throw_error() {
+  declare source="$1"
+  declare message="$2"
+
+  echo -e "$PROGRAM_NAME: $source: ${ERROR_COLOR}$message$RESET_COLOR" >&2
+  exit "$FAIL"
+}
+
 # Help colors:
 declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
 declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
@@ -105,11 +120,8 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
-check_dependencies_correctness() {
-  which sed >/dev/null || {
-    echo -e "$PROGRAM_NAME: sed: ${ERROR_COLOR}installed command expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+throw_if_dependencies_are_not_satisfied() {
+  which sed >/dev/null || throw_error "sed" "installed command expected"
 }
 
 check_layout_correctness() {
@@ -562,22 +574,9 @@ convert() {
   declare in_special_placeholder_config="$2"
 
   declare file_content="$(cat "$in_file")"
-  declare program_name="$(basename "$PROGRAM_NAME")"
 
-  check_layout_correctness "$file_content" || {
-    echo -e "$program_name: $in_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
-
-  check_page_is_alias "$file_content" && {
-    echo -e "$program_name: $in_file: ${ERROR_COLOR}non-alias page expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
-
-  [[ -f "$in_special_placeholder_config" ]] || {
-    echo -e "$program_name: $in_special_placeholder_config: ${ERROR_COLOR}existing special placeholder config expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+  check_layout_correctness "$file_content" || throw_error "$in_file" "valid layout expected"
+  check_page_is_alias "$file_content" && throw_error "$in_file" "non-alias page expected"
 
   file_content="$(convert_summary "$file_content")"
   file_content="$(convert_code_descriptions "$file_content")"
@@ -663,26 +662,21 @@ parse_options() {
       shift
       ;;
     --output-directory | -od)
-      [[ -z "$value" ]] && {
-        echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
-        exit "$FAIL"
-      }
+      [[ -z "$value" ]] && throw_error "$option" "directory expected"
+      [[ -d "$value" ]] || throw_error "$option" "existing directory expected"
 
       output_directory="$value"
       shift 2
       ;;
     --special-placeholder-config | -spc)
-      [[ -z "$value" ]] && {
-        echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}config expected$RESET_COLOR" >&2
-        exit "$FAIL"
-      }
+      [[ -z "$value" ]] && throw_error "$option" "config expected"
+      [[ -d "$value" ]] || throw_error "$option" "existing config expected"
 
       special_placeholder_config="$value"
       shift 2
       ;;
     --* | -*)
-      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option expected$RESET_COLOR" >&2
-      exit
+      throw_error "$option" "valid option expected"
       ;;
     *)
       declare tldr_file="$option"
@@ -701,7 +695,7 @@ parse_options() {
 
       if ((no_file_save == 1)); then
         echo "$clip_content" >"$clip_file"
-        echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+        print_message "$tldr_file" "converted to '$clip_file'"
       else
         echo "$clip_content"
       fi
@@ -712,7 +706,7 @@ parse_options() {
   done
 }
 
-check_dependencies_correctness || exit "$FAIL"
+throw_if_dependencies_are_not_satisfied
 
 (($# == 0)) && {
   help
