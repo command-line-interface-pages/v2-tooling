@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=2016,2155,2181,1087
+# shellcheck disable=2016,2155,2181,1087,2120
 
 declare -i SUCCESS=0
 declare -i FAIL=1
 
 declare PROGRAM_NAME="$(basename "$0")"
+
+# Options
+declare output_directory
+declare special_placeholder_config="$HOME/.md-to-clip.yaml"
+declare -i no_file_save=1
 
 color_to_code() {
   declare color="$1"
@@ -67,6 +72,21 @@ declare RESET_COLOR="\e[$(color_to_code none)m"
 declare ERROR_COLOR="\e[$(color_to_code red)m"
 declare SUCCESS_COLOR="\e[$(color_to_code green)m"
 
+print_message() {
+  declare source="$1"
+  declare message="$2"
+
+  echo -e "$PROGRAM_NAME: $source: ${SUCCESS_COLOR}$message$RESET_COLOR" >&2
+}
+
+throw_error() {
+  declare source="$1"
+  declare message="$2"
+
+  echo -e "$PROGRAM_NAME: $source: ${ERROR_COLOR}$message$RESET_COLOR" >&2
+  exit "$FAIL"
+}
+
 # Help colors:
 declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
 declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
@@ -83,7 +103,7 @@ ${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
   $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--no-file-save$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-nfs$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
+  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--special-placeholder-config$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-spc$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<file.yaml>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
 
 ${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
   - Command summary and tag simplification
@@ -94,7 +114,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "2.0.0" >&2
+  echo "2.0.7" >&2
 }
 
 author() {
@@ -105,11 +125,8 @@ email() {
   echo "EmilySeville7cfg@gmail.com" >&2
 }
 
-check_dependencies_correctness() {
-  which sed >/dev/null || {
-    echo -e "$PROGRAM_NAME: sed: ${ERROR_COLOR}installed command expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+throw_if_dependencies_are_not_satisfied() {
+  which sed >/dev/null || throw_error "sed" "installed command expected"
 }
 
 check_layout_correctness() {
@@ -131,6 +148,12 @@ check_page_is_alias() {
 convert_summary() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^>/ {
     s/\.$//
     s/More +information: <(.*)>$/More information: \1/
@@ -145,6 +168,12 @@ convert_summary() {
 convert_code_descriptions() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^-/ {
     s/`(std(in|out|err))`/\1/g
     s/standard +input( +stream)?/stdin/g
@@ -158,6 +187,12 @@ convert_code_descriptions() {
 convert_code_examples_remove_broken_ellipsis() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     s/ *\{\{\.\.\.\}\} */ /g
   }' <<<"$in_file_content"
@@ -165,6 +200,12 @@ convert_code_examples_remove_broken_ellipsis() {
 
 convert_code_examples_expand_plural_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     s|\{\{([^{}]+)(\(s\)\|\{[[:digit:]]+,[[:digit:]]+(,[[:digit:]]+)*\})\}\}|{{\11 \12 ...}}|g
@@ -174,100 +215,115 @@ convert_code_examples_expand_plural_placeholders() {
 convert_code_examples_convert_special_placeholders() {
   declare in_file_content="$1"
 
-  declare in_keyword=
-  declare in_result_keyword=
-  declare in_description_keyword=
-  declare -i in_option_part_start_index=
-  declare in_suffix=name
-  declare allow_prefix=false
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
+  declare input_placeholder=
+  declare input_allow_prefix=false
+  declare -i input_index=0
+  declare output_type=
+  declare output_description=
+  
+  declare suffix=value
 
   shift
   while [[ -n "$1" ]]; do
     declare option="$1"
 
     case "$option" in
-      --in-keyword | -ik)
-        in_keyword="$2"
-        shift 2
-        ;;
-      --result-keyword | -rk)
-        in_result_keyword="$2"
-        shift 2
-        ;;
-      --description-keyword | -dk)
-        in_description_keyword="$2"
-        shift 2
-        ;;
-      --option-part-start-index | -opsi)
-        in_option_part_start_index="$2"
-        shift 2
-        ;;
-      --is-value | -iv)
-        in_suffix=value
-        shift
-        ;;
-      --allow-prefix | -ap)
-        allow_prefix=true
-        shift
-        ;;
-      *)
-        return "$FAIL"
-        ;;
+    --in-placeholder | -ip)
+      input_placeholder="$2"
+      shift 2
+      ;;
+    --in-allow-prefix | -iap)
+      input_allow_prefix=true
+      shift
+      ;;
+    --in-index | -ii)
+      input_index="$2"
+      shift 2
+      ;;
+    --out-type | -ot)
+      output_type="$2"
+      shift 2
+      ;;
+    --out-description | -od)
+      output_description="$2"
+      shift 2
+      ;;
+    --out-is-name | -oin)
+      suffix=name
+      shift
+      ;;
+    *)
+      throw_error "$option" "valid option expected"
+      ;;
     esac
   done
 
-  [[ -z "$in_keyword" ]] && return "$FAIL"
+  [[ -z "$input_placeholder" ]] && return "$FAIL"
+  [[ -z "$output_type" ]] && return "$FAIL"
 
-  [[ -z "$in_result_keyword" ]] && in_result_keyword="$in_keyword"
-  [[ -z "$in_description_keyword" ]] && in_description_keyword="$in_keyword"
+  [[ -z "$output_description" ]] && output_description="$input_placeholder"
+
+  declare input_placeholder_initial="$input_placeholder"
 
   declare -i group_multiplier=0
-  ((in_option_part_start_index > 0)) && {
-    in_keyword="${in_keyword:0:in_option_part_start_index}(${in_keyword:in_option_part_start_index})?"
+  ((input_index > 0)) && {
+    input_placeholder="${input_placeholder:0:input_index}(${input_placeholder:input_index})?"
     group_multiplier=1
   }
-  
-  if [[ "$allow_prefix" == true ]]; then
+
+  if [[ "$input_allow_prefix" == true ]]; then
     sed -E "/^\`/ {
       # Expansion
       ## General cases
-      s|\{\{(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{${in_result_keyword}\\$((2 + group_multiplier))}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?[[:digit:]]* +${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
+      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder}\\$((2 + group_multiplier))}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
 
-      ## Cases with prefix like positive_integer
-      s|\{\{([^{}_ ]+)_+(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{\1_${in_result_keyword}1 \1_${in_result_keyword}2 ...}}|g
-      s|\{\{([^{}_ ]+)_+${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{\1_${in_result_keyword}\\$((3 + group_multiplier))}}|g
-      s|\{\{([^{}_ ]+)_+${in_keyword}(_*${in_suffix})?[[:digit:]]* +\1_+${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{\1_${in_result_keyword}1 \1_${in_result_keyword}2 ...}}|g
+      ## Cases with prefix like positive_integers
+      s|\{\{([^{}_ ]+)_+(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{\1_${input_placeholder}\\$((3 + group_multiplier))}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\1_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
 
       # Conversion
       ## General cases
-      s|\{\{${in_result_keyword}\}\}|{${in_result_keyword} ${in_description_keyword}}|g
-      s|\{\{${in_result_keyword}([[:digit:]])\}\}|{${in_result_keyword} ${in_description_keyword} \1}|g
-      s|\{\{${in_result_keyword}[[:digit:]]* +${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* ${in_description_keyword}}|g
+      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
+      s|\{\{${input_placeholder}([[:digit:]])\}\}|{${output_type} ${output_description} \1}|g
+      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
 
-      ## Cases with prefix like positive_integer
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}\}\}|{${in_result_keyword} \1 ${in_description_keyword}}|g
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}([[:digit:]])\}\}|{${in_result_keyword} \1 ${in_description_keyword} \2}|g
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}[[:digit:]]* +\1_+${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* \1 ${in_description_keyword}}|g
+      ## Cases with prefix like positive_integers
+      s|\{\{([^{}_ ]+)_+${input_placeholder}\}\}|{${output_type} \1 ${output_description}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}([[:digit:]])\}\}|{${output_type} \1 ${output_description} \2}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* \1 ${output_description}}|g
     }" <<<"$in_file_content"
   else
     sed -E "/^\`/ {
       # Expansion
-      s|\{\{(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{${in_result_keyword}\\$((2 + group_multiplier))}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?[[:digit:]]* +${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
+      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder_initial}\\$((2 + group_multiplier))}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
 
       # Conversion
-      s|\{\{${in_result_keyword}\}\}|{${in_result_keyword} ${in_description_keyword}}|g
-      s|\{\{${in_result_keyword}([[:digit:]]+)\}\}|{${in_result_keyword} ${in_description_keyword} \1}|g
-      s|\{\{${in_result_keyword}[[:digit:]]* +${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* ${in_description_keyword}}|g
+      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
+      s|\{\{${input_placeholder}([[:digit:]]+)\}\}|{${output_type} ${output_description} \1}|g
+      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
     }" <<<"$in_file_content"
   fi
 }
 
 convert_code_examples_convert_integer_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -298,6 +354,12 @@ convert_code_examples_convert_integer_placeholders() {
 convert_code_examples_convert_float_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -327,6 +389,12 @@ convert_code_examples_convert_float_placeholders() {
 convert_code_examples_convert_option_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     s|\{\{(options\|option_*names)[[:digit:]]*\}\}|{{option1 option2 ...}}|g
@@ -345,6 +413,12 @@ convert_code_examples_convert_option_placeholders() {
 
 convert_code_examples_convert_device_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -373,6 +447,12 @@ convert_code_examples_convert_device_placeholders() {
 convert_code_examples_convert_path_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -400,6 +480,12 @@ convert_code_examples_convert_path_placeholders() {
 
 convert_code_examples_convert_file_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -469,6 +555,12 @@ convert_code_examples_convert_file_placeholders() {
 convert_code_examples_convert_directory_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -501,6 +593,12 @@ convert_code_examples_convert_directory_placeholders() {
 convert_code_examples_convert_boolean_placeholders() {
   declare in_file_content="$1"
 
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
+
   sed -E '/^`/ {
     # Expansion
     ## General cases
@@ -530,6 +628,12 @@ convert_code_examples_convert_boolean_placeholders() {
 
 convert_code_examples_convert_character_placeholders() {
   declare in_file_content="$1"
+
+  [[ -z "$in_file_content" ]] && {
+    while read -r line; do
+      in_file_content+="$line"$'\n'
+    done
+  }
 
   sed -E '/^`/ {
     # Expansion
@@ -561,46 +665,52 @@ convert() {
   declare in_file="$1"
 
   declare file_content="$(cat "$in_file")"
-  declare program_name="$(basename "$PROGRAM_NAME")"
 
-  check_layout_correctness "$file_content" || {
-    echo -e "$program_name: $in_file: ${ERROR_COLOR}valid page layout expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+  check_layout_correctness "$file_content" || throw_error "$in_file" "valid layout expected"
+  check_page_is_alias "$file_content" && throw_error "$in_file" "non-alias page expected"
 
-  check_page_is_alias "$file_content" && {
-    echo -e "$program_name: $in_file: ${ERROR_COLOR}non-alias page expected$RESET_COLOR" >&2
-    return "$FAIL"
-  }
+  # shellcheck disable=SC2119
+  file_content="$(echo "$file_content" | convert_summary |
+    convert_code_descriptions |
+    convert_code_examples_remove_broken_ellipsis |
+    convert_code_examples_expand_plural_placeholders)"
 
-  file_content="$(convert_summary "$file_content")"
-  file_content="$(convert_code_descriptions "$file_content")"
-  file_content="$(convert_code_examples_remove_broken_ellipsis "$file_content")"
-  file_content="$(convert_code_examples_expand_plural_placeholders "$file_content")"
-
-  placeholder_in_keywords=(user group ip database argument setting subcommand extension string)
-  placeholder_out_keywords=(string string string string any string command string string)
-  placeholder_optional_part_start_indixes=(0 0 0 0 3 0 0 3 3)
+  declare special_placeholder_file_content="$(yq '.' "$special_placeholder_config")"
+  declare -i special_placeholder_count="$(yq 'length' <<<"$special_placeholder_file_content")"
   
-  for ((index=0; index < ${#placeholder_in_keywords[@]}; index++)); do
-    file_content="$(convert_code_examples_convert_special_placeholders "$file_content" \
-      -ik "${placeholder_in_keywords[index]}" \
-      -rk "${placeholder_out_keywords[index]}" \
-      -opsi "${placeholder_optional_part_start_indixes[index]}" \
-      -ap
-      )"
+  for ((i = 0; i < special_placeholder_count; i++)); do
+    declare special_placeholder="$(yq ".[$i]" <<<"$special_placeholder_file_content")"
+    
+    declare in_placeholder="$(yq '.in-placeholder' <<<"$special_placeholder")"
+    declare out_type="$(yq '.out-type' <<<"$special_placeholder")"
+
+    declare -i in_index="$(yq '.in-index // 0' <<<"$special_placeholder")"
+    declare in_allow_prefix="$(yq '.in-allow-prefix // false' <<<"$special_placeholder")"
+    declare out_description="$(yq '.out-description // ""' <<<"$special_placeholder")"
+    declare out_is_name="$(yq '.out-is-name // false' <<<"$special_placeholder")"
+
+    declare convert_args=(-ip "$in_placeholder"
+      -ot "$out_type"
+      -ii "$in_index")
+
+    [[ "$in_allow_prefix" == true ]] && convert_args+=(-iap)
+    convert_args+=(-od "$out_description")
+    [[ "$out_is_name" == true ]] && convert_args+=(-oin)
+
+    file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
 
-  file_content="$(convert_code_examples_convert_integer_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_float_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_option_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_device_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_path_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_file_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_directory_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_boolean_placeholders "$file_content")"
-  file_content="$(convert_code_examples_convert_character_placeholders "$file_content")"
-  
+  # shellcheck disable=SC2119
+  file_content="$(echo "$file_content" | convert_code_examples_convert_integer_placeholders |
+    convert_code_examples_convert_float_placeholders |
+    convert_code_examples_convert_option_placeholders |
+    convert_code_examples_convert_device_placeholders |
+    convert_code_examples_convert_path_placeholders |
+    convert_code_examples_convert_file_placeholders |
+    convert_code_examples_convert_directory_placeholders |
+    convert_code_examples_convert_boolean_placeholders |
+    convert_code_examples_convert_character_placeholders)"
+
   sed -E '/^`/ {
     # Processing file placeholders with sample values.
     ## Conversion
@@ -614,73 +724,88 @@ convert() {
   }' <<<"$file_content"
 }
 
-check_dependencies_correctness || exit "$FAIL"
+handle_page() {
+  declare in_tldr_file="$option"
 
-if (($# == 0)); then
-  help
-fi
-
-declare output_directory
-declare -i no_file_save=1
-
-while [[ -n "$1" ]]; do
-  declare option="$1"
-  declare value="$2"
-
-  case "$option" in
-  --help | -h)
-    help
-    exit
-    ;;
-  --version | -v)
-    version
-    exit
-    ;;
-  --author | -a)
-    author
-    exit
-    ;;
-  --email | -e)
-    email
-    exit
-    ;;
-  --no-file-save | -nfs)
-    no_file_save=0
-    shift
-    ;;
-  --output-directory | -od)
-    [[ -z "$value" ]] && {
-      echo -e "$PROGRAM_NAME: --output-directory: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
-      exit "$FAIL"
-    }
-    output_directory="$value"
-    shift 2
-    ;;
-  *)
-    declare tldr_file="$option"
-    declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
-    ((no_file_save == 1)) && {
-      if [[ -z "$output_directory" ]]; then
-        clip_file="$(dirname "$tldr_file")/$clip_file"
-      else
-        clip_file="$output_directory/$clip_file"
-      fi
-    }
-
-    declare clip_content
-    clip_content="$(convert "$tldr_file")"
-    (($? != 0)) && exit "$FAIL"
-
-    if ((no_file_save == 1)); then
-      echo "$clip_content" >"$clip_file"
-      echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+  declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$in_tldr_file")"
+  ((no_file_save == 1)) && {
+    if [[ -z "$output_directory" ]]; then
+      clip_file="$(dirname "$in_tldr_file")/$clip_file"
     else
-      echo "$clip_content"
+      clip_file="$output_directory/$clip_file"
     fi
-    
-    shift
-    ;;
-  esac
-done
+  }
 
+  declare clip_content
+  clip_content="$(convert "$in_tldr_file")"
+  (($? != 0)) && exit "$FAIL"
+
+  if ((no_file_save == 1)); then
+    echo "$clip_content" >"$clip_file"
+    print_message "$in_tldr_file" "converted to '$clip_file'"
+  else
+    echo "$clip_content"
+  fi
+}
+
+parse_options() {
+  while [[ -n "$1" ]]; do
+    declare option="$1"
+    declare value="$2"
+
+    case "$option" in
+    --help | -h)
+      help
+      exit
+      ;;
+    --version | -v)
+      version
+      exit
+      ;;
+    --author | -a)
+      author
+      exit
+      ;;
+    --email | -e)
+      email
+      exit
+      ;;
+    --no-file-save | -nfs)
+      no_file_save=0
+      shift
+      ;;
+    --output-directory | -od)
+      [[ -z "$value" ]] && throw_error "$option" "directory expected"
+      [[ -d "$value" ]] || throw_error "$option" "existing directory expected"
+
+      output_directory="$value"
+      shift 2
+      ;;
+    --special-placeholder-config | -spc)
+      [[ -z "$value" ]] && throw_error "$option" "config expected"
+      [[ -d "$value" ]] || throw_error "$option" "existing config expected"
+
+      special_placeholder_config="$value"
+      shift 2
+      ;;
+    --* | -*)
+      throw_error "$option" "valid option expected"
+      ;;
+    *)
+      handle_page "$option"
+      shift
+      ;;
+    esac
+  done
+}
+
+throw_if_dependencies_are_not_satisfied
+
+(($# == 0)) && {
+  help
+  exit
+}
+
+parse_options "$@"
 exit "$SUCCESS"
+

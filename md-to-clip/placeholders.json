@@ -1,0 +1,86 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "description": "Placeholders",
+    "type": "array",
+    "uniqueItems": true,
+    "items": {
+        "title": "conversion",
+        "description": "A conversion",
+        "type": "object",
+        "required": [
+            "in-placeholder",
+            "out-type"
+        ],
+        "properties": {
+            "in-placeholder": {
+                "description": "An input TlDr placeholder content for the current conversion\nContrary to `out-description` key this one can contain human readable word or a contraction like 'arg'",
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^\\w*$",
+                "examples": [
+                    "arg"
+                ]
+            },
+            "out-type": {
+                "description": "An output Command Line Interface Page placeholder type for the current conversion",
+                "type": "string",
+                "enum": [
+                    "bool",
+                    "int",
+                    "float",
+                    "char",
+                    "string",
+                    "command",
+                    "option",
+                    "file",
+                    "directory",
+                    "path",
+                    "/file",
+                    "/directory",
+                    "/path",
+                    "/?file",
+                    "/?directory",
+                    "/?path",
+                    "remote-file",
+                    "remote-directory",
+                    "remote-path",
+                    "/remote-file",
+                    "/remote-directory",
+                    "/remote-path",
+                    "/?remote-file",
+                    "/?remote-directory",
+                    "/?remote-path",
+                    "any",
+                    "remote-any"
+                ]
+            },
+            "out-description": {
+                "description": "An output Command Line Interface Page placeholder description for the current conversion\nContrary to `in-placeholder` key this one should contain human readable word, not a contraction like 'arg'\nWhen omitted it's equal to `in-placeholder`",
+                "type": "string",
+                "pattern": "^\\w*$",
+                "examples": [
+                    "argument"
+                ]
+            },
+            "in-index": {
+                "description": "A starting index of an optional part of TlDr placeholder content for the current conversion\nIt should not exceed TlDr placeholder content length minus 1",
+                "type": "integer",
+                "minimum": 0,
+                "examples": [
+                    3
+                ]
+            },
+            "out-is-name": {
+                "description": "Whether to allow name/names suffix for a TlDr placeholder content\nWhen false value/values is used instead of name/names",
+                "type": "boolean",
+                "default": false
+            },
+            "in-allow-prefix": {
+                "description": "Whether to allow one word prefix for a TlDr placeholder content",
+                "type": "boolean",
+                "default": false
+            }
+        },
+        "additionalProperties": false
+    }
+}
