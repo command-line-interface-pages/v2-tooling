@@ -632,88 +632,93 @@ convert() {
   }' <<<"$file_content"
 }
 
+parse_options() {
+  declare output_directory
+  declare special_placeholder_config="$HOME/.md-to-clip.yaml"
+  declare -i no_file_save=1
+
+  while [[ -n "$1" ]]; do
+    declare option="$1"
+    declare value="$2"
+
+    case "$option" in
+    --help | -h)
+      help
+      exit
+      ;;
+    --version | -v)
+      version
+      exit
+      ;;
+    --author | -a)
+      author
+      exit
+      ;;
+    --email | -e)
+      email
+      exit
+      ;;
+    --no-file-save | -nfs)
+      no_file_save=0
+      shift
+      ;;
+    --output-directory | -od)
+      [[ -z "$value" ]] && {
+        echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
+        exit "$FAIL"
+      }
+
+      output_directory="$value"
+      shift 2
+      ;;
+    --special-placeholder-config | -spc)
+      [[ -z "$value" ]] && {
+        echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}config expected$RESET_COLOR" >&2
+        exit "$FAIL"
+      }
+
+      special_placeholder_config="$value"
+      shift 2
+      ;;
+    --* | -*)
+      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option expected$RESET_COLOR" >&2
+      exit
+      ;;
+    *)
+      declare tldr_file="$option"
+      declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
+      ((no_file_save == 1)) && {
+        if [[ -z "$output_directory" ]]; then
+          clip_file="$(dirname "$tldr_file")/$clip_file"
+        else
+          clip_file="$output_directory/$clip_file"
+        fi
+      }
+
+      declare clip_content
+      clip_content="$(convert "$tldr_file" "$special_placeholder_config")"
+      (($? != 0)) && exit "$FAIL"
+
+      if ((no_file_save == 1)); then
+        echo "$clip_content" >"$clip_file"
+        echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
+      else
+        echo "$clip_content"
+      fi
+
+      shift
+      ;;
+    esac
+  done
+}
+
 check_dependencies_correctness || exit "$FAIL"
 
-if (($# == 0)); then
+(($# == 0)) && {
   help
-fi
+  exit
+}
 
-declare output_directory
-declare special_placeholder_config="$HOME/.md-to-clip.yaml"
-declare -i no_file_save=1
-
-while [[ -n "$1" ]]; do
-  declare option="$1"
-  declare value="$2"
-
-  case "$option" in
-  --help | -h)
-    help
-    exit
-    ;;
-  --version | -v)
-    version
-    exit
-    ;;
-  --author | -a)
-    author
-    exit
-    ;;
-  --email | -e)
-    email
-    exit
-    ;;
-  --no-file-save | -nfs)
-    no_file_save=0
-    shift
-    ;;
-  --output-directory | -od)
-    [[ -z "$value" ]] && {
-      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}directory expected$RESET_COLOR" >&2
-      exit "$FAIL"
-    }
-
-    output_directory="$value"
-    shift 2
-    ;;
-  --special-placeholder-config | -spc)
-    [[ -z "$value" ]] && {
-      echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}config expected$RESET_COLOR" >&2
-      exit "$FAIL"
-    }
-
-    special_placeholder_config="$value"
-    shift 2
-    ;;
-  --* | -*)
-    echo -e "$PROGRAM_NAME: $option: ${ERROR_COLOR}valid option expected$RESET_COLOR" >&2
-    exit
-    ;;
-  *)
-    declare tldr_file="$option"
-    declare clip_file="$(sed -E 's/.*\///; s/\.md$/.clip/' <<<"$tldr_file")"
-    ((no_file_save == 1)) && {
-      if [[ -z "$output_directory" ]]; then
-        clip_file="$(dirname "$tldr_file")/$clip_file"
-      else
-        clip_file="$output_directory/$clip_file"
-      fi
-    }
-
-    declare clip_content
-    clip_content="$(convert "$tldr_file" "$special_placeholder_config")"
-    (($? != 0)) && exit "$FAIL"
-
-    if ((no_file_save == 1)); then
-      echo "$clip_content" >"$clip_file"
-      echo -e "$PROGRAM_NAME: $tldr_file: ${SUCCESS_COLOR}converted to $clip_file$RESET_COLOR" >&2
-    else
-      echo "$clip_content"
-    fi
-
-    shift
-    ;;
-  esac
-done
-
+parse_options "$@"
 exit "$SUCCESS"
+
