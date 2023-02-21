@@ -221,94 +221,97 @@ convert_code_examples_convert_special_placeholders() {
     done
   }
 
-  declare in_keyword=
-  declare in_result_keyword=
-  declare in_description_keyword=
-  declare -i in_option_part_start_index=
-  declare in_suffix=name
-  declare allow_prefix=false
+  declare input_placeholder=
+  declare input_allow_prefix=false
+  declare -i input_index=0
+  declare output_type=
+  declare output_description=
+  
+  declare suffix=value
 
   shift
   while [[ -n "$1" ]]; do
     declare option="$1"
 
     case "$option" in
-    --in-keyword | -ik)
-      in_keyword="$2"
+    --in-placeholder | -ip)
+      input_placeholder="$2"
       shift 2
       ;;
-    --result-keyword | -rk)
-      in_result_keyword="$2"
-      shift 2
-      ;;
-    --description-keyword | -dk)
-      in_description_keyword="$2"
-      shift 2
-      ;;
-    --option-part-start-index | -opsi)
-      in_option_part_start_index="$2"
-      shift 2
-      ;;
-    --is-value | -iv)
-      in_suffix=value
+    --in-allow-prefix | -iap)
+      input_allow_prefix=true
       shift
       ;;
-    --allow-prefix | -ap)
-      allow_prefix=true
+    --in-index | -ii)
+      input_index="$2"
+      shift 2
+      ;;
+    --out-type | -ot)
+      output_type="$2"
+      shift 2
+      ;;
+    --out-description | -od)
+      output_description="$2"
+      shift 2
+      ;;
+    --out-is-name | -oin)
+      suffix=name
       shift
       ;;
     *)
-      return "$FAIL"
+      throw_error "$option" "valid option expected"
       ;;
     esac
   done
 
-  [[ -z "$in_keyword" ]] && return "$FAIL"
+  [[ -z "$input_placeholder" ]] && return "$FAIL"
+  [[ -z "$output_type" ]] && return "$FAIL"
 
-  [[ -z "$in_result_keyword" ]] && in_result_keyword="$in_keyword"
-  [[ -z "$in_description_keyword" ]] && in_description_keyword="$in_keyword"
+  [[ -z "$output_description" ]] && output_description="$input_placeholder"
+
+  declare input_placeholder_initial="$input_placeholder"
 
   declare -i group_multiplier=0
-  ((in_option_part_start_index > 0)) && {
-    in_keyword="${in_keyword:0:in_option_part_start_index}(${in_keyword:in_option_part_start_index})?"
+  ((input_index > 0)) && {
+    input_placeholder="${input_placeholder:0:input_index}(${input_placeholder:input_index})?"
     group_multiplier=1
   }
 
-  if [[ "$allow_prefix" == true ]]; then
+  if [[ "$input_allow_prefix" == true ]]; then
     sed -E "/^\`/ {
       # Expansion
       ## General cases
-      s|\{\{(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{${in_result_keyword}\\$((2 + group_multiplier))}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?[[:digit:]]* +${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
+      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder}\\$((2 + group_multiplier))}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
 
-      ## Cases with prefix like positive_integer
-      s|\{\{([^{}_ ]+)_+(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{\1_${in_result_keyword}1 \1_${in_result_keyword}2 ...}}|g
-      s|\{\{([^{}_ ]+)_+${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{\1_${in_result_keyword}\\$((3 + group_multiplier))}}|g
-      s|\{\{([^{}_ ]+)_+${in_keyword}(_*${in_suffix})?[[:digit:]]* +\1_+${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{\1_${in_result_keyword}1 \1_${in_result_keyword}2 ...}}|g
+      ## Cases with prefix like positive_integers
+      s|\{\{([^{}_ ]+)_+(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{\1_${input_placeholder}\\$((3 + group_multiplier))}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\1_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
 
       # Conversion
       ## General cases
-      s|\{\{${in_result_keyword}\}\}|{${in_result_keyword} ${in_description_keyword}}|g
-      s|\{\{${in_result_keyword}([[:digit:]])\}\}|{${in_result_keyword} ${in_description_keyword} \1}|g
-      s|\{\{${in_result_keyword}[[:digit:]]* +${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* ${in_description_keyword}}|g
+      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
+      s|\{\{${input_placeholder}([[:digit:]])\}\}|{${output_type} ${output_description} \1}|g
+      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
 
-      ## Cases with prefix like positive_integer
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}\}\}|{${in_result_keyword} \1 ${in_description_keyword}}|g
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}([[:digit:]])\}\}|{${in_result_keyword} \1 ${in_description_keyword} \2}|g
-      s|\{\{([^{}_ ]+)_+${in_result_keyword}[[:digit:]]* +\1_+${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* \1 ${in_description_keyword}}|g
+      ## Cases with prefix like positive_integers
+      s|\{\{([^{}_ ]+)_+${input_placeholder}\}\}|{${output_type} \1 ${output_description}}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}([[:digit:]])\}\}|{${output_type} \1 ${output_description} \2}|g
+      s|\{\{([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* \1 ${output_description}}|g
     }" <<<"$in_file_content"
   else
     sed -E "/^\`/ {
       # Expansion
-      s|\{\{(${in_keyword}s\|${in_keyword}_*${in_suffix}s)[[:digit:]]*\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?([[:digit:]]*)\}\}|{{${in_result_keyword}\\$((2 + group_multiplier))}}|g
-      s|\{\{${in_keyword}(_*${in_suffix})?[[:digit:]]* +${in_keyword}(_*${in_suffix})?[[:digit:]]* +\.\.\.\}\}|{{${in_result_keyword}1 ${in_result_keyword}2 ...}}|g
+      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder_initial}\\$((2 + group_multiplier))}}|g
+      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
 
       # Conversion
-      s|\{\{${in_result_keyword}\}\}|{${in_result_keyword} ${in_description_keyword}}|g
-      s|\{\{${in_result_keyword}([[:digit:]]+)\}\}|{${in_result_keyword} ${in_description_keyword} \1}|g
-      s|\{\{${in_result_keyword}[[:digit:]]* +${in_result_keyword}[[:digit:]]* +\.\.\.\}\}|{${in_result_keyword}* ${in_description_keyword}}|g
+      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
+      s|\{\{${input_placeholder}([[:digit:]]+)\}\}|{${output_type} ${output_description} \1}|g
+      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
     }" <<<"$in_file_content"
   fi
 }
@@ -682,17 +685,17 @@ convert() {
     declare out_type="$(yq '.out-type' <<<"$special_placeholder")"
 
     declare -i in_index="$(yq '.in-index // 0' <<<"$special_placeholder")"
-    declare -i in_allow_prefix="$(yq '.in-allow-prefix // 1' <<<"$special_placeholder")"
+    declare in_allow_prefix="$(yq '.in-allow-prefix // false' <<<"$special_placeholder")"
     declare out_description="$(yq '.out-description // ""' <<<"$special_placeholder")"
-    declare -i out_is_name="$(yq '.out-is-name // 1' <<<"$special_placeholder")"
+    declare out_is_name="$(yq '.out-is-name // false' <<<"$special_placeholder")"
 
-    declare convert_args=(-ik "$in_placeholder"
-      -rk "$out_type"
-      -opsi "$in_index")
+    declare convert_args=(-ip "$in_placeholder"
+      -ot "$out_type"
+      -ii "$in_index")
 
-    ((in_allow_prefix == 0)) && convert_args+=(-ap)
-    convert_args+=(-dk "$out_description")
-    ((out_is_name == 0)) || convert_args+=(-iv)
+    [[ "$in_allow_prefix" == true ]] && convert_args+=(-iap)
+    convert_args+=(-od "$out_description")
+    [[ "$out_is_name" == true ]] && convert_args+=(-oin)
 
     file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
