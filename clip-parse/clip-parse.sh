@@ -84,7 +84,7 @@ throw_error() {
 # Check whether a page content is valid.
 # 
 # Output:
-#   <empty string>
+#   <empty-string>
 # 
 # Return:
 #   - 0 if page layout is valid
