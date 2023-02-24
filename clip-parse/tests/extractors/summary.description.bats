@@ -7,7 +7,7 @@
     ! parser_output_command_description '# some
 
 > Some text.
-> More information https://example.com.
+> More information: https://example.com.
 
 - Some text:
 
@@ -35,7 +35,7 @@
     run parser_output_command_description '# some
 
 > Some text.
-> More information https://example.com.
+> More information: https://example.com.
 
 - Some text:
 
