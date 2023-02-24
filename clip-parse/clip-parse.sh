@@ -302,6 +302,30 @@ parser_output_command_internal_tag() {
     parser_output_command_tag "$page_content" "Internal"
 }
 
+# parser_output_command_internal_tag_or_default <page-content>
+# Output "Internal" tag from a page content or it's default when it's missing.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_internal_tag_or_default() {
+    declare page_content="$1"
+
+    declare output=
+    output="$(parser_output_command_internal_tag "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$FAIL"
+
+    [[ -z "$output" ]] && output=false
+    echo -n "$output"
+}
+
 # parser_output_command_deprecated_tag <page-content>
 # Output "Deprecated" tag from a page content.
 #
@@ -318,6 +342,30 @@ parser_output_command_deprecated_tag() {
     declare page_content="$1"
 
     parser_output_command_tag "$page_content" "Deprecated"
+}
+
+# parser_output_command_deprecated_tag_or_default <page-content>
+# Output "Deprecated" tag from a page content or it's default when it's missing.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_deprecated_tag_or_default() {
+    declare page_content="$1"
+
+    declare output=
+    output="$(parser_output_command_deprecated_tag "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$FAIL"
+
+    [[ -z "$output" ]] && output=false
+    echo -n "$output"
 }
 
 # parser_output_command_see_also_tag <page-content>
@@ -429,11 +477,11 @@ parser_output_command_structure_compatible_tag() {
 }
 
 
-parser_output_command_more_information_tag '# some
+parser_output_command_internal_tag_or_default '# some
 
 > Some text.
 > More information: https://example.com.
-> Structure compatible: /bin
+> Internal: true
 
 - Some text:
 
