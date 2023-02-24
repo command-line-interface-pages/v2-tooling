@@ -7,6 +7,7 @@
     ! parser_output_command_with_subcommands '# some
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -21,6 +22,7 @@
     ! parser_output_command_with_subcommands '## some
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -35,6 +37,7 @@
     run parser_output_command_with_subcommands '#  some  command with  subcommand 
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
