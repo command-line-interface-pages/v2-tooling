@@ -134,3 +134,22 @@ parser_output_command_name_with_subcommands() {
 
     sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$page_content"
 }
+
+# parser_check_summary_correctness <page-summary>
+# Check whether a page summary is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if page summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - page summary without trailing \n
+parser_check_summary_correctness() {
+    declare page_summary="$1"
+
+    # shellcheck disable=2016
+    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n]+:[^\n]+\n)$/! Q1' <<<"$page_summary"$'\n'
+}
