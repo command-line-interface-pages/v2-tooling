@@ -115,3 +115,23 @@ parser_check_layout_correctness() {
     # shellcheck disable=2016
     sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content"$'\n\n'
 }
+
+# parser_output_command_name_with_subcommands <page-content>
+# Output command name with subcommands from a page content.
+#
+# Output:
+#   <command-with-subcommands>
+#
+# Return:
+#   - 0 if page layout is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_name_with_subcommands() {
+    declare page_content="$1"
+
+    parser_check_layout_correctness "$page_content" || return "$FAIL"
+
+    sed -nE '1 { s/^# +//; s/ +$//; p; }' <<<"$page_content"
+}
