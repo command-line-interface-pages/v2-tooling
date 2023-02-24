@@ -175,5 +175,5 @@ parser_output_command_description() {
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
     parser_check_command_summary_correctness "$command_summary" || return "$FAIL"
 
-    sed -nE '/^> [^\n:]+$/ s/^> //p' <<<"$command_summary"
+    sed -nE '/^> [^:]+$/ s/^> //p' <<<"$command_summary"
 }
