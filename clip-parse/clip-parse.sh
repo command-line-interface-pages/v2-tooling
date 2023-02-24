@@ -158,7 +158,7 @@ parser_check_command_summary_correctness() {
 # Output command description from a page content.
 #
 # Output:
-#   <command-with-subcommands>
+#   <command-description>
 #
 # Return:
 #   - 0 if page layout/command summary is valid
