@@ -15,7 +15,7 @@
 }
 
 # bats test_tags=invalid, extra-level
-@test "expect error when invalid header with second second passed" {
+@test "expect error when invalid header with second level passed" {
     source ./clip-parse.sh
 
     ! parser_output_command_name_with_subcommands '## some
