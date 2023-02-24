@@ -65,13 +65,12 @@ declare RESET_COLOR="\e[$(parser_color_to_code none)m"
 declare ERROR_COLOR="\e[$(parser_color_to_code red)m"
 declare SUCCESS_COLOR="\e[$(parser_color_to_code green)m"
 
-
 # parser_print_message <source> <message>
 # Print message.
-# 
+#
 # Output:
 #   <empty-string>
-# 
+#
 # Return:
 #   - 0 always
 parser_print_message() {
@@ -83,10 +82,10 @@ parser_print_message() {
 
 # parser_throw_error <source> <message>
 # Output error message and fail.
-# 
+#
 # Output:
 #   <empty-string>
-# 
+#
 # Return:
 #   - $FAIL always
 parser_throw_error() {
@@ -99,14 +98,14 @@ parser_throw_error() {
 
 # parser_check_layout_correctness <page-content>
 # Check whether a page content is valid.
-# 
+#
 # Output:
 #   <empty-string>
-# 
+#
 # Return:
 #   - 0 if page layout is valid
 #   - 1 otherwise
-# 
+#
 # Notes:
 #   - .clip page content without trailing \n
 parser_check_layout_correctness() {
