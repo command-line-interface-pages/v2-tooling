@@ -161,7 +161,7 @@ parser_check_command_summary_correctness() {
 #   <command-description>
 #
 # Return:
-#   - 0 if page layout/command summary is valid
+#   - 0 if page layout, command summary is valid
 #   - 1 otherwise
 #
 # Notes:
