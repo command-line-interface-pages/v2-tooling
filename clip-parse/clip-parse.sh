@@ -3,6 +3,11 @@
 declare -i SUCCESS=0
 declare -i FAIL=1
 
+declare -i INVALID_LAYOUT_FAIL=1
+declare -i INVALID_SUMMARY_FAIL=2
+declare -i INVALID_TAG_FAIL=3
+declare -i INVALID_TAG_VALUE_FAIL=4
+
 declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 
 parser_color_to_code() {
@@ -130,7 +135,7 @@ parser_check_layout_correctness() {
 parser_output_command_with_subcommands() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$FAIL"
+    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
 
     sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$page_content"
 }
@@ -169,11 +174,11 @@ parser_check_command_summary_correctness() {
 parser_output_command_description() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$FAIL"
+    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
-    parser_check_command_summary_correctness "$command_summary" || return "$FAIL"
+    parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p; }' <<<"$command_summary"
 }
@@ -208,11 +213,11 @@ parser_check_command_tag_correctness() {
 parser_output_command_tags() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$FAIL"
+    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
-    parser_check_command_summary_correctness "$command_summary" || return "$FAIL"
+    parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     # shellcheck disable=2155
     declare output="$(sed -nE '/^> [^:]+:.+$/ { s/^> //; s/: +/\n/; p; }' <<<"$command_summary")"
@@ -221,7 +226,7 @@ parser_output_command_tags() {
     declare -i index=0
     while ((index < "${#command_tags[@]}")); do
         declare tag="${command_tags[index]}"
-        parser_check_command_tag_correctness "$tag" || return "$FAIL"
+        parser_check_command_tag_correctness "$tag" || return "$INVALID_TAG_FAIL"
         index+=2
     done
 
@@ -244,12 +249,12 @@ parser_output_command_tag() {
     declare page_content="$1"
     declare command_tag="$2"
 
-    parser_check_command_tag_correctness "$command_tag" || "$FAIL"
+    parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
 
     declare output=
     output="$(parser_output_command_tags "$page_content")"
     # shellcheck disable=2181
-    (($? == 0)) || return "$FAIL"
+    (($? == 0)) || return "$?"
     mapfile -t command_tags <<< "$output"
 
     declare -i index=0
@@ -320,7 +325,7 @@ parser_output_command_internal_tag_or_default() {
     declare output=
     output="$(parser_output_command_internal_tag "$page_content")"
     # shellcheck disable=2181
-    (($? == 0)) || return "$FAIL"
+    (($? == 0)) || return "$?"
 
     [[ -z "$output" ]] && output=false
     echo -n "$output"
@@ -362,7 +367,7 @@ parser_output_command_deprecated_tag_or_default() {
     declare output=
     output="$(parser_output_command_deprecated_tag "$page_content")"
     # shellcheck disable=2181
-    (($? == 0)) || return "$FAIL"
+    (($? == 0)) || return "$?"
 
     [[ -z "$output" ]] && output=false
     echo -n "$output"
@@ -475,14 +480,3 @@ parser_output_command_structure_compatible_tag() {
 
     parser_output_command_tag "$page_content" "Structure compatible"
 }
-
-
-parser_output_command_internal_tag_or_default '# some
-
-> Some text.
-> More information: https://example.com.
-> Internal: true
-
-- Some text:
-
-`some`'
