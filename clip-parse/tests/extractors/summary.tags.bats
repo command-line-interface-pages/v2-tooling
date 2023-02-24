@@ -4,7 +4,7 @@
 @test "expect error when invalid layout passed" {
     source ./clip-parse.sh
 
-    ! parser_output_command_tags '# some
+    ! __parser_output_command_tags '# some
 
 > Some text.
 > See also: other.
@@ -20,7 +20,7 @@
 @test "expect error when invalid summary passed" {
     source ./clip-parse.sh
 
-    ! parser_output_command_tags '# some
+    ! __parser_output_command_tags '# some
 
 > Some text.
 
@@ -33,7 +33,7 @@
 @test "expect no error when valid summary passed" {
     source ./clip-parse.sh
 
-    run parser_output_command_tags '# some
+    run __parser_output_command_tags '# some
 
 > Some text.
 > See also: other.

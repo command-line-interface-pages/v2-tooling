@@ -101,7 +101,7 @@ parser_throw_error() {
     exit "$FAIL"
 }
 
-# parser_check_layout_correctness <page-content>
+# __parser_check_layout_correctness <page-content>
 # Check whether a page content is valid.
 #
 # Output:
@@ -113,7 +113,7 @@ parser_throw_error() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_check_layout_correctness() {
+__parser_check_layout_correctness() {
     declare page_content="$1"
 
     # shellcheck disable=2016
@@ -135,12 +135,12 @@ parser_check_layout_correctness() {
 parser_output_command_with_subcommands() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
 
     sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$page_content"
 }
 
-# parser_check_summary_correctness <page-summary>
+# __parser_check_command_summary_correctness <page-summary>
 # Check whether a command summary is valid.
 #
 # Output:
@@ -152,7 +152,7 @@ parser_output_command_with_subcommands() {
 #
 # Notes:
 #   - page summary without trailing \n
-parser_check_command_summary_correctness() {
+__parser_check_command_summary_correctness() {
     declare page_summary="$1"
 
     # shellcheck disable=2016
@@ -174,16 +174,16 @@ parser_check_command_summary_correctness() {
 parser_output_command_description() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
-    parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
+    __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p; }' <<<"$command_summary"
 }
 
-# parser_check_command_tag_correctness <command-tag>
+# __parser_check_command_tag_correctness <command-tag>
 # Check whether a command tag is valid.
 #
 # Output:
@@ -192,13 +192,13 @@ parser_output_command_description() {
 # Return:
 #   - 0 if command tag is valid
 #   - 1 otherwise
-parser_check_command_tag_correctness() {
+__parser_check_command_tag_correctness() {
     declare command_tag="$1"
 
     [[ "$command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
 }
 
-# parser_check_command_tag_value_correctness <command-tag> <command-tag-value>
+# __parser_check_command_tag_value_correctness <command-tag> <command-tag-value>
 # Check whether a command tag value is valid.
 #
 # Output:
@@ -207,7 +207,7 @@ parser_check_command_tag_correctness() {
 # Return:
 #   - 0 if command tag value is valid
 #   - 1 otherwise
-parser_check_command_tag_value_correctness() {
+__parser_check_command_tag_value_correctness() {
     declare command_tag="$1"
     declare command_tag_value="$2"
 
@@ -218,7 +218,7 @@ parser_check_command_tag_value_correctness() {
     fi
 }
 
-# parser_output_command_tag <page-content>
+# __parser_output_command_tag <page-content>
 # Output command tags from a page content.
 #
 # Output:
@@ -230,14 +230,14 @@ parser_check_command_tag_value_correctness() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_tags() {
+__parser_output_command_tags() {
     declare page_content="$1"
 
-    parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
-    parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
+    __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     # shellcheck disable=2155
     declare output="$(sed -nE '/^> [^:]+:.+$/ { s/^> //; s/: +/\n/; p; }' <<<"$command_summary")"
@@ -247,15 +247,15 @@ parser_output_command_tags() {
     while ((index < "${#command_tags[@]}")); do
         declare tag="${command_tags[index]}"
         declare value="${command_tags[index + 1]}"
-        parser_check_command_tag_correctness "$tag" || return "$INVALID_TAG_FAIL"
-        parser_check_command_tag_value_correctness "$tag" "$value" || return "$INVALID_TAG_VALUE_FAIL"
+        __parser_check_command_tag_correctness "$tag" || return "$INVALID_TAG_FAIL"
+        __parser_check_command_tag_value_correctness "$tag" "$value" || return "$INVALID_TAG_VALUE_FAIL"
         index+=2
     done
 
     echo -n "$output"
 }
 
-# parser_output_command_tag <page-content> <tag>
+# __parser_output_command_tag <page-content> <tag>
 # Output specific tag from a page content.
 #
 # Output:
@@ -267,14 +267,14 @@ parser_output_command_tags() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_tag() {
+__parser_output_command_tag() {
     declare page_content="$1"
     declare command_tag="$2"
 
-    parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
+    __parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
 
     declare output=
-    output="$(parser_output_command_tags "$page_content")"
+    output="$(__parser_output_command_tags "$page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
     mapfile -t command_tags <<< "$output"
