@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
-# bats test_tags=invalid, header
-@test "expect layout check error when invalid page passed" {
+# bats test_tags=invalid, external
+@test "expect error when invalid layout passed" {
     source ./clip-parse.sh
 
     ! parser_output_command_name_with_subcommands '# some
@@ -14,11 +14,25 @@
 '
 }
 
-# bats test_tags=valid, header
-@test "expect no command extraction error when valid page passed" {
+# bats test_tags=invalid, extra-level
+@test "expect error when invalid header with second second passed" {
     source ./clip-parse.sh
 
-    run parser_output_command_name_with_subcommands '#  some 
+    ! parser_output_command_name_with_subcommands '## some
+
+> Some text.
+
+- Some text:
+
+`some`
+'
+}
+
+# bats test_tags=valid, header
+@test "expect no header extraction error when header passed" {
+    source ./clip-parse.sh
+
+    run parser_output_command_name_with_subcommands '#  some  command with  subcommand 
 
 > Some text.
 
