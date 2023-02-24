@@ -147,7 +147,7 @@ parser_output_command_with_subcommands() {
 #
 # Notes:
 #   - page summary without trailing \n
-parser_check_summary_correctness() {
+parser_check_command_summary_correctness() {
     declare page_summary="$1"
 
     # shellcheck disable=2016
