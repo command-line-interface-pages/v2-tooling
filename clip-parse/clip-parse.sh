@@ -136,7 +136,7 @@ parser_output_command_with_subcommands() {
 }
 
 # parser_check_summary_correctness <page-summary>
-# Check whether a page summary is valid.
+# Check whether a command summary is valid.
 #
 # Output:
 #   <empty-string>
