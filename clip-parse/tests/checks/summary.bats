@@ -5,7 +5,7 @@
     source ./clip-parse.sh
 
     ! parser_check_command_summary_correctness '> Some text.
-> More information https://example.com.
+> More information: https://example.com.
 '
 }
 
@@ -15,7 +15,7 @@
 
     ! parser_check_command_summary_correctness '
 > Some text.
-> More information https://example.com.'
+> More information: https://example.com.'
 }
 
 # bats test_tags=invalid, extra-newlines
@@ -24,7 +24,7 @@
 
     ! parser_check_command_summary_correctness '> Some text.
 
-> More information https://example.com.'
+> More information: https://example.com.'
 }
 
 # bats test_tags=invalid, no-description
@@ -75,5 +75,5 @@
     source ./clip-parse.sh
 
     parser_check_command_summary_correctness '> Some text.
-> More information https://example.com.'
+> More information: https://example.com.'
 }
