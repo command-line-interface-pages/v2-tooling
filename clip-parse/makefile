@@ -1,3 +1,3 @@
 .PHONY: tests
 tests:
-	@bats $(shell find ./tests/ -type f -name '*.bats')
+	@bats --print-output-on-failure $(shell find ./tests/ -type f -name '*.bats')
