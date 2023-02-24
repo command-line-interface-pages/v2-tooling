@@ -7,6 +7,7 @@
     ! parser_check_layout_correctness '# some
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -22,6 +23,7 @@
 # some
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -36,6 +38,7 @@
 
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -47,6 +50,7 @@
     source ./clip-parse.sh
 
     ! parser_check_layout_correctness '> Some text.
+> More information https://example.com.
 
 - Some text:
 
@@ -70,7 +74,8 @@
 
     ! parser_check_layout_correctness '# some
 
-> Some text.'
+> Some text.
+> More information https://example.com.'
 }
 
 # bats test_tags=valid, layout
@@ -80,6 +85,7 @@
     parser_check_layout_correctness '# some
 
 > Some text.
+> More information https://example.com.
 
 - Some text:
 
