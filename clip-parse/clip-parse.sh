@@ -198,6 +198,26 @@ parser_check_command_tag_correctness() {
     [[ "$command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
 }
 
+# parser_check_command_tag_value_correctness <command-tag> <command-tag-value>
+# Check whether a command tag value is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if command tag value is valid
+#   - 1 otherwise
+parser_check_command_tag_value_correctness() {
+    declare command_tag="$1"
+    declare command_tag_value="$2"
+
+    if [[ "$command_tag" =~ ^(Internal|Deprecated)$ ]]; then
+        [[ "$command_tag_value" =~ ^(true|false)$ ]]
+    elif [[ "$command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
+        ! [[ "$command_tag_value" =~ ,, ]]
+    fi
+}
+
 # parser_output_command_tag <page-content>
 # Output command tags from a page content.
 #
@@ -226,7 +246,9 @@ parser_output_command_tags() {
     declare -i index=0
     while ((index < "${#command_tags[@]}")); do
         declare tag="${command_tags[index]}"
+        declare value="${command_tags[index + 1]}"
         parser_check_command_tag_correctness "$tag" || return "$INVALID_TAG_FAIL"
+        parser_check_command_tag_value_correctness "$tag" "$value" || return "$INVALID_TAG_VALUE_FAIL"
         index+=2
     done
 
