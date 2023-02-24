@@ -10,66 +10,6 @@ declare -i INVALID_TAG_VALUE_FAIL=4
 
 declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 
-__parser_color_to_code() {
-    declare color="$1"
-
-    case "$color" in
-    red)
-        echo -n 31
-        ;;
-    green)
-        echo -n 32
-        ;;
-    yellow)
-        echo -n 33
-        ;;
-    blue)
-        echo -n 34
-        ;;
-    magenta)
-        echo -n 35
-        ;;
-    cyan)
-        echo -n 36
-        ;;
-    light-gray)
-        echo -n 37
-        ;;
-    gray)
-        echo -n 90
-        ;;
-    light-red)
-        echo -n 91
-        ;;
-    light-green)
-        echo -n 92
-        ;;
-    light-yellow)
-        echo -n 93
-        ;;
-    light-blue)
-        echo -n 94
-        ;;
-    light-magenta)
-        echo -n 95
-        ;;
-    light-cyan)
-        echo -n 96
-        ;;
-    white)
-        echo -n 97
-        ;;
-    *)
-        echo -n 0
-        ;;
-    esac
-}
-
-# Error colors:
-declare RESET_COLOR="\e[$(__parser_color_to_code none)m"
-declare ERROR_COLOR="\e[$(__parser_color_to_code red)m"
-declare SUCCESS_COLOR="\e[$(__parser_color_to_code green)m"
-
 # parser_print_message <source> <message>
 # Print message.
 #
