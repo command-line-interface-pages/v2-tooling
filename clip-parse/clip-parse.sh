@@ -308,7 +308,7 @@ __parser_output_command_tag() {
 parser_output_command_more_information_tag() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "More information"
+    __parser_output_command_tag "$page_content" "More information"
 }
 
 # parser_output_command_internal_tag <page-content>
