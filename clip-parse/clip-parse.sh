@@ -132,5 +132,5 @@ parser_output_command_name_with_subcommands() {
 
     parser_check_layout_correctness "$page_content" || return "$FAIL"
 
-    sed -nE '1 { s/^# +//; s/ +$//; p; }' <<<"$page_content"
+    sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$page_content"
 }

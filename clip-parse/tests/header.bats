@@ -26,5 +26,5 @@
 
 `some`'
 
-    [[ "$output" == "some" ]]
+    [[ "$output" == "some command with subcommand" ]]
 }
