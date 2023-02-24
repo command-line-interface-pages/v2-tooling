@@ -127,7 +127,7 @@ parser_check_layout_correctness() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_name_with_subcommands() {
+parser_output_command_with_subcommands() {
     declare page_content="$1"
 
     parser_check_layout_correctness "$page_content" || return "$FAIL"

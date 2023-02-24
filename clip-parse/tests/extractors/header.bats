@@ -4,7 +4,7 @@
 @test "expect error when invalid layout passed" {
     source ./clip-parse.sh
 
-    ! parser_output_command_name_with_subcommands '# some
+    ! parser_output_command_with_subcommands '# some
 
 > Some text.
 
@@ -18,7 +18,7 @@
 @test "expect error when invalid header with second level passed" {
     source ./clip-parse.sh
 
-    ! parser_output_command_name_with_subcommands '## some
+    ! parser_output_command_with_subcommands '## some
 
 > Some text.
 
@@ -32,7 +32,7 @@
 @test "expect no header extraction error when valid header passed" {
     source ./clip-parse.sh
 
-    run parser_output_command_name_with_subcommands '#  some  command with  subcommand 
+    run parser_output_command_with_subcommands '#  some  command with  subcommand 
 
 > Some text.
 
