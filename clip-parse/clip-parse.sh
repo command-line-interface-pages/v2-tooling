@@ -178,7 +178,6 @@ parser_output_command_description() {
     sed -nE '/^> [^:]+$/ s/^> //p' <<<"$command_summary"
 }
 
-
 # parser_output_command_tag <page-content>
 # Output command tags from a page content.
 #
