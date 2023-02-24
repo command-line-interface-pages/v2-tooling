@@ -71,7 +71,7 @@
 }
 
 # bats test_tags=valid, summary
-@test "expect no summary extraction error when valid summary passed" {
+@test "expect no error when valid summary passed" {
     source ./clip-parse.sh
 
     parser_check_command_summary_correctness '> Some text.

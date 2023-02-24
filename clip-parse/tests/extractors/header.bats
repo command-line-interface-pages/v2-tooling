@@ -31,7 +31,7 @@
 }
 
 # bats test_tags=valid, header
-@test "expect no header extraction error when valid header passed" {
+@test "expect no error when valid header passed" {
     source ./clip-parse.sh
 
     run parser_output_command_with_subcommands '#  some  command with  subcommand 

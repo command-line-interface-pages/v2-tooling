@@ -17,7 +17,7 @@
 }
 
 # bats test_tags=invalid, external
-@test "expect error when summary layout passed" {
+@test "expect error when invalid summary passed" {
     source ./clip-parse.sh
 
     ! parser_output_command_description '# some
@@ -30,7 +30,7 @@
 }
 
 # bats test_tags=valid, summary, description
-@test "expect no command description extraction error when valid summary passed" {
+@test "expect no error when valid summary passed" {
     source ./clip-parse.sh
 
     run parser_output_command_description '# some

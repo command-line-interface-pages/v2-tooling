@@ -79,7 +79,7 @@
 }
 
 # bats test_tags=valid, layout
-@test "expect no layout check error when valid page passed" {
+@test "expect no error when valid page passed" {
     source ./clip-parse.sh
 
     parser_check_layout_correctness '# some
