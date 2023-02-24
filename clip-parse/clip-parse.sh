@@ -81,7 +81,7 @@ throw_error() {
 }
 
 # parser_check_layout_correctness <page-content>
-# Check whether a page content is valid and return exit status.
+# Check whether a page content is valid.
 # 
 # Output:
 #   <empty string>
