@@ -267,7 +267,7 @@ __parser_output_command_tags() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-__parser_output_command_tag() {
+__parser_output_command_tag_value() {
     declare page_content="$1"
     declare command_tag="$2"
 
@@ -305,10 +305,10 @@ __parser_output_command_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_more_information_tag() {
+parser_output_command_more_information_tag_value() {
     declare page_content="$1"
 
-    __parser_output_command_tag "$page_content" "More information"
+    __parser_output_command_tag_value "$page_content" "More information"
 }
 
 # parser_output_command_internal_tag <page-content>
@@ -323,10 +323,10 @@ parser_output_command_more_information_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_internal_tag() {
+parser_output_command_internal_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Internal"
+    parser_output_command_tag_value "$page_content" "Internal"
 }
 
 # parser_output_command_internal_tag_or_default <page-content>
@@ -341,11 +341,11 @@ parser_output_command_internal_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_internal_tag_or_default() {
+parser_output_command_internal_tag_value_or_default() {
     declare page_content="$1"
 
     declare output=
-    output="$(parser_output_command_internal_tag "$page_content")"
+    output="$(parser_output_command_internal_tag_value "$page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -365,10 +365,10 @@ parser_output_command_internal_tag_or_default() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_deprecated_tag() {
+parser_output_command_deprecated_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Deprecated"
+    parser_output_command_tag_value "$page_content" "Deprecated"
 }
 
 # parser_output_command_deprecated_tag_or_default <page-content>
@@ -383,11 +383,11 @@ parser_output_command_deprecated_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_deprecated_tag_or_default() {
+parser_output_command_deprecated_tag_value_or_default() {
     declare page_content="$1"
 
     declare output=
-    output="$(parser_output_command_deprecated_tag "$page_content")"
+    output="$(parser_output_command_deprecated_tag_value "$page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -407,10 +407,10 @@ parser_output_command_deprecated_tag_or_default() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_see_also_tag() {
+parser_output_command_see_also_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "See also"
+    parser_output_command_tag_value "$page_content" "See also"
 }
 
 # parser_output_command_aliases_tag <page-content>
@@ -425,10 +425,10 @@ parser_output_command_see_also_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_aliases_tag() {
+parser_output_command_aliases_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Aliases"
+    parser_output_command_tag_value "$page_content" "Aliases"
 }
 
 # parser_output_command_syntax_compatible_tag <page-content>
@@ -446,7 +446,7 @@ parser_output_command_aliases_tag() {
 parser_output_command_syntax_compatible_tag() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Syntax compatible"
+    parser_output_command_tag_value "$page_content" "Syntax compatible"
 }
 
 # parser_output_command_help_tag <page-content>
@@ -461,10 +461,10 @@ parser_output_command_syntax_compatible_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_help_tag() {
+parser_output_command_help_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Help"
+    parser_output_command_tag_value "$page_content" "Help"
 }
 
 # parser_output_command_version_tag <page-content>
@@ -479,10 +479,10 @@ parser_output_command_help_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_version_tag() {
+parser_output_command_version_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Version"
+    parser_output_command_tag_value "$page_content" "Version"
 }
 
 # parser_output_command_structure_compatible_tag <page-content>
@@ -497,8 +497,8 @@ parser_output_command_version_tag() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_structure_compatible_tag() {
+parser_output_command_structure_compatible_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag "$page_content" "Structure compatible"
+    parser_output_command_tag_value "$page_content" "Structure compatible"
 }
