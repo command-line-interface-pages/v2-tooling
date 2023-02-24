@@ -178,6 +178,21 @@ parser_output_command_description() {
     sed -nE '/^> [^:]+$/ s/^> //p' <<<"$command_summary"
 }
 
+# parser_check_command_tag_correctness <command-tag>
+# Check whether a command tag is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if command tag is valid
+#   - 1 otherwise
+parser_check_command_tag_correctness() {
+    declare command_tag="$1"
+
+    [[ "$command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
+}
+
 # parser_output_command_tag <page-content>
 # Output command tags from a page content.
 #
@@ -199,5 +214,227 @@ parser_output_command_tags() {
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
     parser_check_command_summary_correctness "$command_summary" || return "$FAIL"
 
-    sed -nE '/^> [^:]+:.+$/ { s/^> //; s/: +/\n/; p; }' <<<"$command_summary"
+    # shellcheck disable=2155
+    declare output="$(sed -nE '/^> [^:]+:.+$/ { s/^> //; s/: +/\n/; p; }' <<<"$command_summary")"
+    mapfile -t command_tags <<<"$output"
+
+    declare -i index=0
+    while ((index < "${#command_tags[@]}")); do
+        declare tag="${command_tags[index]}"
+        parser_check_command_tag_correctness "$tag" || return "$FAIL"
+        index+=2
+    done
+
+    echo -n "$output"
 }
+
+# parser_output_command_tag <page-content> <tag>
+# Output specific tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary, tag is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_tag() {
+    declare page_content="$1"
+    declare command_tag="$2"
+
+    parser_check_command_tag_correctness "$command_tag" || "$FAIL"
+
+    declare output=
+    output="$(parser_output_command_tags "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$FAIL"
+    mapfile -t command_tags <<< "$output"
+
+    declare -i index=0
+    while ((index < "${#command_tags[@]}")); do
+        declare tag="${command_tags[index]}"
+        declare value="${command_tags[index + 1]}"
+        
+        [[ "$tag" == "$command_tag" ]] && {
+            echo -n "$value"
+            return "$SUCCESS"
+        }
+
+        index+=2
+    done
+}
+
+# parser_output_command_more_information_tag <page-content>
+# Output "More information" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_more_information_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "More information"
+}
+
+# parser_output_command_internal_tag <page-content>
+# Output "Internal" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_internal_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Internal"
+}
+
+# parser_output_command_deprecated_tag <page-content>
+# Output "Deprecated" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_deprecated_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Deprecated"
+}
+
+# parser_output_command_see_also_tag <page-content>
+# Output "See also" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_see_also_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "See also"
+}
+
+# parser_output_command_aliases_tag <page-content>
+# Output "Aliases" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_aliases_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Aliases"
+}
+
+# parser_output_command_syntax_compatible_tag <page-content>
+# Output "Syntax compatible" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_syntax_compatible_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Syntax compatible"
+}
+
+# parser_output_command_help_tag <page-content>
+# Output "Help" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_help_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Help"
+}
+
+# parser_output_command_version_tag <page-content>
+# Output "Version" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_version_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Version"
+}
+
+# parser_output_command_structure_compatible_tag <page-content>
+# Output "Structure compatible" tag from a page content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if page layout, command summary is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_structure_compatible_tag() {
+    declare page_content="$1"
+
+    parser_output_command_tag "$page_content" "Structure compatible"
+}
+
+
+parser_output_command_more_information_tag '# some
+
+> Some text.
+> More information: https://example.com.
+> Structure compatible: /bin
+
+- Some text:
+
+`some`'
