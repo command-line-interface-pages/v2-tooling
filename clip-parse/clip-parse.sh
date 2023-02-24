@@ -151,7 +151,7 @@ parser_check_command_summary_correctness() {
     declare page_summary="$1"
 
     # shellcheck disable=2016
-    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n]+:[^\n]+\n)$/! Q1' <<<"$page_summary"$'\n'
+    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n:]+\n)$/! Q1' <<<"$page_summary"$'\n'
 }
 
 # parser_output_command_description <page-content>
