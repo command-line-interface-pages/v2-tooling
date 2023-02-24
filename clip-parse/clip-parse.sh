@@ -3,9 +3,9 @@
 declare -i SUCCESS=0
 declare -i FAIL=1
 
-declare LIBRARY_NAME="$(basename "$0")"
+declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 
-color_to_code() {
+parser_color_to_code() {
     declare color="$1"
 
     case "$color" in
@@ -61,22 +61,39 @@ color_to_code() {
 }
 
 # Error colors:
-declare RESET_COLOR="\e[$(color_to_code none)m"
-declare ERROR_COLOR="\e[$(color_to_code red)m"
-declare SUCCESS_COLOR="\e[$(color_to_code green)m"
+declare RESET_COLOR="\e[$(parser_color_to_code none)m"
+declare ERROR_COLOR="\e[$(parser_color_to_code red)m"
+declare SUCCESS_COLOR="\e[$(parser_color_to_code green)m"
 
-print_message() {
+
+# parser_print_message <source> <message>
+# Print message.
+# 
+# Output:
+#   <empty-string>
+# 
+# Return:
+#   - 0 always
+parser_print_message() {
     declare source="$1"
     declare message="$2"
 
-    echo -e "$PROGRAM_NAME: $source: ${SUCCESS_COLOR}$message$RESET_COLOR" >&2
+    echo -e "$PARSER_ERROR_PREFIX: $source: ${SUCCESS_COLOR}$message$RESET_COLOR" >&2
 }
 
-throw_error() {
+# parser_throw_error <source> <message>
+# Output error message and fail.
+# 
+# Output:
+#   <empty-string>
+# 
+# Return:
+#   - $FAIL always
+parser_throw_error() {
     declare source="$1"
     declare message="$2"
 
-    echo -e "$PROGRAM_NAME: $source: ${ERROR_COLOR}$message$RESET_COLOR" >&2
+    echo -e "$PARSER_ERROR_PREFIX: $source: ${ERROR_COLOR}$message$RESET_COLOR" >&2
     exit "$FAIL"
 }
 
