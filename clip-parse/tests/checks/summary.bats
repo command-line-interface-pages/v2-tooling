@@ -5,7 +5,7 @@
     source ./clip-parse.sh
 
     ! __parser_check_command_summary_correctness '> Some text.
-> More information: https://example.com.
+> More information: https://example.com
 '
 }
 
@@ -15,7 +15,7 @@
 
     ! __parser_check_command_summary_correctness '
 > Some text.
-> More information: https://example.com.'
+> More information: https://example.com'
 }
 
 # bats test_tags=invalid, extra-newlines
@@ -24,7 +24,17 @@
 
     ! __parser_check_command_summary_correctness '> Some text.
 
-> More information: https://example.com.'
+> More information: https://example.com'
+}
+
+# bats test_tags=invalid, extra-description-lines
+@test "expect error when invalid summary with several extra description lines passed" {
+    source ./clip-parse.sh
+
+    ! __parser_check_command_summary_correctness '> Some text.
+> Some text.
+> Some text.
+> More information: https://example.com'
 }
 
 # bats test_tags=invalid, no-description
@@ -33,7 +43,7 @@
 
     ! __parser_check_command_summary_correctness '# some
 
-> More information: https://example.com.
+> More information: https://example.com
 
 - Some text:
 
@@ -55,13 +65,13 @@
 '
 }
 
-# bats test_tags=invalid, invalid-order
+# bats test_tags=invalid, no-valid-order
 @test "expect error when invalid summary with invalid order passed" {
     source ./clip-parse.sh
 
     ! __parser_check_command_summary_correctness '# some
 
-> More information: https://example.com.
+> More information: https://example.com
 > Some text.
 
 - Some text:
@@ -70,10 +80,28 @@
 '
 }
 
-# bats test_tags=valid, summary
+# bats test_tags=valid, all
 @test "expect no error when valid summary passed" {
     source ./clip-parse.sh
 
     __parser_check_command_summary_correctness '> Some text.
-> More information: https://example.com.'
+> More information: https://example.com'
+}
+
+# bats test_tags=valid, all
+@test "expect no error when valid summary with description lines passed" {
+    source ./clip-parse.sh
+
+    __parser_check_command_summary_correctness '> Some text.
+> Some text.
+> More information: https://example.com'
+}
+
+# bats test_tags=valid, all
+@test "expect no error when valid summary with several tags passed" {
+    source ./clip-parse.sh
+
+    __parser_check_command_summary_correctness '> Some text.
+> Internal: true
+> More information: https://example.com'
 }
