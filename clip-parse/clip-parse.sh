@@ -120,7 +120,7 @@ parser_output_command_description() {
     declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
     __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
-    sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; p; }' <<<"$command_summary"
+    sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; s/  +/ /g; p; }' <<<"$command_summary"
 }
 
 # __parser_check_command_tag_correctness <command-tag>
@@ -156,7 +156,7 @@ __parser_check_command_tag_value_correctness() {
     elif [[ "$command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
         ! [[ "$command_tag_value" =~ ,, ]]
     else
-        [[ "$command_tag" == "More information" ]]
+        [[ "$command_tag" =~ ^(More information|Help|Version)$ ]]
     fi
 }
 
@@ -268,7 +268,7 @@ parser_output_command_more_information_tag_value() {
 parser_output_command_internal_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Internal"
+    __parser_output_command_tag_value "$page_content" "Internal"
 }
 
 # parser_output_command_internal_tag_or_default <page-content>
@@ -310,7 +310,7 @@ parser_output_command_internal_tag_value_or_default() {
 parser_output_command_deprecated_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Deprecated"
+    __parser_output_command_tag_value "$page_content" "Deprecated"
 }
 
 # parser_output_command_deprecated_tag_or_default <page-content>
@@ -352,7 +352,7 @@ parser_output_command_deprecated_tag_value_or_default() {
 parser_output_command_see_also_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "See also"
+    __parser_output_command_tag_value "$page_content" "See also"
 }
 
 # parser_output_command_aliases_tag <page-content>
@@ -370,7 +370,7 @@ parser_output_command_see_also_tag_value() {
 parser_output_command_aliases_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Aliases"
+    __parser_output_command_tag_value "$page_content" "Aliases"
 }
 
 # parser_output_command_syntax_compatible_tag <page-content>
@@ -385,10 +385,10 @@ parser_output_command_aliases_tag_value() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-parser_output_command_syntax_compatible_tag() {
+parser_output_command_syntax_compatible_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Syntax compatible"
+    __parser_output_command_tag_value "$page_content" "Syntax compatible"
 }
 
 # parser_output_command_help_tag <page-content>
@@ -406,7 +406,7 @@ parser_output_command_syntax_compatible_tag() {
 parser_output_command_help_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Help"
+    __parser_output_command_tag_value "$page_content" "Help"
 }
 
 # parser_output_command_version_tag <page-content>
@@ -424,7 +424,7 @@ parser_output_command_help_tag_value() {
 parser_output_command_version_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Version"
+    __parser_output_command_tag_value "$page_content" "Version"
 }
 
 # parser_output_command_structure_compatible_tag <page-content>
@@ -442,5 +442,13 @@ parser_output_command_version_tag_value() {
 parser_output_command_structure_compatible_tag_value() {
     declare page_content="$1"
 
-    parser_output_command_tag_value "$page_content" "Structure compatible"
+    __parser_output_command_tag_value "$page_content" "Structure compatible"
 }
+parser_output_command_description '# some
+
+> Some  text.
+> More information: https://example.com.
+
+- Some text:
+
+`some`'
