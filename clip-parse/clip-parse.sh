@@ -479,7 +479,7 @@ __parser_output_command_examples() {
 #
 # Notes:
 #   - .clip page content without trailing \n
-__parser_output_command_examples_count() {
+__parser_output_command_example_count() {
     declare page_content="$1"
 
     declare examples=
@@ -518,7 +518,7 @@ parser_output_command_example_description() {
     (($? == 0)) || return "$?"
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_examples_count "$page_content")"
+    declare -i count="$(__parser_output_command_example_count "$page_content")"
     ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     sed -nE "$((index * 2 + 1)) p" <<<"$examples"
@@ -548,7 +548,7 @@ parser_output_command_example_code() {
     (($? == 0)) || return "$?"
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_examples_count "$page_content")"
+    declare -i count="$(__parser_output_command_example_count "$page_content")"
     ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     sed -nE "$((index * 2 + 2)) p" <<<"$examples"
