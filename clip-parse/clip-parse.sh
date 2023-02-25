@@ -155,6 +155,8 @@ __parser_check_command_tag_value_correctness() {
         [[ "$command_tag_value" =~ ^(true|false)$ ]]
     elif [[ "$command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
         ! [[ "$command_tag_value" =~ ,, ]]
+    else
+        [[ "$command_tag" == "More information" ]]
     fi
 }
 
