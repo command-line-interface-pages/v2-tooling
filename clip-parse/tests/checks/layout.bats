@@ -92,7 +92,7 @@
 `some`'
 }
 
-# bats test_tags=valid, layout
+# bats test_tags=valid, all
 @test "expect no error when valid page passed" {
     source ./clip-parse.sh
 
