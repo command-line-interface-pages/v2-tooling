@@ -78,7 +78,7 @@
 > More information https://example.com.'
 }
 
-# bats test_tags=invalid, invalid-order
+# bats test_tags=invalid, no-valid-order
 @test "expect error when invalid layout with invalid order passed" {
     source ./clip-parse.sh
 
