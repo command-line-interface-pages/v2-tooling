@@ -65,7 +65,7 @@
 }
 
 
-# bats test_tags=valid, header
+# bats test_tags=valid, other
 @test "expect no error when valid header passed" {
     source ./clip-parse.sh
 
