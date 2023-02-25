@@ -7,7 +7,7 @@
     ! __parser_check_layout_correctness '# some
 
 > Some text.
-> More information https://example.com
+> More information: https://example.com
 
 - Some text:
 
@@ -23,7 +23,7 @@
 # some
 
 > Some text.
-> More information https://example.com
+> More information: https://example.com
 
 - Some text:
 
@@ -38,7 +38,7 @@
 
 
 > Some text.
-> More information https://example.com
+> More information: https://example.com
 
 - Some text:
 
@@ -50,7 +50,7 @@
     source ./clip-parse.sh
 
     ! __parser_check_layout_correctness '> Some text.
-> More information https://example.com
+> More information: https://example.com
 
 - Some text:
 
@@ -75,7 +75,7 @@
     ! __parser_check_layout_correctness '# some
 
 > Some text.
-> More information https://example.com'
+> More information: https://example.com'
 }
 
 # bats test_tags=invalid, no-valid-order
@@ -83,7 +83,7 @@
     source ./clip-parse.sh
 
     ! __parser_check_layout_correctness '> Some text.
-> More information https://example.com
+> More information: https://example.com
 
 # some
 
@@ -99,7 +99,7 @@
     __parser_check_layout_correctness '# some
 
 > Some text.
-> More information https://example.com
+> More information: https://example.com
 
 - Some text:
 
