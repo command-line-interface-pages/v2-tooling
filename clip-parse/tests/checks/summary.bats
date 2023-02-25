@@ -80,7 +80,7 @@
 '
 }
 
-# bats test_tags=valid, all
+# bats test_tags=valid, other
 @test "expect no error when valid summary passed" {
     source ./clip-parse.sh
 
@@ -88,7 +88,7 @@
 > More information: https://example.com'
 }
 
-# bats test_tags=valid, all
+# bats test_tags=valid, other
 @test "expect no error when valid summary with description lines passed" {
     source ./clip-parse.sh
 
@@ -97,7 +97,7 @@
 > More information: https://example.com'
 }
 
-# bats test_tags=valid, all
+# bats test_tags=valid, other
 @test "expect no error when valid summary with several tags passed" {
     source ./clip-parse.sh
 

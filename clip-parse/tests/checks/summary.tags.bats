@@ -28,7 +28,7 @@
     ! __parser_check_command_tag_correctness 'Invalid'
 }
 
-# bats test_tags=valid, all
+# bats test_tags=valid, other
 @test "expect error when valid tag passed" {
     source ./clip-parse.sh
 
