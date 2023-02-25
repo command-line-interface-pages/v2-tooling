@@ -444,11 +444,3 @@ parser_output_command_structure_compatible_tag_value() {
 
     __parser_output_command_tag_value "$page_content" "Structure compatible"
 }
-parser_output_command_description '# some
-
-> Some  text.
-> More information: https://example.com.
-
-- Some text:
-
-`some`'
