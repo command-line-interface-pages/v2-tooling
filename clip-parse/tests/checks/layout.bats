@@ -78,6 +78,20 @@
 > More information https://example.com.'
 }
 
+# bats test_tags=invalid, no-valid-order
+@test "expect error when invalid layout with invalid order passed" {
+    source ./clip-parse.sh
+
+    ! __parser_check_layout_correctness '> Some text.
+> More information https://example.com.
+
+# some
+
+- Some text:
+
+`some`'
+}
+
 # bats test_tags=valid, layout
 @test "expect no error when valid page passed" {
     source ./clip-parse.sh
