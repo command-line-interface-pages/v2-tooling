@@ -108,7 +108,8 @@ __parser_check_command_summary_correctness() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -169,7 +170,10 @@ __parser_check_command_tag_value_correctness() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 11 if command tag is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -206,7 +210,10 @@ __parser_output_command_tags() {
 #
 # Return:
 #   - 0 if page layout, command summary, tag is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 11 if command tag is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -244,7 +251,9 @@ __parser_output_command_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -262,7 +271,9 @@ parser_output_command_more_information_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -280,7 +291,9 @@ parser_output_command_internal_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -304,7 +317,9 @@ parser_output_command_internal_tag_value_or_default() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -322,7 +337,9 @@ parser_output_command_deprecated_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -346,7 +363,9 @@ parser_output_command_deprecated_tag_value_or_default() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -364,7 +383,9 @@ parser_output_command_see_also_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -382,7 +403,9 @@ parser_output_command_aliases_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -400,7 +423,9 @@ parser_output_command_syntax_compatible_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -418,7 +443,9 @@ parser_output_command_help_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -436,7 +463,9 @@ parser_output_command_version_tag_value() {
 #
 # Return:
 #   - 0 if page layout, command summary is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 10 if command summary is invalid
+#   - 12 if tag value is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -502,7 +531,8 @@ __parser_output_command_example_count() {
 #
 # Return:
 #   - 0 if page layout, index is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 20 if index is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -532,7 +562,8 @@ parser_output_command_example_description() {
 #
 # Return:
 #   - 0 if page layout, index is valid
-#   - 1 otherwise
+#   - 1 if page layout is invalid
+#   - 20 if index is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
