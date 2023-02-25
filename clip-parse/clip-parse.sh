@@ -4,9 +4,10 @@ declare -i SUCCESS=0
 declare -i FAIL=1
 
 declare -i INVALID_LAYOUT_FAIL=1
-declare -i INVALID_SUMMARY_FAIL=2
-declare -i INVALID_TAG_FAIL=3
-declare -i INVALID_TAG_VALUE_FAIL=4
+declare -i INVALID_SUMMARY_FAIL=10
+declare -i INVALID_TAG_FAIL=11
+declare -i INVALID_TAG_VALUE_FAIL=12
+declare -i INVALID_EXAMPLE_INDEX_FAIL=20
 
 declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 
@@ -443,4 +444,112 @@ parser_output_command_structure_compatible_tag_value() {
     declare page_content="$1"
 
     __parser_output_command_tag_value "$page_content" "Structure compatible"
+}
+
+# __parser_output_command_examples <page-content>
+# Output command examples from a page content.
+#
+# Output:
+#   <command-examples>
+#
+# Return:
+#   - 0 if page layout is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+__parser_output_command_examples() {
+    declare page_content="$1"
+
+    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    
+    # shellcheck disable=2016
+    sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$page_content"
+}
+
+# __parser_output_command_examples_count <page-content>
+# Output command example count from a page content.
+#
+# Output:
+#   <command-examples-count>
+#
+# Return:
+#   - 0 if page layout is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+__parser_output_command_examples_count() {
+    declare page_content="$1"
+
+    declare examples=
+    examples="$(__parser_output_command_examples "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    # shellcheck disable=2155
+    declare -i count="$(echo "$examples" | wc -l)"
+    ((count % 2 == 0)) || ((count++))
+
+    echo -n "$((count / 2))"
+}
+
+# parser_output_command_example_description <page-content> <index>
+# Output command example description from a page content.
+#
+# Output:
+#   <command-example-description>
+#
+# Return:
+#   - 0 if page layout, index is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_example_description() {
+    declare page_content="$1"
+    declare -i index="$2"
+
+    ((index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    declare examples=
+    examples="$(__parser_output_command_examples "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    # shellcheck disable=2155
+    declare -i count="$(__parser_output_command_examples_count "$page_content")"
+    ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    sed -nE "$((index * 2 + 1)) p" <<<"$examples"
+}
+
+# parser_output_command_example_code <page-content> <index>
+# Output command example code from a page content.
+#
+# Output:
+#   <command-example-code>
+#
+# Return:
+#   - 0 if page layout, index is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_example_code() {
+    declare page_content="$1"
+    declare -i index="$2"
+
+    ((index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    declare examples=
+    examples="$(__parser_output_command_examples "$page_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    # shellcheck disable=2155
+    declare -i count="$(__parser_output_command_examples_count "$page_content")"
+    ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    sed -nE "$((index * 2 + 2)) p" <<<"$examples"
 }
