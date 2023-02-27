@@ -400,7 +400,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.3.2" >&2
+  echo "1.3.3" >&2
 }
 
 author() {
@@ -527,7 +527,7 @@ get_colorized_description() {
     }
   done
 
-  colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX/g" <<<"$colorized_description")"
+  colorized_description="$(sed -E "s/\<(std(in|out|err))\>/\\\\e[${CODE_DESCRIPTION_STREAM_PREFIX_COLOR}m$CODE_DESCRIPTION_STREAM_PREFIX\\\\e[${CODE_DESCRIPTION_STREAM_COLOR}m\1\\\\e[${CODE_DESCRIPTION_STREAM_SUFFIX_COLOR}m$CODE_DESCRIPTION_STREAM_SUFFIX\\\\e[${CODE_DESCRIPTION_COLOR}m/g" <<<"$colorized_description")"
   echo -n "$colorized_description"
 }
 
