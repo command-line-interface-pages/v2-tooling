@@ -8,6 +8,7 @@ declare -i INVALID_SUMMARY_FAIL=10
 declare -i INVALID_TAG_FAIL=11
 declare -i INVALID_TAG_VALUE_FAIL=12
 declare -i INVALID_EXAMPLE_INDEX_FAIL=20
+declare -i INVALID_CONSTRUCT_FAIL=30
 
 declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 
@@ -583,4 +584,106 @@ parser_output_command_example_code() {
     ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     sed -nE "$((index * 2 + 2)) p" <<<"$examples"
+}
+
+# __parser_output_current_token <string> <index> <next-token-start>
+# Output current token from a string.
+#
+# Output:
+#   <string-token>
+#
+# Return:
+#   - index after traversal
+__parser_output_current_token() {
+    declare string="$1"
+    declare -i index="$2"
+    declare next_token_start="${3:0:1}"
+
+    declare current_token=
+
+    while ((index < ${#string})) && [[ "${string:index:1}" != "$next_token_start" ]]; do
+        [[ "${string:index:1}" == \\ ]] && index+=1
+
+        current_token+="${string:index:1}"
+        index+=1
+    done
+
+    echo -n "$current_token"
+
+    return "$index"
+}
+
+# __parser_output_tokenized_by_balanced_tokens <string> <special-construct-start-and-end>
+# Output tokens from a string.
+#
+# Output:
+#   <string-tokens>
+#
+# Return:
+#   - 0 if string is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - string without trailing \n
+#   - token types:
+#     - LITERAL
+#     - CONSTRUCT
+#   - token type precedes token value (which may be missing if token doesn't contain value)
+#   - nested contructs are unsupported
+__parser_output_tokenized_by_balanced_tokens() {
+    declare string="$1"
+    declare construct_delimiters="${2:0:2}"
+
+    declare -i index=0
+    declare construct_start="${construct_delimiters:0:1}"
+    declare construct_end="${construct_delimiters:1:1}"
+
+    while ((index < ${#string})); do
+        declare literal_token=
+        literal_token="$(__parser_output_current_token "$string" "$index" "$construct_start")"
+        index="$?"
+
+        printf "%s\n%s\n" LITERAL "$literal_token"
+        index+=1
+
+        declare construct_token=
+        construct_token="$(__parser_output_current_token "$string" "$index" "$construct_end")"
+        index="$?"
+
+        [[ "${string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
+        [[ -n "$construct_token" ]] && printf "%s\n%s\n" CONSTRUCT "$construct_token"
+        index+=1
+    done
+}
+
+# __parser_output_tokenized_by_unbalanced_tokens <string> <special-construct>
+# Output tokens from a string.
+#
+# Output:
+#   <string-tokens>
+#
+# Return:
+#   - 0 if string is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - string without trailing \n
+#   - token types:
+#     - LITERAL
+#     - CONSTRUCT
+#   - token type precedes token value (which may be missing if token doesn't contain value)
+__parser_output_tokenized_by_unbalanced_tokens() {
+    declare string="$1"
+    declare construct_delimiter="${2:0:1}"
+
+    declare -i index=0
+
+    while ((index < ${#string})); do
+        declare literal_token=
+        literal_token="$(__parser_output_current_token "$string" "$index" "$construct_delimiter")"
+        index="$?"
+
+        [[ -n "$literal_token" ]] && printf "%s\n%s\n" CONSTRUCT "$literal_token"
+        index+=1
+    done
 }
