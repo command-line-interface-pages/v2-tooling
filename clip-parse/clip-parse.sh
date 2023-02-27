@@ -519,7 +519,7 @@ __parser_output_command_example_count() {
 
     # shellcheck disable=2155
     declare -i count="$(echo "$examples" | wc -l)"
-    ((count % 2 == 0)) || ((count++))
+    ((count % 2 == 0)) || count+=1
 
     echo -n "$((count / 2))"
 }
