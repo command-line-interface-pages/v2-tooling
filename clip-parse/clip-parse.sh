@@ -761,3 +761,90 @@ __parser_output_token_type() {
 
     [[ -n "${tokens[line]}" ]] && echo -n "${tokens[line]}"
 }
+
+# parser_output_command_example_description_tokens <page-content> <index>
+# Output command example description tokens for alternatives and literals from a page content.
+#
+# Output:
+#   <command-example-description>
+#
+# Return:
+#   - 0 if page layout, index is valid
+#   - 1 if page layout is invalid
+#   - 20 if index is invalid
+#
+# Notes:
+#   - .clip page content without trailing \n
+#   - alternative parsing is the first parsing stage
+#   - mnemonics are considered to be nested inside alternatives or literals
+parser_output_command_example_description_tokens() {
+    declare in_page_content="$1"
+    declare -i in_index="$2"
+
+    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    declare description=
+    description="$(parser_output_command_example_description "$in_page_content" "$in_index")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    declare tokens=
+    tokens="$(__parser_output_tokenized_by_balanced_tokens "$description" "()")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    echo -n "$tokens"
+}
+
+# parser_output_command_example_description_mnemonic_tokens <page-content> <index>
+# Output command example description tokens for mnemonics and literals from a page content.
+#
+# Output:
+#   <command-example-description>
+#
+# Return:
+#   - 0 if page layout, index is valid
+#   - 1 if page layout is invalid
+#   - 20 if index is invalid
+#
+# Notes:
+#   - .clip page content without trailing \n
+#   - mnemonic parsing is the second parsing stage
+#   - alternatives should be already expanded before parsing mnemonics
+parser_output_command_example_description_mnemonic_tokens() {
+    declare in_page_content="$1"
+    declare -i in_index="$2"
+
+    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    declare description=
+    description="$(parser_output_command_example_description "$in_page_content" "$in_index")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    declare tokens=
+    tokens="$(__parser_output_tokenized_by_balanced_tokens "$description" "[]")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    echo -n "$tokens"
+}
+
+# parser_output_command_example_description_alternative_tokens <alternative>
+# Output tokens from an alternative.
+#
+# Output:
+#   <alternative-tokens>
+#
+# Return:
+#   - 0 if page layout, index is valid
+#   - 1 if page layout is invalid
+#   - 20 if index is invalid
+#
+# Notes:
+#   - .clip page content without trailing \n
+parser_output_command_example_description_alternative_tokens() {
+    declare in_alternative="$1"
+
+    __parser_output_tokenized_by_unbalanced_tokens "$in_alternative" "|"
+}
