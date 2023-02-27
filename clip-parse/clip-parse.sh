@@ -718,6 +718,7 @@ __parser_output_token_value() {
     declare tokens="$1"
     declare index="$2"
 
+    # shellcheck disable=2155
     declare count="$(__parser_output_token_count "$tokens")"
     declare -i line=0
     declare -i current_index=0
@@ -744,6 +745,7 @@ __parser_output_token_type() {
     declare tokens="$1"
     declare index="$2"
 
+    # shellcheck disable=2155
     declare count="$(__parser_output_token_count "$tokens")"
     declare -i line=0
     declare -i current_index=0
