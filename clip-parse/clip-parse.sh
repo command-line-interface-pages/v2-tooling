@@ -731,3 +731,29 @@ __parser_output_token_value() {
 
     [[ -n "${tokens[line + 1]}" ]] && echo -n "${tokens[line + 1]}"
 }
+
+# __parser_output_token_type <tokens> <index>
+# Output token type from a token list.
+#
+# Output:
+#   <token-type>
+#
+# Return:
+#   - 0 always
+__parser_output_token_type() {
+    declare tokens="$1"
+    declare index="$2"
+
+    declare count="$(__parser_output_token_count "$tokens")"
+    declare -i line=0
+    declare -i current_index=0
+
+    mapfile -t tokens <<<"$tokens"
+
+    while ((line < count * 2)) && ((current_index != index)); do
+        line+=2
+        current_index+=1
+    done
+
+    [[ -n "${tokens[line]}" ]] && echo -n "${tokens[line]}"
+}
