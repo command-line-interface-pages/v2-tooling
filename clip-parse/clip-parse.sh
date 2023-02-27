@@ -21,10 +21,10 @@ declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
 # Return:
 #   - 0 always
 parser_print_message() {
-    declare source="$1"
-    declare message="$2"
+    declare in_source="$1"
+    declare in_message="$2"
 
-    echo -e "$PARSER_ERROR_PREFIX: $source: ${SUCCESS_COLOR}$message$RESET_COLOR" >&2
+    echo -e "$PARSER_ERROR_PREFIX: $in_source: ${SUCCESS_COLOR}$in_message$RESET_COLOR" >&2
 }
 
 # parser_throw_error <source> <message>
@@ -36,10 +36,10 @@ parser_print_message() {
 # Return:
 #   - $FAIL always
 parser_throw_error() {
-    declare source="$1"
-    declare message="$2"
+    declare in_source="$1"
+    declare in_message="$2"
 
-    echo -e "$PARSER_ERROR_PREFIX: $source: ${ERROR_COLOR}$message$RESET_COLOR" >&2
+    echo -e "$PARSER_ERROR_PREFIX: $in_source: ${ERROR_COLOR}$in_message$RESET_COLOR" >&2
     exit "$FAIL"
 }
 
@@ -56,10 +56,10 @@ parser_throw_error() {
 # Notes:
 #   - .clip page content without trailing \n
 __parser_check_layout_correctness() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
     # shellcheck disable=2016
-    sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$page_content"$'\n\n'
+    sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$in_page_content"$'\n\n'
 }
 
 # parser_output_command_name_with_subcommands <page-content>
@@ -75,11 +75,11 @@ __parser_check_layout_correctness() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_with_subcommands() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
 
-    sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$page_content"
+    sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$in_page_content"
 }
 
 # __parser_check_command_summary_correctness <page-summary>
@@ -95,10 +95,10 @@ parser_output_command_with_subcommands() {
 # Notes:
 #   - page summary without trailing \n
 __parser_check_command_summary_correctness() {
-    declare page_summary="$1"
+    declare in_page_summary="$1"
 
     # shellcheck disable=2016
-    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$page_summary"$'\n'
+    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$in_page_summary"$'\n'
 }
 
 # parser_output_command_description <page-content>
@@ -115,12 +115,12 @@ __parser_check_command_summary_correctness() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_description() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
-    declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
+    declare command_summary="$(sed -nE '/^>/ p' <<<"$in_page_content")"
     __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; s/  +/ /g; p; }' <<<"$command_summary"
@@ -136,9 +136,9 @@ parser_output_command_description() {
 #   - 0 if command tag is valid
 #   - 1 otherwise
 __parser_check_command_tag_correctness() {
-    declare command_tag="$1"
+    declare in_command_tag="$1"
 
-    [[ "$command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
+    [[ "$in_command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
 }
 
 # __parser_check_command_tag_value_correctness <command-tag> <command-tag-value>
@@ -151,15 +151,15 @@ __parser_check_command_tag_correctness() {
 #   - 0 if command tag value is valid
 #   - 1 otherwise
 __parser_check_command_tag_value_correctness() {
-    declare command_tag="$1"
-    declare command_tag_value="$2"
+    declare in_command_tag="$1"
+    declare in_command_tag_value="$2"
 
-    if [[ "$command_tag" =~ ^(Internal|Deprecated)$ ]]; then
-        [[ "$command_tag_value" =~ ^(true|false)$ ]]
-    elif [[ "$command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
-        ! [[ "$command_tag_value" =~ ,, ]]
+    if [[ "$in_command_tag" =~ ^(Internal|Deprecated)$ ]]; then
+        [[ "$in_command_tag_value" =~ ^(true|false)$ ]]
+    elif [[ "$in_command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
+        ! [[ "$in_command_tag_value" =~ ,, ]]
     else
-        [[ "$command_tag" =~ ^(More information|Help|Version)$ ]]
+        [[ "$in_command_tag" =~ ^(More information|Help|Version)$ ]]
     fi
 }
 
@@ -179,12 +179,12 @@ __parser_check_command_tag_value_correctness() {
 # Notes:
 #   - .clip page content without trailing \n
 __parser_output_command_tags() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2155
-    declare command_summary="$(sed -nE '/^>/ p' <<<"$page_content")"
+    declare command_summary="$(sed -nE '/^>/ p' <<<"$in_page_content")"
     __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
 
     # shellcheck disable=2155
@@ -219,13 +219,13 @@ __parser_output_command_tags() {
 # Notes:
 #   - .clip page content without trailing \n
 __parser_output_command_tag_value() {
-    declare page_content="$1"
-    declare command_tag="$2"
+    declare in_page_content="$1"
+    declare in_command_tag="$2"
 
-    __parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
+    __parser_check_command_tag_correctness "$in_command_tag" || return "$INVALID_TAG_FAIL"
 
     declare output=
-    output="$(__parser_output_command_tags "$page_content")"
+    output="$(__parser_output_command_tags "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
     mapfile -t command_tags <<< "$output"
@@ -235,7 +235,7 @@ __parser_output_command_tag_value() {
         declare tag="${command_tags[index]}"
         declare value="${command_tags[index + 1]}"
         
-        [[ "$tag" == "$command_tag" ]] && {
+        [[ "$tag" == "$in_command_tag" ]] && {
             echo -n "$value"
             return "$SUCCESS"
         }
@@ -259,9 +259,9 @@ __parser_output_command_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_more_information_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "More information"
+    __parser_output_command_tag_value "$in_page_content" "More information"
 }
 
 # parser_output_command_internal_tag <page-content>
@@ -279,9 +279,9 @@ parser_output_command_more_information_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_internal_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Internal"
+    __parser_output_command_tag_value "$in_page_content" "Internal"
 }
 
 # parser_output_command_internal_tag_or_default <page-content>
@@ -299,10 +299,10 @@ parser_output_command_internal_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_internal_tag_value_or_default() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
     declare output=
-    output="$(parser_output_command_internal_tag_value "$page_content")"
+    output="$(parser_output_command_internal_tag_value "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -325,9 +325,9 @@ parser_output_command_internal_tag_value_or_default() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_deprecated_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Deprecated"
+    __parser_output_command_tag_value "$in_page_content" "Deprecated"
 }
 
 # parser_output_command_deprecated_tag_or_default <page-content>
@@ -345,10 +345,10 @@ parser_output_command_deprecated_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_deprecated_tag_value_or_default() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
     declare output=
-    output="$(parser_output_command_deprecated_tag_value "$page_content")"
+    output="$(parser_output_command_deprecated_tag_value "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -371,9 +371,9 @@ parser_output_command_deprecated_tag_value_or_default() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_see_also_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "See also"
+    __parser_output_command_tag_value "$in_page_content" "See also"
 }
 
 # parser_output_command_aliases_tag <page-content>
@@ -391,9 +391,9 @@ parser_output_command_see_also_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_aliases_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Aliases"
+    __parser_output_command_tag_value "$in_page_content" "Aliases"
 }
 
 # parser_output_command_syntax_compatible_tag <page-content>
@@ -411,9 +411,9 @@ parser_output_command_aliases_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_syntax_compatible_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Syntax compatible"
+    __parser_output_command_tag_value "$in_page_content" "Syntax compatible"
 }
 
 # parser_output_command_help_tag <page-content>
@@ -431,9 +431,9 @@ parser_output_command_syntax_compatible_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_help_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Help"
+    __parser_output_command_tag_value "$in_page_content" "Help"
 }
 
 # parser_output_command_version_tag <page-content>
@@ -451,9 +451,9 @@ parser_output_command_help_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_version_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Version"
+    __parser_output_command_tag_value "$in_page_content" "Version"
 }
 
 # parser_output_command_structure_compatible_tag <page-content>
@@ -471,9 +471,9 @@ parser_output_command_version_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_structure_compatible_tag_value() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$page_content" "Structure compatible"
+    __parser_output_command_tag_value "$in_page_content" "Structure compatible"
 }
 
 # __parser_output_command_examples <page-content>
@@ -489,12 +489,12 @@ parser_output_command_structure_compatible_tag_value() {
 # Notes:
 #   - .clip page content without trailing \n
 __parser_output_command_examples() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
-    __parser_check_layout_correctness "$page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2016
-    sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$page_content"
+    sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$in_page_content"
 }
 
 # __parser_output_command_examples_count <page-content>
@@ -510,10 +510,10 @@ __parser_output_command_examples() {
 # Notes:
 #   - .clip page content without trailing \n
 __parser_output_command_example_count() {
-    declare page_content="$1"
+    declare in_page_content="$1"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$page_content")"
+    examples="$(__parser_output_command_examples "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -538,21 +538,21 @@ __parser_output_command_example_count() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_example_description() {
-    declare page_content="$1"
-    declare -i index="$2"
+    declare in_page_content="$1"
+    declare -i in_index="$2"
 
-    ((index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$page_content")"
+    examples="$(__parser_output_command_examples "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_example_count "$page_content")"
-    ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    declare -i count="$(__parser_output_command_example_count "$in_page_content")"
+    ((in_index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
-    sed -nE "$((index * 2 + 1)) p" <<<"$examples"
+    sed -nE "$((in_index * 2 + 1)) p" <<<"$examples"
 }
 
 # parser_output_command_example_code <page-content> <index>
@@ -569,21 +569,21 @@ parser_output_command_example_description() {
 # Notes:
 #   - .clip page content without trailing \n
 parser_output_command_example_code() {
-    declare page_content="$1"
-    declare -i index="$2"
+    declare in_page_content="$1"
+    declare -i in_index="$2"
 
-    ((index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$page_content")"
+    examples="$(__parser_output_command_examples "$in_page_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_example_count "$page_content")"
-    ((index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    declare -i count="$(__parser_output_command_example_count "$in_page_content")"
+    ((in_index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
-    sed -nE "$((index * 2 + 2)) p" <<<"$examples"
+    sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
 }
 
 # __parser_output_current_token <string> <index> <next-token-start>
@@ -595,22 +595,22 @@ parser_output_command_example_code() {
 # Return:
 #   - index after traversal
 __parser_output_current_token() {
-    declare string="$1"
-    declare -i index="$2"
-    declare next_token_start="${3:0:1}"
+    declare in_string="$1"
+    declare -i in_index="$2"
+    declare in_next_token_start="${3:0:1}"
 
     declare current_token=
 
-    while ((index < ${#string})) && [[ "${string:index:1}" != "$next_token_start" ]]; do
-        [[ "${string:index:1}" == \\ ]] && index+=1
+    while ((in_index < ${#in_string})) && [[ "${in_string:in_index:1}" != "$in_next_token_start" ]]; do
+        [[ "${in_string:in_index:1}" == \\ ]] && in_index+=1
 
-        current_token+="${string:index:1}"
+        current_token+="${in_string:in_index:1}"
         index+=1
     done
 
     echo -n "$current_token"
 
-    return "$index"
+    return "$in_index"
 }
 
 # __parser_output_tokenized_by_balanced_tokens <string> <special-construct-start-and-end>
@@ -631,26 +631,26 @@ __parser_output_current_token() {
 #   - token type precedes token value (which may be missing if token doesn't contain value)
 #   - nested contructs are unsupported
 __parser_output_tokenized_by_balanced_tokens() {
-    declare string="$1"
-    declare construct_delimiters="${2:0:2}"
+    declare in_string="$1"
+    declare in_construct_delimiters="${2:0:2}"
 
     declare -i index=0
-    declare construct_start="${construct_delimiters:0:1}"
-    declare construct_end="${construct_delimiters:1:1}"
+    declare construct_start="${in_construct_delimiters:0:1}"
+    declare construct_end="${in_construct_delimiters:1:1}"
 
-    while ((index < ${#string})); do
+    while ((index < ${#in_string})); do
         declare literal_token=
-        literal_token="$(__parser_output_current_token "$string" "$index" "$construct_start")"
+        literal_token="$(__parser_output_current_token "$in_string" "$index" "$construct_start")"
         index="$?"
 
         printf "%s\n%s\n" LITERAL "$literal_token"
         index+=1
 
         declare construct_token=
-        construct_token="$(__parser_output_current_token "$string" "$index" "$construct_end")"
+        construct_token="$(__parser_output_current_token "$in_string" "$index" "$construct_end")"
         index="$?"
 
-        [[ "${string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
+        [[ "${in_string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
         [[ -n "$construct_token" ]] && printf "%s\n%s\n" CONSTRUCT "$construct_token"
         index+=1
     done
@@ -673,14 +673,14 @@ __parser_output_tokenized_by_balanced_tokens() {
 #     - CONSTRUCT
 #   - token type precedes token value (which may be missing if token doesn't contain value)
 __parser_output_tokenized_by_unbalanced_tokens() {
-    declare string="$1"
-    declare construct_delimiter="${2:0:1}"
+    declare in_string="$1"
+    declare in_construct_delimiter="${2:0:1}"
 
     declare -i index=0
 
-    while ((index < ${#string})); do
+    while ((index < ${#in_string})); do
         declare literal_token=
-        literal_token="$(__parser_output_current_token "$string" "$index" "$construct_delimiter")"
+        literal_token="$(__parser_output_current_token "$in_string" "$index" "$in_construct_delimiter")"
         index="$?"
 
         [[ -n "$literal_token" ]] && printf "%s\n%s\n" CONSTRUCT "$literal_token"
@@ -697,10 +697,10 @@ __parser_output_tokenized_by_unbalanced_tokens() {
 # Return:
 #   - 0 always
 __parser_output_token_count() {
-    declare tokens="$1"
+    declare in_tokens="$1"
 
     # shellcheck disable=2155
-    declare -i count="$(echo -n "$tokens" | wc -l)"
+    declare -i count="$(echo -n "$in_tokens" | wc -l)"
     ((count % 2 == 0)) || count+=1
 
     echo -n "$((count / 2))"
@@ -715,17 +715,17 @@ __parser_output_token_count() {
 # Return:
 #   - 0 always
 __parser_output_token_value() {
-    declare tokens="$1"
-    declare index="$2"
+    declare in_tokens="$1"
+    declare in_index="$2"
 
     # shellcheck disable=2155
-    declare count="$(__parser_output_token_count "$tokens")"
+    declare count="$(__parser_output_token_count "$in_tokens")"
     declare -i line=0
     declare -i current_index=0
 
-    mapfile -t tokens <<<"$tokens"
+    mapfile -t tokens <<<"$in_tokens"
 
-    while ((line < count * 2)) && ((current_index != index)); do
+    while ((line < count * 2)) && ((current_index != in_index)); do
         line+=2
         current_index+=1
     done
@@ -742,17 +742,17 @@ __parser_output_token_value() {
 # Return:
 #   - 0 always
 __parser_output_token_type() {
-    declare tokens="$1"
-    declare index="$2"
+    declare in_tokens="$1"
+    declare in_index="$2"
 
     # shellcheck disable=2155
-    declare count="$(__parser_output_token_count "$tokens")"
+    declare count="$(__parser_output_token_count "$in_tokens")"
     declare -i line=0
     declare -i current_index=0
 
-    mapfile -t tokens <<<"$tokens"
+    mapfile -t tokens <<<"$in_tokens"
 
-    while ((line < count * 2)) && ((current_index != index)); do
+    while ((line < count * 2)) && ((current_index != in_index)); do
         line+=2
         current_index+=1
     done
