@@ -605,7 +605,7 @@ __parser_output_current_token() {
         [[ "${in_string:in_index:1}" == \\ ]] && in_index+=1
 
         current_token+="${in_string:in_index:1}"
-        index+=1
+        in_index+=1
     done
 
     echo -n "$current_token"
@@ -650,8 +650,10 @@ __parser_output_tokenized_by_balanced_tokens() {
         construct_token="$(__parser_output_current_token "$in_string" "$index" "$construct_end")"
         index="$?"
 
-        [[ "${in_string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
-        [[ -n "$construct_token" ]] && printf "%s\n%s\n" CONSTRUCT "$construct_token"
+        [[ -n "$construct_token" ]] && {
+            [[ "${in_string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
+            printf "%s\n%s\n" CONSTRUCT "$construct_token"
+        }
         index+=1
     done
 }
