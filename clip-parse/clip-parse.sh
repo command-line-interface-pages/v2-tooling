@@ -687,3 +687,21 @@ __parser_output_tokenized_by_unbalanced_tokens() {
         index+=1
     done
 }
+
+# __parser_output_token_count <tokens>
+# Output token count from a token list.
+#
+# Output:
+#   <token-count>
+#
+# Return:
+#   - 0 always
+__parser_output_token_count() {
+    declare tokens="$1"
+
+    # shellcheck disable=2155
+    declare -i count="$(echo -n "$tokens" | wc -l)"
+    ((count % 2 == 0)) || count+=1
+
+    echo -n "$((count / 2))"
+}
