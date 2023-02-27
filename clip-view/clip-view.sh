@@ -400,7 +400,7 @@ ${HELP_HEADER_COLOR}Examples:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "1.3.2" >&2
+  echo "1.3.3" >&2
 }
 
 author() {
