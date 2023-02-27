@@ -705,3 +705,29 @@ __parser_output_token_count() {
 
     echo -n "$((count / 2))"
 }
+
+# __parser_output_token_value <tokens> <index>
+# Output token value from a token list.
+#
+# Output:
+#   <token-value>
+#
+# Return:
+#   - 0 always
+__parser_output_token_value() {
+    declare tokens="$1"
+    declare index="$2"
+
+    declare count="$(__parser_output_token_count "$tokens")"
+    declare -i line=0
+    declare -i current_index=0
+
+    mapfile -t tokens <<<"$tokens"
+
+    while ((line < count * 2)) && ((current_index != index)); do
+        line+=2
+        current_index+=1
+    done
+
+    [[ -n "${tokens[line + 1]}" ]] && echo -n "${tokens[line + 1]}"
+}
