@@ -927,7 +927,7 @@ parser_output_command_example_code_placeholder_alternative_type() {
     __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
         return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
 
-    sed -E 's/^(\/|\/\?)?([^ *+?]+).+$/\2/' <<<"$in_placeholder_alternative_content"
+    sed -E 's/^((\/|\/\?)?[^ *+?]+).+$/\1/' <<<"$in_placeholder_alternative_content"
 }
 
 # parser_output_command_example_code_placeholder_alternative_quantifier <page-content> <placeholder-alternative>
