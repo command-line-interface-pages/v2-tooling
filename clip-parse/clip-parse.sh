@@ -979,3 +979,50 @@ parser_check_command_example_code_placeholder_alternative_allow_repetitions() {
     ! sed -nE '/^(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))!/! Q1' <<<"$in_placeholder_alternative_content" ||
         return "$INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED"
 }
+
+# parser_output_command_example_code_placeholder_alternative_description <placeholder-alternative>
+# Output an alternative description for a specific placeholder alternative.
+#
+# Output:
+#   <alternative-description>
+#
+# Return:
+#   - 0 if placeholder alternative is valid
+#   - 24 otherwise
+#
+# Notes:
+#   - placeholder without trailing \n
+parser_output_command_example_code_placeholder_alternative_description() {
+    declare in_alternative_content="$1"
+
+    __parser_check_command_example_code_placeholder_alternative_correctness "$in_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    
+    in_alternative_content="$(sed -E 's/^(\/|\/\?)?[^ *+?]+([*+?]!?| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+)!?)? +//' <<<"$in_alternative_content")"
+    
+    echo -n "$(__parser_output_current_token "$in_alternative_content" 0 ":")"
+}
+
+# parser_output_command_example_code_placeholder_alternative_description <placeholder-alternative>
+# Output an alternative description for a specific placeholder alternative.
+#
+# Output:
+#   <alternative-description>
+#
+# Return:
+#   - 0 if placeholder alternative is valid
+#   - 24 otherwise
+#
+# Notes:
+#   - placeholder without trailing \n
+parser_output_command_example_code_placeholder_alternative_examples() {
+    declare in_alternative_content="$1"
+
+    __parser_check_command_example_code_placeholder_alternative_correctness "$in_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    
+    # shellcheck disable=2155
+    declare alternative_description="$(__parser_output_current_token "$in_alternative_content" 0 ":")"
+    declare -i description_length="${#alternative_description} + 1"
+    echo -n "$(sed -E 's/^ +//' <<< "${in_alternative_content:description_length}")"
+}
