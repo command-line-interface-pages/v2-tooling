@@ -748,7 +748,7 @@ __parser_output_token_type() {
 }
 
 # parser_output_command_example_description_tokens <page-content> <example-index>
-# Output an example description tokens for alternatives and literals from a specific page content.
+# Output description tokens for alternatives and literals from a specific page content.
 #
 # Output:
 #   <description-tokens>
@@ -783,7 +783,7 @@ parser_output_command_example_description_tokens() {
 }
 
 # parser_output_command_example_description_mnemonic_tokens <page-content> <example-index>
-# Output an example description tokens for mnemonics and literals from a specific page content.
+# Output description tokens for mnemonics and literals from a specific page content.
 #
 # Output:
 #   <description-tokens>
