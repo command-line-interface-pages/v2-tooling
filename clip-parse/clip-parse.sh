@@ -10,39 +10,6 @@ declare -i INVALID_TAG_VALUE_FAIL=12
 declare -i INVALID_EXAMPLE_INDEX_FAIL=20
 declare -i INVALID_CONSTRUCT_FAIL=30
 
-declare PARSER_ERROR_PREFIX="${PARSER_ERROR_PREFIX:-$(basename "$0")}"
-
-# parser_print_message <source> <message>
-# Print message.
-#
-# Output:
-#   <empty-string>
-#
-# Return:
-#   - 0 always
-parser_print_message() {
-    declare in_source="$1"
-    declare in_message="$2"
-
-    echo -e "$PARSER_ERROR_PREFIX: $in_source: ${SUCCESS_COLOR}$in_message$RESET_COLOR" >&2
-}
-
-# parser_throw_error <source> <message>
-# Output error message and fail.
-#
-# Output:
-#   <empty-string>
-#
-# Return:
-#   - $FAIL always
-parser_throw_error() {
-    declare in_source="$1"
-    declare in_message="$2"
-
-    echo -e "$PARSER_ERROR_PREFIX: $in_source: ${ERROR_COLOR}$in_message$RESET_COLOR" >&2
-    exit "$FAIL"
-}
-
 # __parser_check_layout_correctness <page-content>
 # Check whether a page content is valid.
 #
