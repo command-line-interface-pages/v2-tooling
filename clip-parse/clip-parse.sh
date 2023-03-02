@@ -887,3 +887,23 @@ parser_output_command_example_code_tokens() {
 
     echo -n "$tokens"
 }
+
+# __parser_check_command_example_code_placeholder_alternative_correctness <placeholder-alternative>
+# Check whether a specific placeholder alternative is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if placeholder alternative is valid
+#   - 1 otherwise
+#
+# Notes:
+#   - placeholder without trailing \n
+#   - escaping is not checked
+__parser_check_command_example_code_placeholder_alternative_correctness() {
+    declare in_placeholder_alternative_content="$1"
+
+    # shellcheck disable=2016
+    sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)[*+?]? +[^{}]+$/! Q1' <<<"$in_placeholder_alternative_content"
+}
