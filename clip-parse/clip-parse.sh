@@ -15,6 +15,7 @@ declare -i INVALID_TAG_VALUE_FAIL=12
 declare -i INVALID_EXAMPLE_INDEX_FAIL=20
 declare -i INVALID_CONSTRUCT_FAIL=21
 declare -i INVALID_TOKEN_INDEX_FAIL=22
+declare -i INVALID_TOKEN_VALUE_FAIL=23
 
 # __parser_check_layout_correctness <page-content>
 # Check whether a specific page content is valid.
@@ -793,6 +794,7 @@ parser_output_command_example_description_tokens() {
 #   - 1 if page layout is invalid
 #   - 20 if example index is invalid
 #   - 21 if example description is invalid
+#   - 23 if description mnemonic is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -813,6 +815,23 @@ parser_output_command_example_description_mnemonic_tokens() {
     tokens="$(__parser_output_tokenized_by_balanced_tokens "$description" "[]")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
+
+    # shellcheck disable=2155
+    declare -i count="$(__parser_output_token_count "$tokens")"
+
+    declare -i index=0
+
+    # shellcheck disable=2155
+    while ((index < count)); do
+        declare token_type="$(__parser_output_token_type "$tokens" "$index")"
+        declare token_value="$(__parser_output_token_value "$tokens" "$index")"
+
+        if [[ "$token_type" == CONSTRUCT ]] && [[ "$token_value" =~ ' ' ]]; then
+            return "$INVALID_TOKEN_VALUE_FAIL"
+        fi
+
+        index+=1
+    done
 
     echo -n "$tokens"
 }
