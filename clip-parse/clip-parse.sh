@@ -834,3 +834,38 @@ parser_output_command_example_description_alternative_tokens() {
 
     __parser_output_tokenized_by_unbalanced_tokens "$in_alternative" "|"
 }
+
+# parser_output_command_example_code_tokens <page-content> <example-index>
+# Output code tokens for placeholders and literals from a specific page content.
+#
+# Output:
+#   <code-tokens>
+#
+# Return:
+#   - 0 if page layout && example index is valid
+#   - 1 if page layout is invalid
+#   - 20 if example index is invalid
+#   - 21 if example description is invalid
+#
+# Notes:
+#   - .clip page content without trailing \n
+#   - alternative parsing is the first parsing stage
+#   - mnemonics are considered to be nested inside alternatives or literals
+parser_output_command_example_code_tokens() {
+    declare in_page_content="$1"
+    declare -i in_example_index="$2"
+
+    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+
+    declare code=
+    code="$(parser_output_command_example_code "$in_page_content" "$in_example_index")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    declare tokens=
+    tokens="$(__parser_output_tokenized_by_balanced_tokens "$code" "{}")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    echo -n "$tokens"
+}
