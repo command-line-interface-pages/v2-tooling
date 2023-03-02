@@ -13,10 +13,11 @@ declare -i INVALID_TAG_VALUE_FAIL=12
 
 # Example validation fails
 declare -i INVALID_EXAMPLE_INDEX_FAIL=20
-declare -i INVALID_CONSTRUCT_FAIL=30
+declare -i INVALID_CONSTRUCT_FAIL=21
+declare -i INVALID_TOKEN_INDEX_FAIL=22
 
 # __parser_check_layout_correctness <page-content>
-# Check whether a page content is valid.
+# Check whether a specific page content is valid.
 #
 # Output:
 #   <empty-string>
@@ -34,8 +35,8 @@ __parser_check_layout_correctness() {
     sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$in_page_content"$'\n\n'
 }
 
-# parser_output_command_name_with_subcommands <page-content>
-# Output command name with subcommands from a page content.
+# parser_output_command_with_subcommands <page-content>
+# Output a command name with subcommands from a specific page content.
 #
 # Output:
 #   <command-with-subcommands>
@@ -54,8 +55,9 @@ parser_output_command_with_subcommands() {
     sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$in_page_content"
 }
 
+
 # __parser_check_command_summary_correctness <page-summary>
-# Check whether a command summary is valid.
+# Check whether a specific command summary is valid.
 #
 # Output:
 #   <empty-string>
@@ -74,13 +76,13 @@ __parser_check_command_summary_correctness() {
 }
 
 # parser_output_command_description <page-content>
-# Output command description from a page content.
+# Output a command description from a specific page content.
 #
 # Output:
 #   <command-description>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #
@@ -99,7 +101,7 @@ parser_output_command_description() {
 }
 
 # __parser_check_command_tag_correctness <command-tag>
-# Check whether a command tag is valid.
+# Check whether a specific command tag is valid.
 #
 # Output:
 #   <empty-string>
@@ -113,36 +115,36 @@ __parser_check_command_tag_correctness() {
     [[ "$in_command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
 }
 
-# __parser_check_command_tag_value_correctness <command-tag> <command-tag-value>
-# Check whether a command tag value is valid.
+# __parser_check_command_tag_value_correctness <command-tag> <tag-value>
+# Check whether a specific tag value is valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if command tag value is valid
+#   - 0 if tag value is valid
 #   - 1 otherwise
 __parser_check_command_tag_value_correctness() {
     declare in_command_tag="$1"
-    declare in_command_tag_value="$2"
+    declare in_tag_value="$2"
 
     if [[ "$in_command_tag" =~ ^(Internal|Deprecated)$ ]]; then
-        [[ "$in_command_tag_value" =~ ^(true|false)$ ]]
-    elif [[ "$in_command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible)$ ]]; then
-        ! [[ "$in_command_tag_value" =~ ,, ]]
+        [[ "$in_tag_value" =~ ^(true|false)$ ]]
+    elif [[ "$in_command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
+        ! [[ "$in_tag_value" =~ ,, ]]
     else
-        [[ "$in_command_tag" =~ ^(More information|Help|Version)$ ]]
+        [[ "$in_command_tag" =~ ^(More information)$ ]]
     fi
 }
 
-# __parser_output_command_tag <page-content>
-# Output command tags from a page content.
+# __parser_output_command_tags <page-content>
+# Output all command tags from a specific page content.
 #
 # Output:
 #   <command-tags>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 11 if command tag is invalid
@@ -165,24 +167,24 @@ __parser_output_command_tags() {
 
     declare -i index=0
     while ((index < "${#command_tags[@]}")); do
-        declare tag="${command_tags[index]}"
-        declare value="${command_tags[index + 1]}"
-        __parser_check_command_tag_correctness "$tag" || return "$INVALID_TAG_FAIL"
-        __parser_check_command_tag_value_correctness "$tag" "$value" || return "$INVALID_TAG_VALUE_FAIL"
+        declare command_tag="${command_tags[index]}"
+        declare tag_value="${command_tags[index + 1]}"
+        __parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
+        __parser_check_command_tag_value_correctness "$command_tag" "$tag_value" || return "$INVALID_TAG_VALUE_FAIL"
         index+=2
     done
 
     echo -n "$output"
 }
 
-# __parser_output_command_tag <page-content> <tag>
-# Output specific tag from a page content.
+# __parser_output_command_tag_value <page-content> <command-tag>
+# Output a specific command tag from a page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary, tag is valid
+#   - 0 if page layout && command summary && command tag && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 11 if command tag is invalid
@@ -216,14 +218,14 @@ __parser_output_command_tag_value() {
     done
 }
 
-# parser_output_command_more_information_tag <page-content>
-# Output "More information" tag from a page content.
+# parser_output_command_more_information_tag_value <page-content>
+# Output "More information" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -236,14 +238,14 @@ parser_output_command_more_information_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "More information"
 }
 
-# parser_output_command_internal_tag <page-content>
-# Output "Internal" tag from a page content.
+# parser_output_command_internal_tag_value <page-content>
+# Output "Internal" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -256,14 +258,14 @@ parser_output_command_internal_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Internal"
 }
 
-# parser_output_command_internal_tag_or_default <page-content>
-# Output "Internal" tag from a page content or it's default when it's missing.
+# parser_output_command_internal_tag_value_or_default <page-content>
+# Output "Internal" tag from a specific page content or it's default when it's missing.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -282,14 +284,14 @@ parser_output_command_internal_tag_value_or_default() {
     echo -n "$output"
 }
 
-# parser_output_command_deprecated_tag <page-content>
-# Output "Deprecated" tag from a page content.
+# parser_output_command_deprecated_tag_value <page-content>
+# Output "Deprecated" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -302,14 +304,14 @@ parser_output_command_deprecated_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Deprecated"
 }
 
-# parser_output_command_deprecated_tag_or_default <page-content>
-# Output "Deprecated" tag from a page content or it's default when it's missing.
+# parser_output_command_deprecated_tag_value_or_default <page-content>
+# Output "Deprecated" tag from a specific page content or it's default when it's missing.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -328,14 +330,14 @@ parser_output_command_deprecated_tag_value_or_default() {
     echo -n "$output"
 }
 
-# parser_output_command_see_also_tag <page-content>
-# Output "See also" tag from a page content.
+# parser_output_command_see_also_tag_value <page-content>
+# Output "See also" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -348,14 +350,14 @@ parser_output_command_see_also_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "See also"
 }
 
-# parser_output_command_aliases_tag <page-content>
-# Output "Aliases" tag from a page content.
+# parser_output_command_aliases_tag_value <page-content>
+# Output "Aliases" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -368,14 +370,14 @@ parser_output_command_aliases_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Aliases"
 }
 
-# parser_output_command_syntax_compatible_tag <page-content>
-# Output "Syntax compatible" tag from a page content.
+# parser_output_command_syntax_compatible_tag_value <page-content>
+# Output "Syntax compatible" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -388,14 +390,14 @@ parser_output_command_syntax_compatible_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Syntax compatible"
 }
 
-# parser_output_command_help_tag <page-content>
-# Output "Help" tag from a page content.
+# parser_output_command_help_tag_value <page-content>
+# Output "Help" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -408,14 +410,14 @@ parser_output_command_help_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Help"
 }
 
-# parser_output_command_version_tag <page-content>
-# Output "Version" tag from a page content.
+# parser_output_command_version_tag_value <page-content>
+# Output "Version" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -428,14 +430,14 @@ parser_output_command_version_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Version"
 }
 
-# parser_output_command_structure_compatible_tag <page-content>
-# Output "Structure compatible" tag from a page content.
+# parser_output_command_structure_compatible_tag_value <page-content>
+# Output "Structure compatible" tag from a specific page content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout, command summary is valid
+#   - 0 if page layout && command summary && tag value are valid
 #   - 1 if page layout is invalid
 #   - 10 if command summary is invalid
 #   - 12 if tag value is invalid
@@ -448,8 +450,9 @@ parser_output_command_structure_compatible_tag_value() {
     __parser_output_command_tag_value "$in_page_content" "Structure compatible"
 }
 
+
 # __parser_output_command_examples <page-content>
-# Output command examples from a page content.
+# Output command examples from a specific page content.
 #
 # Output:
 #   <command-examples>
@@ -469,11 +472,11 @@ __parser_output_command_examples() {
     sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$in_page_content"
 }
 
-# __parser_output_command_examples_count <page-content>
-# Output command example count from a page content.
+# __parser_output_command_example_count <page-content>
+# Output an example count from a specific page content.
 #
 # Output:
-#   <command-examples-count>
+#   <examples-count>
 #
 # Return:
 #   - 0 if page layout is valid
@@ -497,13 +500,13 @@ __parser_output_command_example_count() {
 }
 
 # parser_output_command_example_description <page-content> <index>
-# Output command example description from a page content.
+# Output a specific example description from a page content.
 #
 # Output:
-#   <command-example-description>
+#   <example-description>
 #
 # Return:
-#   - 0 if page layout, index is valid
+#   - 0 if page layout && index are valid
 #   - 1 if page layout is invalid
 #   - 20 if index is invalid
 #
@@ -528,13 +531,13 @@ parser_output_command_example_description() {
 }
 
 # parser_output_command_example_code <page-content> <index>
-# Output command example code from a page content.
+# Output a specific example code from a page content.
 #
 # Output:
-#   <command-example-code>
+#   <example-code>
 #
 # Return:
-#   - 0 if page layout, index is valid
+#   - 0 if page layout && index are valid
 #   - 1 if page layout is invalid
 #   - 20 if index is invalid
 #
@@ -559,10 +562,10 @@ parser_output_command_example_code() {
 }
 
 # __parser_output_current_token <string> <index> <next-token-start>
-# Output current token from a string.
+# Output the current token from a specific string.
 #
 # Output:
-#   <string-token>
+#   <token>
 #
 # Return:
 #   - index after traversal
@@ -586,14 +589,14 @@ __parser_output_current_token() {
 }
 
 # __parser_output_tokenized_by_balanced_tokens <string> <special-construct-start-and-end>
-# Output tokens from a string.
+# Output all tokens from a specific string.
 #
 # Output:
-#   <string-tokens>
+#   <tokens>
 #
 # Return:
 #   - 0 if string is valid
-#   - 1 otherwise
+#   - 21 otherwise
 #
 # Notes:
 #   - string without trailing \n
@@ -631,14 +634,14 @@ __parser_output_tokenized_by_balanced_tokens() {
 }
 
 # __parser_output_tokenized_by_unbalanced_tokens <string> <special-construct>
-# Output tokens from a string.
+# Output all tokens from a specific string.
 #
 # Output:
-#   <string-tokens>
+#   <tokens>
 #
 # Return:
 #   - 0 if string is valid
-#   - 1 otherwise
+#   - 21 otherwise
 #
 # Notes:
 #   - string without trailing \n
@@ -663,7 +666,7 @@ __parser_output_tokenized_by_unbalanced_tokens() {
 }
 
 # __parser_output_token_count <tokens>
-# Output token count from a token list.
+# Output token count from a specific token list.
 #
 # Output:
 #   <token-count>
@@ -681,69 +684,80 @@ __parser_output_token_count() {
 }
 
 # __parser_output_token_value <tokens> <index>
-# Output token value from a token list.
+# Output a specific token value from a token list.
 #
 # Output:
 #   <token-value>
 #
 # Return:
-#   - 0 always
+#   - 0 index is valid
+#   - 22 otherwise
 __parser_output_token_value() {
     declare in_tokens="$1"
     declare in_index="$2"
 
+    ((in_index < 0)) && return "$INVALID_TOKEN_INDEX_FAIL"
+
     # shellcheck disable=2155
     declare count="$(__parser_output_token_count "$in_tokens")"
+    ((in_index >= count)) && return "$INVALID_TOKEN_INDEX_FAIL"
+
     declare -i line=0
-    declare -i current_index=0
+    declare -i index=0
 
     mapfile -t tokens <<<"$in_tokens"
 
-    while ((line < count * 2)) && ((current_index != in_index)); do
+    while ((line < count * 2)) && ((index != in_index)); do
         line+=2
-        current_index+=1
+        index+=1
     done
 
     [[ -n "${tokens[line + 1]}" ]] && echo -n "${tokens[line + 1]}"
 }
 
 # __parser_output_token_type <tokens> <index>
-# Output token type from a token list.
+# Output a specific token type from a token list.
 #
 # Output:
 #   <token-type>
 #
 # Return:
-#   - 0 always
+#   - 0 index is valid
+#   - 22 otherwise
 __parser_output_token_type() {
     declare in_tokens="$1"
     declare in_index="$2"
 
+    ((in_index < 0)) && return "$INVALID_TOKEN_INDEX_FAIL"
+
     # shellcheck disable=2155
     declare count="$(__parser_output_token_count "$in_tokens")"
+    ((in_index >= count)) && return "$INVALID_TOKEN_INDEX_FAIL"
+
     declare -i line=0
-    declare -i current_index=0
+    declare -i index=0
 
     mapfile -t tokens <<<"$in_tokens"
 
-    while ((line < count * 2)) && ((current_index != in_index)); do
+    while ((line < count * 2)) && ((index != in_index)); do
         line+=2
-        current_index+=1
+        index+=1
     done
 
     [[ -n "${tokens[line]}" ]] && echo -n "${tokens[line]}"
 }
 
-# parser_output_command_example_description_tokens <page-content> <index>
-# Output command example description tokens for alternatives and literals from a page content.
+# parser_output_command_example_description_tokens <page-content> <example-index>
+# Output an example description tokens for alternatives and literals from a specific page content.
 #
 # Output:
-#   <command-example-description>
+#   <description-tokens>
 #
 # Return:
-#   - 0 if page layout, index is valid
+#   - 0 if page layout && example index is valid
 #   - 1 if page layout is invalid
-#   - 20 if index is invalid
+#   - 20 if example index is invalid
+#   - 21 if example description is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -751,12 +765,12 @@ __parser_output_token_type() {
 #   - mnemonics are considered to be nested inside alternatives or literals
 parser_output_command_example_description_tokens() {
     declare in_page_content="$1"
-    declare -i in_index="$2"
+    declare -i in_example_index="$2"
 
     ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     declare description=
-    description="$(parser_output_command_example_description "$in_page_content" "$in_index")"
+    description="$(parser_output_command_example_description "$in_page_content" "$in_example_index")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -768,16 +782,17 @@ parser_output_command_example_description_tokens() {
     echo -n "$tokens"
 }
 
-# parser_output_command_example_description_mnemonic_tokens <page-content> <index>
-# Output command example description tokens for mnemonics and literals from a page content.
+# parser_output_command_example_description_mnemonic_tokens <page-content> <example-index>
+# Output an example description tokens for mnemonics and literals from a specific page content.
 #
 # Output:
-#   <command-example-description>
+#   <description-tokens>
 #
 # Return:
-#   - 0 if page layout, index is valid
+#   - 0 if page layout && example index is valid
 #   - 1 if page layout is invalid
-#   - 20 if index is invalid
+#   - 20 if example index is invalid
+#   - 21 if example description is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
@@ -785,12 +800,12 @@ parser_output_command_example_description_tokens() {
 #   - alternatives should be already expanded before parsing mnemonics
 parser_output_command_example_description_mnemonic_tokens() {
     declare in_page_content="$1"
-    declare -i in_index="$2"
+    declare -i in_example_index="$2"
 
     ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
 
     declare description=
-    description="$(parser_output_command_example_description "$in_page_content" "$in_index")"
+    description="$(parser_output_command_example_description "$in_page_content" "$in_example_index")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -803,15 +818,14 @@ parser_output_command_example_description_mnemonic_tokens() {
 }
 
 # parser_output_command_example_description_alternative_tokens <alternative>
-# Output tokens from an alternative.
+# Output tokens from a specific alternative.
 #
 # Output:
 #   <alternative-tokens>
 #
 # Return:
-#   - 0 if page layout, index is valid
-#   - 1 if page layout is invalid
-#   - 20 if index is invalid
+#   - 0 if alternative is valid
+#   - 21 if alternative is invalid
 #
 # Notes:
 #   - .clip page content without trailing \n
