@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 declare -i SUCCESS=0
-declare -i FAIL=1
 
 # Page validation fails
 declare -i INVALID_LAYOUT_FAIL=1
