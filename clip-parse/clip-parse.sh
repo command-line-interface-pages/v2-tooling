@@ -15,6 +15,7 @@ declare -i INVALID_EXAMPLE_INDEX_FAIL=20
 declare -i INVALID_CONSTRUCT_FAIL=21
 declare -i INVALID_TOKEN_INDEX_FAIL=22
 declare -i INVALID_TOKEN_VALUE_FAIL=23
+declare -i INVALID_PLACEHOLDER_ALTERNATIVE_FAIL=24
 
 # __parser_check_layout_correctness <page-content>
 # Check whether a specific page content is valid.
@@ -906,4 +907,50 @@ __parser_check_command_example_code_placeholder_alternative_correctness() {
 
     # shellcheck disable=2016
     sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)[*+?]? +[^{}]+$/! Q1' <<<"$in_placeholder_alternative_content"
+}
+
+# parser_output_command_example_code_placeholder_alternative_type <page-content> <placeholder-alternative>
+# Output an alternative type for a specific placeholder alternative.
+#
+# Output:
+#   <alternative-type>
+#
+# Return:
+#   - 0 if placeholder alternative is valid
+#   - 24 otherwise
+#
+# Notes:
+#   - placeholder without trailing \n
+parser_output_command_example_code_placeholder_alternative_type() {
+    declare in_placeholder_alternative_content="$1"
+
+    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+
+    sed -E 's/^(\/|\/\?)?([^ *+?]+).+$/\2/' <<<"$in_placeholder_alternative_content"
+}
+
+# parser_output_command_example_code_placeholder_alternative_quantifier <page-content> <placeholder-alternative>
+# Output an quantifier type for a specific placeholder alternative.
+#
+# Output:
+#   <quantifier-type>
+#
+# Return:
+#   - 0 if placeholder alternative is valid
+#   - 24 otherwise
+#
+# Notes:
+#   - placeholder without trailing \n
+parser_output_command_example_code_placeholder_alternative_quantifier() {
+    declare in_placeholder_alternative_content="$1"
+
+    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+
+    declare beginning='(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))'
+    ! sed -nE "/^$beginning/! Q1" <<<"$in_placeholder_alternative_content" && return "$SUCCESS"
+
+    sed -E "s/^$beginning.+$/\2/
+s/^ +//" <<<"$in_placeholder_alternative_content"
 }
