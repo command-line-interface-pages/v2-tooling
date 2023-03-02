@@ -16,6 +16,7 @@ declare -i INVALID_CONSTRUCT_FAIL=21
 declare -i INVALID_TOKEN_INDEX_FAIL=22
 declare -i INVALID_TOKEN_VALUE_FAIL=23
 declare -i INVALID_PLACEHOLDER_ALTERNATIVE_FAIL=24
+declare -i INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED=25
 
 # __parser_check_layout_correctness <page-content>
 # Check whether a specific page content is valid.
@@ -906,7 +907,7 @@ __parser_check_command_example_code_placeholder_alternative_correctness() {
     declare in_placeholder_alternative_content="$1"
 
     # shellcheck disable=2016
-    sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)[*+?]? +[^{}]+$/! Q1' <<<"$in_placeholder_alternative_content"
+    sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)([*+?]!?)? +[^{}]+$/! Q1' <<<"$in_placeholder_alternative_content"
 }
 
 # parser_output_command_example_code_placeholder_alternative_type <page-content> <placeholder-alternative>
@@ -953,4 +954,28 @@ parser_output_command_example_code_placeholder_alternative_quantifier() {
 
     sed -E "s/^$beginning.+$/\2/
 s/^ +//" <<<"$in_placeholder_alternative_content"
+}
+
+# parser_check_command_example_code_placeholder_alternative_allow_repetitions <placeholder-alternative>
+# Check whether a specific placeholder alternative allows repetitions.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if placeholder alternative is valid && repetition is allowed
+#   - 24 if placeholder alternative is invalid
+#   - 25 if repetition is not allowed
+#
+# Notes:
+#   - placeholder without trailing \n
+#   - returns 0 for placeholder alternatives without repetition (it's allowed to repeat, but just once)
+parser_check_command_example_code_placeholder_alternative_allow_repetitions() {
+    declare in_placeholder_alternative_content="$1"
+
+    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    
+    ! sed -nE '/^(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))!/! Q1' <<<"$in_placeholder_alternative_content" ||
+        return "$INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED"
 }
