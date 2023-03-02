@@ -3,10 +3,15 @@
 declare -i SUCCESS=0
 declare -i FAIL=1
 
+# Page validation fails
 declare -i INVALID_LAYOUT_FAIL=1
+
+# Summary validation fails
 declare -i INVALID_SUMMARY_FAIL=10
 declare -i INVALID_TAG_FAIL=11
 declare -i INVALID_TAG_VALUE_FAIL=12
+
+# Example validation fails
 declare -i INVALID_EXAMPLE_INDEX_FAIL=20
 declare -i INVALID_CONSTRUCT_FAIL=30
 
