@@ -27,6 +27,48 @@ declare -i PARSER_INVALID_TOKENS_CODE=4
 
 
 
+# __parser_string_join <separator> <strings>
+# Output joined strings.
+#
+# Output:
+#   <strings>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <string> should not contain trailing \n
+__parser_string_join() {
+  declare in_separator="$1"
+  declare in_string="$2"
+
+  if shift 2; then
+    printf '%s' "$in_string" "${@/#/$in_separator}"
+  fi
+}
+
+# __parser_string_unify <string>
+# Output string without repeated comma-separated items.
+#
+# Output:
+#   <string>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <string> should not contain trailing \n
+__parser_string_unify() {
+    declare string="$1"
+
+    mapfile -t string_array < <(echo -n "$string" | sed -E 's/ +/ /g
+    s/ *, */\n/g' | sort -r -u)
+
+    __parser_string_join ", " "${string_array[@]}"
+}
+
+
+
 # __parser_check_content <content>
 # Check whether a content is valid.
 #
@@ -434,7 +476,7 @@ parser_summary_deprecated_value_or_default() {
 parser_summary_see_also_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "See also"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "See also")")"
 }
 
 # parser_summary_aliases_value <content>
@@ -454,7 +496,7 @@ parser_summary_see_also_value() {
 parser_summary_aliases_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Aliases"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Aliases")")"
 }
 
 # parser_summary_syntax_compatible_value <content>
@@ -474,7 +516,7 @@ parser_summary_aliases_value() {
 parser_summary_syntax_compatible_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Syntax compatible"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Syntax compatible")")"
 }
 
 # parser_summary_help_value <content>
@@ -494,7 +536,7 @@ parser_summary_syntax_compatible_value() {
 parser_summary_help_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Help"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Help")")"
 }
 
 # parser_summary_version_value <content>
@@ -514,7 +556,7 @@ parser_summary_help_value() {
 parser_summary_version_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Version"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Version")")"
 }
 
 # parser_summary_structure_compatible_value <content>
@@ -534,7 +576,7 @@ parser_summary_version_value() {
 parser_summary_structure_compatible_value() {
     declare in_page_content="$1"
 
-    __parser_summary_tag_value "$in_page_content" "Structure compatible"
+    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Structure compatible")")"
 }
 
 
@@ -558,46 +600,6 @@ __parser_summary_tag_definition() {
     [[ "$in_tag" =~ ^(Internal|Deprecated)$ && "$in_tag_value" == false ]] && return "$SUCCESS"
 
     echo -n "> $in_tag: $in_tag_value"
-}
-
-# __parser_string_join <separator> <strings>
-# Output joined strings.
-#
-# Output:
-#   <strings>
-#
-# Return:
-#   - 0 always
-#
-# Notes:
-#   - <string> should not contain trailing \n
-__parser_string_join() {
-  declare in_separator="$1"
-  declare in_string="$2"
-
-  if shift 2; then
-    printf '%s' "$in_string" "${@/#/$in_separator}"
-  fi
-}
-
-# __parser_string_unify <string>
-# Output string without repeated comma-separated items.
-#
-# Output:
-#   <string>
-#
-# Return:
-#   - 0 always
-#
-# Notes:
-#   - <string> should not contain trailing \n
-__parser_string_unify() {
-    declare string="$1"
-
-    mapfile -t string_array < <(echo -n "$string" | sed -E 's/ +/ /g
-    s/ *, */\n/g' | sort -r -u)
-
-    __parser_string_join ", " "${string_array[@]}"
 }
 
 # parser_summary_cleaned_up <content>
@@ -632,17 +634,17 @@ parser_summary_cleaned_up() {
     # shellcheck disable=2155
     declare deprecated="$(parser_summary_deprecated_value_or_default "$in_content")"
     # shellcheck disable=2155
-    declare see_also="$(__parser_string_unify "$(parser_summary_see_also_value "$in_content")")"
+    declare see_also="$(parser_summary_see_also_value "$in_content")"
     # shellcheck disable=2155
-    declare aliases="$(__parser_string_unify "$(parser_summary_aliases_value "$in_content")")"
+    declare aliases="$(parser_summary_aliases_value "$in_content")"
     # shellcheck disable=2155
-    declare syntax_compatible="$(__parser_string_unify "$(parser_summary_syntax_compatible_value "$in_content")")"
+    declare syntax_compatible="$(parser_summary_syntax_compatible_value "$in_content")"
     # shellcheck disable=2155
-    declare help="$(__parser_string_unify "$(parser_summary_help_value "$in_content")")"
+    declare help="$(parser_summary_help_value "$in_content")"
     # shellcheck disable=2155
-    declare version="$(__parser_string_unify "$(parser_summary_version_value "$in_content")")"
+    declare version="$(parser_summary_version_value "$in_content")"
     # shellcheck disable=2155
-    declare structure_compatible="$(__parser_string_unify "$(parser_summary_structure_compatible_value "$in_content")")"
+    declare structure_compatible="$(parser_summary_structure_compatible_value "$in_content")"
     
     echo -n "> $description
 $(__parser_summary_tag_definition "Internal" "$internal")
