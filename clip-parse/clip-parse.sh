@@ -578,9 +578,7 @@ parser_summary_cleaned_up() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
-        __parser_check_summary "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
-        __parser_summary_tags "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+        __parser_summary_tags "$in_content" > /dev/null || return "$PARSER_INVALID_SUMMARY_CODE"
     fi
 
     CHECK= # as we already checked input there is no need to do it in each data request
