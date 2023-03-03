@@ -538,6 +538,88 @@ parser_summary_structure_compatible_value() {
 }
 
 
+# __parser_summary_tag_definition <tag> <tag-value>
+# Output a tag definition.
+#
+# Output:
+#   <tag-definition>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <tag> and <tag-value> should not contain trailing \n
+__parser_summary_tag_definition() {
+    declare in_tag="$1"
+    declare in_tag_value="$2"
+
+    [[ -z "$in_tag" || -z "$in_tag_value" ]] && return "$SUCCESS"
+
+    [[ "$in_tag" =~ ^(Internal|Deprecated)$ && "$in_tag_value" == false ]] && return "$SUCCESS"
+
+    echo -n "> $in_tag: $in_tag_value"
+}
+
+# parser_summary_cleaned_up <content>
+# Output summary with sorted tags and applied spacing and punctuation fixes.
+#
+# Output:
+#   <summary>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_cleaned_up() {
+    declare in_content="$1"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+        __parser_check_summary "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+        __parser_summary_tags "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+    fi
+
+    CHECK= # as we already checked input there is no need to do it in each data request
+
+    # shellcheck disable=2155
+    declare description="$(parser_summary_description "$in_content")"
+    # shellcheck disable=2155
+    declare more_information="$(parser_summary_more_information_value "$in_content")"
+    # shellcheck disable=2155
+    declare internal="$(parser_summary_internal_value_or_default "$in_content")"
+    # shellcheck disable=2155
+    declare deprecated="$(parser_summary_deprecated_value_or_default "$in_content")"
+    # shellcheck disable=2155
+    declare see_also="$(parser_summary_see_also_value "$in_content")"
+    # shellcheck disable=2155
+    declare aliases="$(parser_summary_aliases_value "$in_content")"
+    # shellcheck disable=2155
+    declare syntax_compatible="$(parser_summary_syntax_compatible_value "$in_content")"
+    # shellcheck disable=2155
+    declare help="$(parser_summary_help_value "$in_content")"
+    # shellcheck disable=2155
+    declare version="$(parser_summary_version_value "$in_content")"
+    # shellcheck disable=2155
+    declare structure_compatible="$(parser_summary_structure_compatible_value "$in_content")"
+    
+    echo -n "> $description
+$(__parser_summary_tag_definition "Internal" "$internal")
+$(__parser_summary_tag_definition "Deprecated" "$deprecated")
+$(__parser_summary_tag_definition "Help" "$help")
+$(__parser_summary_tag_definition "Version" "$version")
+$(__parser_summary_tag_definition "Syntax compatible" "$syntax_compatible")
+$(__parser_summary_tag_definition "Structure compatible" "$structure_compatible")
+$(__parser_summary_tag_definition "Aliases" "$aliases")
+$(__parser_summary_tag_definition "See also" "$see_also")
+$(__parser_summary_tag_definition "More information" "$more_information")" |
+    sed -nE '/./ p'
+}
+
+
 
 # __parser_output_command_examples <page-content>
 # Output command examples from a specific page content.
@@ -1112,27 +1194,3 @@ parser_output_command_example_code_placeholder_alternative_examples() {
     declare -i description_length="${#alternative_description} + 1"
     echo -n "$(sed -E 's/^ +//' <<< "${in_alternative_content:description_length}")"
 }
-
-CHECK=0 parser_summary_internal_value '# am
-
-> Android activity manager
-> Internal: f
-> More information: https://developer.android.com/studio/command-line/adb#am.
-
-- Start a specific activity:
-
-`am start -n {string activity: com.android.settings/.Settings}`
-
-- Start an activity and pass [d]ata to it:
-
-`am start -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`
-
-- Start an activity matching a specific action and [c]ategory:
-
-`am start -a {string activity: android.intent.action.MAIN} -c {string category: android.intent.category.HOME}`
-
-- Convert an intent to a URI:
-
-`am to-uri -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`' 'More information'
-echo $?
-
