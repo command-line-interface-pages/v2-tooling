@@ -579,7 +579,6 @@ parser_summary_structure_compatible_value() {
     echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Structure compatible")")"
 }
 
-
 # __parser_summary_tag_definition <tag> <tag-value>
 # Output a tag definition.
 #
