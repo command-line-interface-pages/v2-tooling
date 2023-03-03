@@ -18,200 +18,285 @@ declare -i INVALID_TOKEN_VALUE_FAIL=23
 declare -i INVALID_PLACEHOLDER_ALTERNATIVE_FAIL=24
 declare -i INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED=25
 
-# __parser_check_layout_correctness <page-content>
-# Check whether a specific page content is valid.
+
+
+declare -i PARSER_INVALID_CONTENT_CODE=1
+declare -i PARSER_INVALID_SUMMARY_CODE=2
+declare -i PARSER_INVALID_EXAMPLES_CODE=3
+declare -i PARSER_INVALID_TOKENS_CODE=4
+
+
+
+# __parser_check_content <content>
+# Check whether a content is valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if page layout is valid
-#   - 1 otherwise
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
 #
 # Notes:
-#   - .clip page content without trailing \n
-__parser_check_layout_correctness() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+__parser_check_content() {
+    declare in_content="$1"
 
     # shellcheck disable=2016
-    sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$in_page_content"$'\n\n'
+    sed -nE ':x
+        N
+        $! bx
+        /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$in_content"$'\n\n' ||
+        return "$PARSER_INVALID_CONTENT_CODE"
 }
 
-# parser_output_command_with_subcommands <page-content>
-# Output a command name with subcommands from a specific page content.
+# parser_header <content>
+# Output a header from a content.
 #
 # Output:
-#   <command-with-subcommands>
+#   <header>
 #
 # Return:
-#   - 0 if page layout is valid
-#   - 1 otherwise
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_with_subcommands() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_header() {
+    declare in_content="$1"
 
-    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+    fi
 
-    sed -nE '1 { s/^# +//; s/ +$//; s/ +/ /g; p; }' <<<"$in_page_content"
+    sed -nE '1 {
+        s/^# +//
+        s/ +$//
+        s/ +/ /g
+        p
+    }' <<<"$in_content"
 }
 
 
-# __parser_check_command_summary_correctness <page-summary>
-# Check whether a specific command summary is valid.
+
+# __parser_check_summary <summary>
+# Check whether a summary is valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if page summary is valid
-#   - 1 otherwise
+#   - 0 if <summary> is valid
+#   - $PARSER_INVALID_SUMMARY_CODE otherwise
 #
 # Notes:
-#   - page summary without trailing \n
-__parser_check_command_summary_correctness() {
-    declare in_page_summary="$1"
+#   - <summary> should not contain trailing \n
+__parser_check_summary() {
+    declare in_summary="$1"
 
     # shellcheck disable=2016
-    sed -nE ':x; N; $! bx; /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$in_page_summary"$'\n'
+    sed -nE ':x
+        N
+        $! bx
+        /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$in_summary"$'\n' ||
+        return "$PARSER_INVALID_SUMMARY_CODE"
 }
 
-# parser_output_command_description <page-content>
-# Output a command description from a specific page content.
+# parser_summary_description <content>
+# Output a description from a summary.
 #
 # Output:
-#   <command-description>
+#   <description>
 #
 # Return:
-#   - 0 if page layout && command summary are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_description() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_description() {
+    declare in_content="$1"
 
-    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_content "$in_content" || return "$?"
+    fi
     
     # shellcheck disable=2155
-    declare command_summary="$(sed -nE '/^>/ p' <<<"$in_page_content")"
-    __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
+    declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_summary "$summary" || return "$?"
+    fi
 
-    sed -nE '/^> [^:]+$/ { s/^> +//; s/ +$//; s/  +/ /g; p; }' <<<"$command_summary"
+    sed -nE '/^> [^:]+$/ {
+        s/^> +//
+        s/\.$//
+        s/ +$//
+        s/  +/ /g
+        p
+    }' <<<"$summary"
 }
 
-# __parser_check_command_tag_correctness <command-tag>
-# Check whether a specific command tag is valid.
+# __parser_check_summary_tag <tag>
+# Check whether a tag is valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if command tag is valid
-#   - 1 otherwise
-__parser_check_command_tag_correctness() {
-    declare in_command_tag="$1"
+#   - 0 if <tag> is valid
+#   - $PARSER_INVALID_SUMMARY_CODE otherwise
+#
+# Notes:
+#   - <tag> should not contain trailing \n
+__parser_check_summary_tag() {
+    declare in_tag="$1"
 
-    [[ "$in_command_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases|Syntax compatible|Help|Version|Structure compatible)$ ]]
+    [[ "$in_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases\
+|Syntax compatible|Help|Version|Structure compatible)$ ]] ||
+        return "$PARSER_INVALID_SUMMARY_CODE"
 }
 
-# __parser_check_command_tag_value_correctness <command-tag> <tag-value>
-# Check whether a specific tag value is valid.
+# __parser_check_summary_tag_value <tag> <tag-value>
+# Check whether a tag value is valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if tag value is valid
-#   - 1 otherwise
-__parser_check_command_tag_value_correctness() {
-    declare in_command_tag="$1"
+#   - 0 if <tag-value> is valid
+#   - $PARSER_INVALID_SUMMARY_CODE otherwise
+#
+# Notes:
+#   - <tag> and <tag-value> should not contain trailing \n
+__parser_check_summary_tag_value() {
+    declare in_tag="$1"
     declare in_tag_value="$2"
 
-    if [[ "$in_command_tag" =~ ^(Internal|Deprecated)$ ]]; then
-        [[ "$in_tag_value" =~ ^(true|false)$ ]]
-    elif [[ "$in_command_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
-        ! [[ "$in_tag_value" =~ ,, ]]
-    else
-        [[ "$in_command_tag" =~ ^(More information)$ ]]
+    if [[ "$in_tag" =~ ^(Internal|Deprecated)$ ]]; then
+        [[ "$in_tag_value" =~ ^(true|false)$ ]] || return "$PARSER_INVALID_SUMMARY_CODE"
+    elif [[ "$in_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
+        ! [[ "$in_tag_value" =~ ,, ]] || return "$PARSER_INVALID_SUMMARY_CODE"
     fi
 }
 
-# __parser_output_command_tags <page-content>
-# Output all command tags from a specific page content.
+# __parser_check_summary_tags_values <tags>
+# Check whether tag values are valid.
 #
 # Output:
-#   <command-tags>
+#   <empty-string>
 #
 # Return:
-#   - 0 if page layout && command summary are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 11 if command tag is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <tag-value> is valid
+#   - $PARSER_INVALID_SUMMARY_CODE otherwise
 #
 # Notes:
-#   - .clip page content without trailing \n
-__parser_output_command_tags() {
-    declare in_page_content="$1"
+#   - <tag> and <tag-value> should not contain trailing \n
+__parser_check_summary_tags_values() {
+    declare in_tags="$1"
 
-    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
-    
-    # shellcheck disable=2155
-    declare command_summary="$(sed -nE '/^>/ p' <<<"$in_page_content")"
-    __parser_check_command_summary_correctness "$command_summary" || return "$INVALID_SUMMARY_FAIL"
-
-    # shellcheck disable=2155
-    declare output="$(sed -nE '/^> [^:]+:.+$/ { s/^> //; s/: +/\n/; p; }' <<<"$command_summary")"
-    mapfile -t command_tags <<<"$output"
+    mapfile -t tags_array <<<"$in_tags"
 
     declare -i index=0
-    while ((index < "${#command_tags[@]}")); do
-        declare command_tag="${command_tags[index]}"
-        declare tag_value="${command_tags[index + 1]}"
-        __parser_check_command_tag_correctness "$command_tag" || return "$INVALID_TAG_FAIL"
-        __parser_check_command_tag_value_correctness "$command_tag" "$tag_value" || return "$INVALID_TAG_VALUE_FAIL"
+    while ((index < "${#tags_array[@]}")); do
+        declare tag="${tags_array[index]}"
+        declare tag_value="${tags_array[index + 1]}"
+        
+        if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+            __parser_check_summary_tag "$tag" || return "$?"
+            __parser_check_summary_tag_value "$tag" "$tag_value" || return "$?"
+        fi
         index+=2
     done
-
-    echo -n "$output"
 }
 
-# __parser_output_command_tag_value <page-content> <command-tag>
-# Output a specific command tag from a page content.
+# __parser_summary_tags <content>
+# Output all tags from a summary.
+#
+# Output:
+#   <tags>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_summary_tags() {
+    declare in_content="$1"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_content "$in_content" || return "$?"
+    fi
+    
+    # shellcheck disable=2155
+    declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_summary "$summary" || return "$?"
+    fi
+
+    # shellcheck disable=2155
+    declare tags="$(sed -nE '/^> [^:]+:.+$/ {
+        s/^> +//
+        s/\.$//
+        s/ +$//
+        s/ +:$//
+        s/  +/ /g
+        s/: +/\n/
+        p
+    }' <<<"$summary")"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_summary_tags_values "$tags" || return "$?"
+    fi
+
+    echo -n "$tags"
+}
+
+# __parser_summary_tag_value <content> <tag>
+# Output a tag value from a summary.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && command tag && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 11 if command tag is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-__parser_output_command_tag_value() {
-    declare in_page_content="$1"
-    declare in_command_tag="$2"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_summary_tag_value() {
+    declare in_content="$1"
+    # shellcheck disable=2155
+    declare in_tag="$(sed -E 's/^ +//
+        s/ +$//
+        s/ +/ /g' <<<"$2")"
 
-    __parser_check_command_tag_correctness "$in_command_tag" || return "$INVALID_TAG_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_summary_tag "$in_tag" || return "$?"
+    fi
 
-    declare output=
-    output="$(__parser_output_command_tags "$in_page_content")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-    mapfile -t command_tags <<< "$output"
+    declare tags=
+    tags="$(__parser_summary_tags "$in_content")"
+    declare -i status=$?
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    mapfile -t tags_array <<< "$tags"
 
     declare -i index=0
-    while ((index < "${#command_tags[@]}")); do
-        declare tag="${command_tags[index]}"
-        declare value="${command_tags[index + 1]}"
+    while ((index < "${#tags_array[@]}")); do
+        declare tag="${tags_array[index]}"
+        declare value="${tags_array[index + 1]}"
         
-        [[ "$tag" == "$in_command_tag" ]] && {
+        [[ "$tag" == "$in_tag" ]] && {
             echo -n "$value"
             return "$SUCCESS"
         }
@@ -220,65 +305,111 @@ __parser_output_command_tag_value() {
     done
 }
 
-# parser_output_command_more_information_tag_value <page-content>
-# Output "More information" tag from a specific page content.
+# parser_summary_more_information_value <content>
+# Output "More information" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_more_information_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_more_information_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "More information"
+    __parser_summary_tag_value "$in_content" "More information"
 }
 
-# parser_output_command_internal_tag_value <page-content>
-# Output "Internal" tag from a specific page content.
+# parser_summary_internal_value <content>
+# Output "Internal" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_internal_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_internal_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "Internal"
+    __parser_summary_tag_value "$in_content" "Internal"
 }
 
-# parser_output_command_internal_tag_value_or_default <page-content>
-# Output "Internal" tag from a specific page content or it's default when it's missing.
+# parser_summary_internal_value_or_default <content>
+# Output "Internal" tag value from a content or default.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_internal_tag_value_or_default() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_internal_value_or_default() {
+    declare in_content="$1"
+
+    declare tag_value=
+    tag_value="$(parser_summary_internal_value "$in_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+
+    [[ -z "$tag_value" ]] && tag_value=false
+    echo -n "$tag_value"
+}
+
+# parser_summary_deprecated_value <content>
+# Output "Deprecated" tag value from a content.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_deprecated_value() {
+    declare in_content="$1"
+
+    __parser_summary_tag_value "$in_content" "Deprecated"
+}
+
+# parser_summary_deprecated_value_or_default <content>
+# Output "Deprecated" tag value from a content or default.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_deprecated_value_or_default() {
+    declare in_content="$1"
 
     declare output=
-    output="$(parser_output_command_internal_tag_value "$in_page_content")"
+    output="$(parser_summary_deprecated_value "$in_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -286,171 +417,126 @@ parser_output_command_internal_tag_value_or_default() {
     echo -n "$output"
 }
 
-# parser_output_command_deprecated_tag_value <page-content>
-# Output "Deprecated" tag from a specific page content.
+# parser_summary_see_also_value <content>
+# Output "See also" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_deprecated_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_see_also_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "Deprecated"
+    __parser_summary_tag_value "$in_content" "See also"
 }
 
-# parser_output_command_deprecated_tag_value_or_default <page-content>
-# Output "Deprecated" tag from a specific page content or it's default when it's missing.
+# parser_summary_aliases_value <content>
+# Output "Aliases" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_deprecated_tag_value_or_default() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_aliases_value() {
+    declare in_content="$1"
 
-    declare output=
-    output="$(parser_output_command_deprecated_tag_value "$in_page_content")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-
-    [[ -z "$output" ]] && output=false
-    echo -n "$output"
+    __parser_summary_tag_value "$in_content" "Aliases"
 }
 
-# parser_output_command_see_also_tag_value <page-content>
-# Output "See also" tag from a specific page content.
+# parser_summary_syntax_compatible_value <content>
+# Output "Syntax compatible" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_see_also_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_syntax_compatible_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "See also"
+    __parser_summary_tag_value "$in_content" "Syntax compatible"
 }
 
-# parser_output_command_aliases_tag_value <page-content>
-# Output "Aliases" tag from a specific page content.
+# parser_summary_help_value <content>
+# Output "Help" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_aliases_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_help_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "Aliases"
+    __parser_summary_tag_value "$in_content" "Help"
 }
 
-# parser_output_command_syntax_compatible_tag_value <page-content>
-# Output "Syntax compatible" tag from a specific page content.
+# parser_summary_version_value <content>
+# Output "Version" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_syntax_compatible_tag_value() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_version_value() {
+    declare in_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "Syntax compatible"
+    __parser_summary_tag_value "$in_content" "Version"
 }
 
-# parser_output_command_help_tag_value <page-content>
-# Output "Help" tag from a specific page content.
+# parser_summary_structure_compatible_value <content>
+# Output "Structure compatible" tag value from a content.
 #
 # Output:
 #   <tag-value>
 #
 # Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_help_tag_value() {
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary_structure_compatible_value() {
     declare in_page_content="$1"
 
-    __parser_output_command_tag_value "$in_page_content" "Help"
+    __parser_summary_tag_value "$in_page_content" "Structure compatible"
 }
 
-# parser_output_command_version_tag_value <page-content>
-# Output "Version" tag from a specific page content.
-#
-# Output:
-#   <tag-value>
-#
-# Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
-#
-# Notes:
-#   - .clip page content without trailing \n
-parser_output_command_version_tag_value() {
-    declare in_page_content="$1"
-
-    __parser_output_command_tag_value "$in_page_content" "Version"
-}
-
-# parser_output_command_structure_compatible_tag_value <page-content>
-# Output "Structure compatible" tag from a specific page content.
-#
-# Output:
-#   <tag-value>
-#
-# Return:
-#   - 0 if page layout && command summary && tag value are valid
-#   - 1 if page layout is invalid
-#   - 10 if command summary is invalid
-#   - 12 if tag value is invalid
-#
-# Notes:
-#   - .clip page content without trailing \n
-parser_output_command_structure_compatible_tag_value() {
-    declare in_page_content="$1"
-
-    __parser_output_command_tag_value "$in_page_content" "Structure compatible"
-}
 
 
 # __parser_output_command_examples <page-content>
@@ -468,7 +554,7 @@ parser_output_command_structure_compatible_tag_value() {
 __parser_output_command_examples() {
     declare in_page_content="$1"
 
-    __parser_check_layout_correctness "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
+    __parser_check_content "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
     
     # shellcheck disable=2016
     sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$in_page_content"
@@ -1026,3 +1112,27 @@ parser_output_command_example_code_placeholder_alternative_examples() {
     declare -i description_length="${#alternative_description} + 1"
     echo -n "$(sed -E 's/^ +//' <<< "${in_alternative_content:description_length}")"
 }
+
+CHECK=0 parser_summary_internal_value '# am
+
+> Android activity manager
+> Internal: f
+> More information: https://developer.android.com/studio/command-line/adb#am.
+
+- Start a specific activity:
+
+`am start -n {string activity: com.android.settings/.Settings}`
+
+- Start an activity and pass [d]ata to it:
+
+`am start -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`
+
+- Start an activity matching a specific action and [c]ategory:
+
+`am start -a {string activity: android.intent.action.MAIN} -c {string category: android.intent.category.HOME}`
+
+- Convert an intent to a URI:
+
+`am to-uri -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`' 'More information'
+echo $?
+
