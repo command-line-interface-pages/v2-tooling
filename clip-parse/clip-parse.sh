@@ -287,7 +287,7 @@ __parser_summary_tags() {
         s/\.$//
         s/ +$//
         s/ +:$//
-        s/  +/ /g
+        s/ +/ /g
         s/: +/\n/
         p
     }' <<<"$summary")"
