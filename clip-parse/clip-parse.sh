@@ -794,7 +794,9 @@ __parser_tokens__current() {
     declare current_token=
 
     while ((in_index < ${#in_string})) && [[ "${in_string:in_index:1}" != "$in_next_token_start" ]]; do
-        [[ "${in_string:in_index:1}" == \\ ]] && in_index+=1
+        if [[ "${in_string:in_index:1}" == \\ && "${in_string:in_index + 1:1}" == "$in_next_token_start" ]]; then
+            in_index+=1
+        fi
 
         current_token+="${in_string:in_index:1}"
         in_index+=1
@@ -1132,6 +1134,23 @@ parser_examples__code_placeholder_tokens_at() {
     echo -n "$tokens"
 }
 
+# parser_examples__code_placeholder_token_pieces <placeholder>
+# Output placeholder pieces.
+#
+# Output:
+#   <tokens>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <placeholder> should not contain trailing \n
+parser_examples__code_placeholder_token_pieces() {
+    declare in_placeholder="$1"
+
+    __parser_tokens__all_unbalanced "$in_placeholder" "|"
+}
+
 
 
 # __parser_check_examples__code_placeholder_piece <piece>
@@ -1288,25 +1307,77 @@ parser_examples__code_placeholder_piece_examples() {
     echo -n "$(sed -E 's/^ +//' <<< "${in_piece:description_length}")"
 }
 
+# parser_check_examples__code_allows_alternative_expansion <content> <index>
+# Check whether an example allows expansion.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_check_examples__code_allows_alternative_expansion() {
+    declare in_content="$1"
+    declare -i in_index="$2"
 
-CHECK=0 parser_examples__code_placeholder_tokens_at '# am
+    declare description_tokens=
+    declare code_tokens=
 
-> Android activity manager
-> More information: https://developer.android.com/studio/command-line/adb#am
+    description_tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
-- Start a specific activity:
+    code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
-`am start -n {string activity: com.android.settings/.Settings}`
+    # shellcheck disable=2155
+    declare -i description_tokens_count="$(__parser_tokens__count "$description_tokens")"
+    # shellcheck disable=2155
+    declare -i code_tokens_count="$(__parser_tokens__count "$code_tokens")"
 
-- Start an activity and pass [d]ata to it:
+    declare -i index=0
+    declare -i alternative_count=0
+    declare description_alternative=
+    
+    while ((index < description_tokens_count && alternative_count < 1)); do
+        [[ "$(__parser_tokens__type "$description_tokens" "$index")" == CONSTRUCT ]] && {
+            description_alternative="$(__parser_tokens__value "$description_tokens" "$index")"
+            alternative_count+=1
+        }
+        index+=1
+    done
 
-`am start -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`
+    ((alternative_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
+    # shellcheck disable=2155
+    declare -i alternative_piece_count="$(__parser_tokens__count "$(parser_examples__description_alternative_token_pieces "$description_alternative")")"
+    
+    index=0
+    declare -i conforming_placeholder_count=0
 
-- Start an activity matching a specific action and [c]ategory:
+    # shellcheck disable=2155
+    while ((index < code_tokens_count && conforming_placeholder_count < 1)); do
+        declare token_type="$(__parser_tokens__type "$code_tokens" "$index")"
+        declare token_value="$(__parser_tokens__value "$code_tokens" "$index")"
 
-`am start -a {string activity: android.intent.action.MAIN} -c {string category: android.intent.category.HOME}`
+        declare -i token_piece_count="$(__parser_tokens__count "$(parser_examples__code_placeholder_token_pieces "$token_value")")"
 
-- Convert an intent to a URI:
+        if [[ "$token_type" == CONSTRUCT ]] && ((token_piece_count == alternative_piece_count)); then
+            conforming_placeholder_count+=1
+        fi
+        
+        index+=1
+    done
 
-`am to-uri -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`' 1
-echo "STATUS = $?"
+    ((conforming_placeholder_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
+}
