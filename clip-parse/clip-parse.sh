@@ -1,29 +1,13 @@
 #!/usr/bin/env bash
 
 declare -i SUCCESS=0
-
-# Page validation fails
-declare -i INVALID_LAYOUT_FAIL=1
-
-# Summary validation fails
-declare -i INVALID_SUMMARY_FAIL=10
-declare -i INVALID_TAG_FAIL=11
-declare -i INVALID_TAG_VALUE_FAIL=12
-
-# Example validation fails
-declare -i INVALID_EXAMPLE_INDEX_FAIL=20
-declare -i INVALID_CONSTRUCT_FAIL=21
-declare -i INVALID_TOKEN_INDEX_FAIL=22
-declare -i INVALID_TOKEN_VALUE_FAIL=23
-declare -i INVALID_PLACEHOLDER_ALTERNATIVE_FAIL=24
-declare -i INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED=25
-
-
-
 declare -i PARSER_INVALID_CONTENT_CODE=1
 declare -i PARSER_INVALID_SUMMARY_CODE=2
+# shellcheck disable=2034
 declare -i PARSER_INVALID_EXAMPLES_CODE=3
 declare -i PARSER_INVALID_TOKENS_CODE=4
+declare -i PARSER_INVALID_ARGUMENT_CODE=5
+declare -i PARSER_NOT_ALLOWED_CODE=6
 
 
 
@@ -660,46 +644,58 @@ $(__parser_summary_tag_definition "More information" "$more_information_value")"
 
 
 
-# __parser_output_command_examples <page-content>
-# Output command examples from a specific page content.
+# __parser_examples__all <content>
+# Output examples from a content.
 #
 # Output:
-#   <command-examples>
+#   <examples>
 #
 # Return:
-#   - 0 if page layout is valid
-#   - 1 otherwise
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
 #
 # Notes:
-#   - .clip page content without trailing \n
-__parser_output_command_examples() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_examples__all() {
+    declare in_content="$1"
 
-    __parser_check_content "$in_page_content" || return "$INVALID_LAYOUT_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_content "$in_content" || return "$?"
+    fi
     
     # shellcheck disable=2016
-    sed -nE '/^[-`]/ { s/^- +//; s/ *:$//; s/^` *//; s/ *`$//; p; }' <<<"$in_page_content"
+    sed -nE '/^[-`]/ {
+        s/^- +//
+        s/ *:$//
+        s/^` *//
+        s/ *`$//
+        p
+    }' <<<"$in_content"
 }
 
-# __parser_output_command_example_count <page-content>
-# Output an example count from a specific page content.
+# __parser_examples__all_count <content>
+# Output an example count from a content.
 #
 # Output:
-#   <examples-count>
+#   <example-count>
 #
 # Return:
-#   - 0 if page layout is valid
-#   - 1 otherwise
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
 #
 # Notes:
-#   - .clip page content without trailing \n
-__parser_output_command_example_count() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_examples__all_count() {
+    declare in_content="$1"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$in_page_content")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
+    examples="$(__parser_examples__all "$in_content")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
     # shellcheck disable=2155
     declare -i count="$(echo "$examples" | wc -l)"
@@ -708,80 +704,92 @@ __parser_output_command_example_count() {
     echo -n "$((count / 2))"
 }
 
-# parser_output_command_example_description <page-content> <index>
-# Output a specific example description from a page content.
+# parser_examples__description_at <content> <index>
+# Output an example description from a content.
 #
 # Output:
 #   <example-description>
 #
 # Return:
-#   - 0 if page layout && index are valid
-#   - 1 if page layout is invalid
-#   - 20 if index is invalid
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_example_description() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__description_at() {
+    declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$in_page_content")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
+    examples="$(__parser_examples__all "$in_content")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_example_count "$in_page_content")"
-    ((in_index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    declare -i count="$(__parser_examples__all_count "$in_content")"
+    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     sed -nE "$((in_index * 2 + 1)) p" <<<"$examples"
 }
 
-# parser_output_command_example_code <page-content> <index>
-# Output a specific example code from a page content.
+# parser_examples__code_at <content> <index>
+# Output an example code from a content.
 #
 # Output:
-#   <example-code>
+#   <code>
 #
 # Return:
-#   - 0 if page layout && index are valid
-#   - 1 if page layout is invalid
-#   - 20 if index is invalid
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_example_code() {
-    declare in_page_content="$1"
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_at() {
+    declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare examples=
-    examples="$(__parser_output_command_examples "$in_page_content")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
+    examples="$(__parser_examples__all "$in_content")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_output_command_example_count "$in_page_content")"
-    ((in_index >= count)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    declare -i count="$(__parser_examples__all_count "$in_content")"
+    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
 }
 
-# __parser_output_current_token <string> <index> <next-token-start>
-# Output the current token from a specific string.
+# __parser_tokens__current <string> <index> <next-token-start>
+# Output the current token from a string.
 #
 # Output:
-#   <token>
+#   <current-token>
 #
 # Return:
-#   - index after traversal
-__parser_output_current_token() {
+#   - 0 if <index> is valid
+#   - $PARSER_INVALID_ARGUMENT_CODE otherwise
+#
+# Return:
+#   - <index> after traversal
+__parser_tokens__current() {
     declare in_string="$1"
     declare -i in_index="$2"
     declare in_next_token_start="${3:0:1}"
+
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare current_token=
 
@@ -793,28 +801,28 @@ __parser_output_current_token() {
     done
 
     echo -n "$current_token"
-
     return "$in_index"
 }
 
-# __parser_output_tokenized_by_balanced_tokens <string> <special-construct-start-and-end>
-# Output all tokens from a specific string.
+# __parser_tokens__all_balanced <string> <special-construct-start-and-end>
+# Output all balanced tokens from a string.
 #
 # Output:
-#   <tokens>
+#   <balanced-tokens>
 #
 # Return:
-#   - 0 if string is valid
-#   - 21 otherwise
+#   - 0 if <string> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - string without trailing \n
+#   - <string> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
 #   - token types:
 #     - LITERAL
 #     - CONSTRUCT
 #   - token type precedes token value (which may be missing if token doesn't contain value)
 #   - nested contructs are unsupported
-__parser_output_tokenized_by_balanced_tokens() {
+__parser_tokens__all_balanced() {
     declare in_string="$1"
     declare in_construct_delimiters="${2:0:2}"
 
@@ -824,41 +832,42 @@ __parser_output_tokenized_by_balanced_tokens() {
 
     while ((index < ${#in_string})); do
         declare literal_token=
-        literal_token="$(__parser_output_current_token "$in_string" "$index" "$construct_start")"
+        literal_token="$(__parser_tokens__current "$in_string" "$index" "$construct_start")"
         index="$?"
 
         printf "%s\n%s\n" LITERAL "$literal_token"
         index+=1
 
         declare construct_token=
-        construct_token="$(__parser_output_current_token "$in_string" "$index" "$construct_end")"
+        construct_token="$(__parser_tokens__current "$in_string" "$index" "$construct_end")"
         index="$?"
 
         [[ -n "$construct_token" ]] && {
-            [[ "${in_string:index:1}" != "$construct_end" ]] && return "$INVALID_CONSTRUCT_FAIL"
+            if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+                [[ "${in_string:index:1}" == "$construct_end" ]] || return "$PARSER_INVALID_TOKENS_CODE"
+            fi
             printf "%s\n%s\n" CONSTRUCT "$construct_token"
         }
         index+=1
     done
 }
 
-# __parser_output_tokenized_by_unbalanced_tokens <string> <special-construct>
-# Output all tokens from a specific string.
+# __parser_tokens__all_unbalanced <string> <special-construct>
+# Output all unbalanced tokens from a string.
 #
 # Output:
-#   <tokens>
+#   <unbalanced-tokens>
 #
 # Return:
-#   - 0 if string is valid
-#   - 21 otherwise
+#   - 0 always
 #
 # Notes:
-#   - string without trailing \n
+#   - <string> should not contain trailing \n
 #   - token types:
 #     - LITERAL
 #     - CONSTRUCT
 #   - token type precedes token value (which may be missing if token doesn't contain value)
-__parser_output_tokenized_by_unbalanced_tokens() {
+__parser_tokens__all_unbalanced() {
     declare in_string="$1"
     declare in_construct_delimiter="${2:0:1}"
 
@@ -866,7 +875,7 @@ __parser_output_tokenized_by_unbalanced_tokens() {
 
     while ((index < ${#in_string})); do
         declare literal_token=
-        literal_token="$(__parser_output_current_token "$in_string" "$index" "$in_construct_delimiter")"
+        literal_token="$(__parser_tokens__current "$in_string" "$index" "$in_construct_delimiter")"
         index="$?"
 
         [[ -n "$literal_token" ]] && printf "%s\n%s\n" CONSTRUCT "$literal_token"
@@ -874,15 +883,15 @@ __parser_output_tokenized_by_unbalanced_tokens() {
     done
 }
 
-# __parser_output_token_count <tokens>
-# Output token count from a specific token list.
+# __parser_tokens__count <tokens>
+# Output token count from a token list.
 #
 # Output:
 #   <token-count>
 #
 # Return:
 #   - 0 always
-__parser_output_token_count() {
+__parser_tokens__count() {
     declare in_tokens="$1"
 
     # shellcheck disable=2155
@@ -892,344 +901,412 @@ __parser_output_token_count() {
     echo -n "$((count / 2))"
 }
 
-# __parser_output_token_value <tokens> <index>
-# Output a specific token value from a token list.
+# __parser_tokens__value <tokens> <index>
+# Output a token value from a token list.
 #
 # Output:
 #   <token-value>
 #
 # Return:
-#   - 0 index is valid
-#   - 22 otherwise
-__parser_output_token_value() {
+#   - 0 <index> is valid
+#   - $PARSER_INVALID_ARGUMENT_CODE otherwise
+__parser_tokens__value() {
     declare in_tokens="$1"
     declare in_index="$2"
 
-    ((in_index < 0)) && return "$INVALID_TOKEN_INDEX_FAIL"
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     # shellcheck disable=2155
-    declare count="$(__parser_output_token_count "$in_tokens")"
-    ((in_index >= count)) && return "$INVALID_TOKEN_INDEX_FAIL"
+    declare count="$(__parser_tokens__count "$in_tokens")"
+    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare -i line=0
     declare -i index=0
 
-    mapfile -t tokens <<<"$in_tokens"
+    mapfile -t tokens_array <<<"$in_tokens"
 
     while ((line < count * 2)) && ((index != in_index)); do
         line+=2
         index+=1
     done
 
-    [[ -n "${tokens[line + 1]}" ]] && echo -n "${tokens[line + 1]}"
+    [[ -n "${tokens_array[line + 1]}" ]] && echo -n "${tokens_array[line + 1]}"
 }
 
-# __parser_output_token_type <tokens> <index>
-# Output a specific token type from a token list.
+# __parser_tokens__type <tokens> <index>
+# Output a token type from a token list.
 #
 # Output:
 #   <token-type>
 #
 # Return:
-#   - 0 index is valid
-#   - 22 otherwise
-__parser_output_token_type() {
+#   - 0 <index> is valid
+#   - $PARSER_INVALID_ARGUMENT_CODE otherwise
+__parser_tokens__type() {
     declare in_tokens="$1"
     declare in_index="$2"
 
-    ((in_index < 0)) && return "$INVALID_TOKEN_INDEX_FAIL"
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     # shellcheck disable=2155
-    declare count="$(__parser_output_token_count "$in_tokens")"
-    ((in_index >= count)) && return "$INVALID_TOKEN_INDEX_FAIL"
+    declare count="$(__parser_tokens__count "$in_tokens")"
+    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare -i line=0
     declare -i index=0
 
-    mapfile -t tokens <<<"$in_tokens"
+    mapfile -t tokens_array <<<"$in_tokens"
 
     while ((line < count * 2)) && ((index != in_index)); do
         line+=2
         index+=1
     done
 
-    [[ -n "${tokens[line]}" ]] && echo -n "${tokens[line]}"
+    [[ -n "${tokens_array[line]}" ]] && echo -n "${tokens_array[line]}"
 }
 
-# parser_output_command_example_description_tokens <page-content> <example-index>
-# Output description tokens for alternatives and literals from a specific page content.
-#
-# Output:
-#   <description-tokens>
-#
-# Return:
-#   - 0 if page layout && example index is valid
-#   - 1 if page layout is invalid
-#   - 20 if example index is invalid
-#   - 21 if example description is invalid
-#
-# Notes:
-#   - .clip page content without trailing \n
-#   - alternative parsing is the first parsing stage
-#   - mnemonics are considered to be nested inside alternatives or literals
-parser_output_command_example_description_tokens() {
-    declare in_page_content="$1"
-    declare -i in_example_index="$2"
-
-    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
-
-    declare description=
-    description="$(parser_output_command_example_description "$in_page_content" "$in_example_index")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-
-    declare tokens=
-    tokens="$(__parser_output_tokenized_by_balanced_tokens "$description" "()")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-
-    echo -n "$tokens"
-}
-
-# parser_output_command_example_description_mnemonic_tokens <page-content> <example-index>
-# Output description tokens for mnemonics and literals from a specific page content.
-#
-# Output:
-#   <description-tokens>
-#
-# Return:
-#   - 0 if page layout && example index is valid
-#   - 1 if page layout is invalid
-#   - 20 if example index is invalid
-#   - 21 if example description is invalid
-#   - 23 if description mnemonic is invalid
-#
-# Notes:
-#   - .clip page content without trailing \n
-#   - mnemonic parsing is the second parsing stage
-#   - alternatives should be already expanded before parsing mnemonics
-parser_output_command_example_description_mnemonic_tokens() {
-    declare in_page_content="$1"
-    declare -i in_example_index="$2"
-
-    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
-
-    declare description=
-    description="$(parser_output_command_example_description "$in_page_content" "$in_example_index")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-
-    declare tokens=
-    tokens="$(__parser_output_tokenized_by_balanced_tokens "$description" "[]")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
-
-    # shellcheck disable=2155
-    declare -i count="$(__parser_output_token_count "$tokens")"
-
-    declare -i index=0
-
-    # shellcheck disable=2155
-    while ((index < count)); do
-        declare token_type="$(__parser_output_token_type "$tokens" "$index")"
-        declare token_value="$(__parser_output_token_value "$tokens" "$index")"
-
-        if [[ "$token_type" == CONSTRUCT ]] && [[ "$token_value" =~ ' ' ]]; then
-            return "$INVALID_TOKEN_VALUE_FAIL"
-        fi
-
-        index+=1
-    done
-
-    echo -n "$tokens"
-}
-
-# parser_output_command_example_description_alternative_tokens <alternative>
-# Output tokens from a specific alternative.
+# parser_examples__description_alternative_tokens_at <content> <index>
+# Output alternative and literal tokens from a content.
 #
 # Output:
 #   <alternative-tokens>
 #
 # Return:
-#   - 0 if alternative is valid
-#   - 21 if alternative is invalid
+#   - 0 if <content> and <index> are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_TOKENS_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
 #
 # Notes:
-#   - .clip page content without trailing \n
-parser_output_command_example_description_alternative_tokens() {
-    declare in_alternative="$1"
-
-    __parser_output_tokenized_by_unbalanced_tokens "$in_alternative" "|"
-}
-
-# parser_output_command_example_code_tokens <page-content> <example-index>
-# Output code tokens for placeholders and literals from a specific page content.
-#
-# Output:
-#   <code-tokens>
-#
-# Return:
-#   - 0 if page layout && example index is valid
-#   - 1 if page layout is invalid
-#   - 20 if example index is invalid
-#   - 21 if example description is invalid
-#
-# Notes:
-#   - .clip page content without trailing \n
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
 #   - alternative parsing is the first parsing stage
-#   - mnemonics are considered to be nested inside alternatives or literals
-parser_output_command_example_code_tokens() {
-    declare in_page_content="$1"
-    declare -i in_example_index="$2"
+parser_examples__description_alternative_tokens_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$INVALID_EXAMPLE_INDEX_FAIL"
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
-    declare code=
-    code="$(parser_output_command_example_code "$in_page_content" "$in_example_index")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
+    declare description=
+    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+    fi
 
     declare tokens=
-    tokens="$(__parser_output_tokenized_by_balanced_tokens "$code" "{}")"
-    # shellcheck disable=2181
-    (($? == 0)) || return "$?"
+    tokens="$(__parser_tokens__all_balanced "$description" "()")"
+    status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
 
     echo -n "$tokens"
 }
 
-# __parser_check_command_example_code_placeholder_alternative_correctness <placeholder-alternative>
-# Check whether a specific placeholder alternative is valid.
+# __parser_check_examples__description_mnemonic_token_values <tokens>
+# Check whether mnemonic values are valid.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if placeholder alternative is valid
-#   - 1 otherwise
+#   - 0 if <tokens> are valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - placeholder without trailing \n
+#   - <tokens> should not contain trailing \n
+__parser_check_examples__description_mnemonic_token_values() {
+    declare in_tokens="$1"
+
+    # shellcheck disable=2155
+    declare -i count="$(__parser_tokens__count "$in_tokens")"
+
+    declare -i index=0
+
+    # shellcheck disable=2155
+    while ((index < count)); do
+        declare token_type="$(__parser_tokens__type "$in_tokens" "$index")"
+        declare token_value="$(__parser_tokens__value "$in_tokens" "$index")"
+
+        if [[ "$token_type" == CONSTRUCT ]] && [[ "$token_value" =~ ' ' ]]; then
+            return "$PARSER_INVALID_TOKENS_CODE"
+        fi
+
+        index+=1
+    done
+}
+
+# parser_examples__description_mnemonic_tokens_at <content> <index>
+# Output mnemonic and literal tokens from a content.
+#
+# Output:
+#   <mnemonic-tokens>
+#
+# Return:
+#   - 0 if <content> and <index> are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_TOKENS_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+#   - alternatives should be already expanded before parsing mnemonics
+parser_examples__description_mnemonic_tokens_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+
+    declare description=
+    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+    fi
+
+    declare tokens=
+    tokens="$(__parser_tokens__all_balanced "$description" "[]")"
+    status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+        __parser_check_examples__description_mnemonic_token_values "$tokens" || return "$?"
+    fi
+
+    echo -n "$tokens"
+}
+
+# parser_examples__description_alternative_token_pieces <token>
+# Output pieces from a token.
+#
+# Output:
+#   <tokens>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <token> should not contain trailing \n
+parser_examples__description_alternative_token_pieces() {
+    declare in_alternative="$1"
+
+    __parser_tokens__all_unbalanced "$in_alternative" "|"
+}
+
+# parser_examples__code_placeholder_tokens_at <content> <index>
+# Output placeholder and literal tokens from a content.
+#
+# Output:
+#   <alternative-tokens>
+#
+# Return:
+#   - 0 if <content> and <index> are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_TOKENS_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_placeholder_tokens_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+
+    declare code=
+    code="$(parser_examples__code_at "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+    fi
+
+    declare tokens=
+    tokens="$(__parser_tokens__all_balanced "$code" "{}")"
+    status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    echo -n "$tokens"
+}
+
+
+
+# __parser_check_examples__code_placeholder_piece <piece>
+# Check whether a placeholder piece (alternative) is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
+#
+# Notes:
+#   - <piece> should not contain trailing \n
 #   - escaping is not checked
-__parser_check_command_example_code_placeholder_alternative_correctness() {
-    declare in_placeholder_alternative_content="$1"
+__parser_check_examples__code_placeholder_piece() {
+    declare in_piece="$1"
 
     # shellcheck disable=2016
-    sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)([*+?]!?)? +[^{}]+$/! Q1' <<<"$in_placeholder_alternative_content"
+    sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)([*+?]!?)? +[^{}]+$/! Q1' <<<"$in_piece" ||
+        return "$PARSER_INVALID_TOKENS_CODE"
 }
 
-# parser_output_command_example_code_placeholder_alternative_type <page-content> <placeholder-alternative>
-# Output an alternative type for a specific placeholder alternative.
+# parser_examples__code_placeholder_piece_type <piece>
+# Output a placeholder piece (alternative) type.
 #
 # Output:
-#   <alternative-type>
+#   <type>
 #
 # Return:
-#   - 0 if placeholder alternative is valid
-#   - 24 otherwise
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - placeholder without trailing \n
-parser_output_command_example_code_placeholder_alternative_type() {
-    declare in_placeholder_alternative_content="$1"
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_placeholder_piece_type() {
+    declare in_piece="$1"
 
-    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_examples__code_placeholder_piece "$in_piece" ||
+            return "$PARSER_INVALID_TOKENS_CODE"
+    fi
 
-    sed -E 's/^((\/|\/\?)?[^ *+?]+).+$/\1/' <<<"$in_placeholder_alternative_content"
+    sed -E 's/^((\/|\/\?)?[^ *+?]+).+$/\1/' <<<"$in_piece"
 }
 
-# parser_output_command_example_code_placeholder_alternative_quantifier <page-content> <placeholder-alternative>
-# Output an quantifier type for a specific placeholder alternative.
+# parser_examples__code_placeholder_piece_quantifier <piece>
+# Output a placeholder piece (alternative) quantifier.
 #
 # Output:
-#   <quantifier-type>
+#   <quantifier>
 #
 # Return:
-#   - 0 if placeholder alternative is valid
-#   - 24 otherwise
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - placeholder without trailing \n
-parser_output_command_example_code_placeholder_alternative_quantifier() {
-    declare in_placeholder_alternative_content="$1"
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_placeholder_piece_quantifier() {
+    declare in_piece="$1"
 
-    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_examples__code_placeholder_piece "$in_piece" ||
+            return "$PARSER_INVALID_TOKENS_CODE"
+    fi
 
     declare beginning='(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))'
-    ! sed -nE "/^$beginning/! Q1" <<<"$in_placeholder_alternative_content" && return "$SUCCESS"
+    ! sed -nE "/^$beginning/! Q1" <<<"$in_piece" && return "$SUCCESS"
 
     sed -E "s/^$beginning.+$/\2/
-s/^ +//" <<<"$in_placeholder_alternative_content"
+s/^ +//" <<<"$in_piece"
 }
 
-# parser_check_command_example_code_placeholder_alternative_allow_repetitions <placeholder-alternative>
-# Check whether a specific placeholder alternative allows repetitions.
+# parser_check_examples__code_placeholder_piece_allows_repetitions <piece>
+# Check whether a placeholder piece (alternative) allows repetitions.
 #
 # Output:
 #   <empty-string>
 #
 # Return:
-#   - 0 if placeholder alternative is valid && repetition is allowed
-#   - 24 if placeholder alternative is invalid
-#   - 25 if repetition is not allowed
+#   - 0 if <piece> is valid and repetition is allowed
+#   - $PARSER_INVALID_TOKENS_CODE if <piece> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
 #
 # Notes:
-#   - placeholder without trailing \n
-#   - returns 0 for placeholder alternatives without repetition (it's allowed to repeat, but just once)
-parser_check_command_example_code_placeholder_alternative_allow_repetitions() {
-    declare in_placeholder_alternative_content="$1"
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+#   - returns 0 for placeholder piece without repetition (it's allowed to repeat, but just once)
+parser_check_examples__code_placeholder_piece_allows_repetitions() {
+    declare in_piece="$1"
 
-    __parser_check_command_example_code_placeholder_alternative_correctness "$in_placeholder_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_examples__code_placeholder_piece "$in_piece" ||
+            return "$PARSER_INVALID_TOKENS_CODE"
+    fi
     
-    ! sed -nE '/^(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))!/! Q1' <<<"$in_placeholder_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_REPETITION_NOT_ALLOWED"
+    ! sed -nE '/^(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))!/! Q1' <<<"$in_piece" ||
+        return "$PARSER_NOT_ALLOWED_CODE"
 }
 
-# parser_output_command_example_code_placeholder_alternative_description <placeholder-alternative>
-# Output an alternative description for a specific placeholder alternative.
+# parser_examples__code_placeholder_piece_description <piece>
+# Output a placeholder piece (alternative) description.
 #
 # Output:
-#   <alternative-description>
+#   <description>
 #
 # Return:
-#   - 0 if placeholder alternative is valid
-#   - 24 otherwise
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - placeholder without trailing \n
-parser_output_command_example_code_placeholder_alternative_description() {
-    declare in_alternative_content="$1"
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_placeholder_piece_description() {
+    declare in_piece="$1"
 
-    __parser_check_command_example_code_placeholder_alternative_correctness "$in_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_examples__code_placeholder_piece "$in_piece" ||
+            return "$PARSER_INVALID_TOKENS_CODE"
+    fi
     
-    in_alternative_content="$(sed -E 's/^(\/|\/\?)?[^ *+?]+([*+?]!?| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+)!?)? +//' <<<"$in_alternative_content")"
+    in_piece="$(sed -E 's/^(\/|\/\?)?[^ *+?]+([*+?]!?| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+)!?)? +//' <<<"$in_piece")"
     
-    echo -n "$(__parser_output_current_token "$in_alternative_content" 0 ":")"
+    echo -n "$(__parser_tokens__current "$in_piece" 0 ":")"
 }
 
-# parser_output_command_example_code_placeholder_alternative_description <placeholder-alternative>
-# Output an alternative description for a specific placeholder alternative.
+# parser_examples__code_placeholder_piece_examples <piece>
+# Output placeholder piece (alternative) examples.
 #
 # Output:
-#   <alternative-description>
+#   <examples>
 #
 # Return:
-#   - 0 if placeholder alternative is valid
-#   - 24 otherwise
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
 #
 # Notes:
-#   - placeholder without trailing \n
-parser_output_command_example_code_placeholder_alternative_examples() {
-    declare in_alternative_content="$1"
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_placeholder_piece_examples() {
+    declare in_piece="$1"
 
-    __parser_check_command_example_code_placeholder_alternative_correctness "$in_alternative_content" ||
-        return "$INVALID_PLACEHOLDER_ALTERNATIVE_FAIL"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_examples__code_placeholder_piece "$in_piece" ||
+            return "$PARSER_INVALID_TOKENS_CODE"
+    fi
     
     # shellcheck disable=2155
-    declare alternative_description="$(__parser_output_current_token "$in_alternative_content" 0 ":")"
-    declare -i description_length="${#alternative_description} + 1"
-    echo -n "$(sed -E 's/^ +//' <<< "${in_alternative_content:description_length}")"
+    declare description="$(__parser_tokens__current "$in_piece" 0 ":")"
+    declare -i description_length="${#description} + 1"
+    echo -n "$(sed -E 's/^ +//' <<< "${in_placeholder_piece:description_length}")"
 }
+
+
+CHECK=0 parser_examples__code_placeholder_tokens_at '# am
+
+> Android activity manager
+> More information: https://developer.android.com/studio/command-line/adb#am
+
+- Start a specific activity:
+
+`am start -n {string activity: com.android.settings/.Settings}`
+
+- Start an activity and pass [d]ata to it:
+
+`am start -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`
+
+- Start an activity matching a specific action and [c]ategory:
+
+`am start -a {string activity: android.intent.action.MAIN} -c {string category: android.intent.category.HOME}`
+
+- Convert an intent to a URI:
+
+`am to-uri -a {string activity: android.intent.action.VIEW} -d {string data: tel:123}`' 1
+echo "STATUS = $?"
