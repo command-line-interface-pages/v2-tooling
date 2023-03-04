@@ -645,7 +645,7 @@ $(__parser_summary_tag_definition "More information" "$more_information_value")"
 
 
 # __parser_examples__all <content>
-# Output examples from a content.
+# Output examples.
 #
 # Output:
 #   <examples>
@@ -675,10 +675,10 @@ __parser_examples__all() {
 }
 
 # __parser_examples__all_count <content>
-# Output an example count from a content.
+# Output an example count.
 #
 # Output:
-#   <example-count>
+#   <count>
 #
 # Return:
 #   - 0 if <content> is valid
@@ -705,10 +705,10 @@ __parser_examples__all_count() {
 }
 
 # parser_examples__description_at <content> <index>
-# Output an example description from a content.
+# Output an example description.
 #
 # Output:
-#   <example-description>
+#   <description>
 #
 # Return:
 #   - 0 if <content> is valid
@@ -739,7 +739,7 @@ parser_examples__description_at() {
 }
 
 # parser_examples__code_at <content> <index>
-# Output an example code from a content.
+# Output an example code.
 #
 # Output:
 #   <code>
@@ -773,7 +773,7 @@ parser_examples__code_at() {
 }
 
 # __parser_tokens__current <string> <index> <next-token-start>
-# Output the current token from a string.
+# Output the current token.
 #
 # Output:
 #   <current-token>
@@ -805,7 +805,7 @@ __parser_tokens__current() {
 }
 
 # __parser_tokens__all_balanced <string> <special-construct-start-and-end>
-# Output all balanced tokens from a string.
+# Output all balanced tokens.
 #
 # Output:
 #   <balanced-tokens>
@@ -853,7 +853,7 @@ __parser_tokens__all_balanced() {
 }
 
 # __parser_tokens__all_unbalanced <string> <special-construct>
-# Output all unbalanced tokens from a string.
+# Output all unbalanced tokens.
 #
 # Output:
 #   <unbalanced-tokens>
@@ -884,10 +884,10 @@ __parser_tokens__all_unbalanced() {
 }
 
 # __parser_tokens__count <tokens>
-# Output token count from a token list.
+# Output token count.
 #
 # Output:
-#   <token-count>
+#   <count>
 #
 # Return:
 #   - 0 always
@@ -902,7 +902,7 @@ __parser_tokens__count() {
 }
 
 # __parser_tokens__value <tokens> <index>
-# Output a token value from a token list.
+# Output a token value.
 #
 # Output:
 #   <token-value>
@@ -934,7 +934,7 @@ __parser_tokens__value() {
 }
 
 # __parser_tokens__type <tokens> <index>
-# Output a token type from a token list.
+# Output a token type.
 #
 # Output:
 #   <token-type>
@@ -966,7 +966,7 @@ __parser_tokens__type() {
 }
 
 # parser_examples__description_alternative_tokens_at <content> <index>
-# Output alternative and literal tokens from a content.
+# Output alternative and literal tokens.
 #
 # Output:
 #   <alternative-tokens>
@@ -1038,7 +1038,7 @@ __parser_check_examples__description_mnemonic_token_values() {
 }
 
 # parser_examples__description_mnemonic_tokens_at <content> <index>
-# Output mnemonic and literal tokens from a content.
+# Output mnemonic and literal tokens.
 #
 # Output:
 #   <mnemonic-tokens>
@@ -1078,7 +1078,7 @@ parser_examples__description_mnemonic_tokens_at() {
 }
 
 # parser_examples__description_alternative_token_pieces <token>
-# Output pieces from a token.
+# Output alternative pieces.
 #
 # Output:
 #   <tokens>
