@@ -627,34 +627,34 @@ parser_summary_cleaned_up() {
     # shellcheck disable=2155
     declare description="$(parser_summary_description "$in_content")"
     # shellcheck disable=2155
-    declare more_information="$(parser_summary_more_information_value "$in_content")"
+    declare more_information_value="$(parser_summary_more_information_value "$in_content")"
     # shellcheck disable=2155
-    declare internal="$(parser_summary_internal_value_or_default "$in_content")"
+    declare internal_value="$(parser_summary_internal_value_or_default "$in_content")"
     # shellcheck disable=2155
-    declare deprecated="$(parser_summary_deprecated_value_or_default "$in_content")"
+    declare deprecated_value="$(parser_summary_deprecated_value_or_default "$in_content")"
     # shellcheck disable=2155
-    declare see_also="$(parser_summary_see_also_value "$in_content")"
+    declare see_also_value="$(parser_summary_see_also_value "$in_content")"
     # shellcheck disable=2155
-    declare aliases="$(parser_summary_aliases_value "$in_content")"
+    declare aliases_value="$(parser_summary_aliases_value "$in_content")"
     # shellcheck disable=2155
-    declare syntax_compatible="$(parser_summary_syntax_compatible_value "$in_content")"
+    declare syntax_compatible_value="$(parser_summary_syntax_compatible_value "$in_content")"
     # shellcheck disable=2155
-    declare help="$(parser_summary_help_value "$in_content")"
+    declare help_value="$(parser_summary_help_value "$in_content")"
     # shellcheck disable=2155
-    declare version="$(parser_summary_version_value "$in_content")"
+    declare version_value="$(parser_summary_version_value "$in_content")"
     # shellcheck disable=2155
-    declare structure_compatible="$(parser_summary_structure_compatible_value "$in_content")"
+    declare structure_compatible_value="$(parser_summary_structure_compatible_value "$in_content")"
     
     echo -n "> $description
-$(__parser_summary_tag_definition "Internal" "$internal")
-$(__parser_summary_tag_definition "Deprecated" "$deprecated")
-$(__parser_summary_tag_definition "Help" "$help")
-$(__parser_summary_tag_definition "Version" "$version")
-$(__parser_summary_tag_definition "Syntax compatible" "$syntax_compatible")
-$(__parser_summary_tag_definition "Structure compatible" "$structure_compatible")
-$(__parser_summary_tag_definition "Aliases" "$aliases")
-$(__parser_summary_tag_definition "See also" "$see_also")
-$(__parser_summary_tag_definition "More information" "$more_information")" |
+$(__parser_summary_tag_definition "Internal" "$internal_value")
+$(__parser_summary_tag_definition "Deprecated" "$deprecated_value")
+$(__parser_summary_tag_definition "Help" "$help_value")
+$(__parser_summary_tag_definition "Version" "$version_value")
+$(__parser_summary_tag_definition "Syntax compatible" "$syntax_compatible_value")
+$(__parser_summary_tag_definition "Structure compatible" "$structure_compatible_value")
+$(__parser_summary_tag_definition "Aliases" "$aliases_value")
+$(__parser_summary_tag_definition "See also" "$see_also_value")
+$(__parser_summary_tag_definition "More information" "$more_information_value")" |
     sed -nE '/./ p'
 }
 
