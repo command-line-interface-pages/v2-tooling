@@ -885,7 +885,7 @@ __parser_tokens__all_unbalanced() {
     done
 }
 
-# __parser_tokens__count <tokens>
+# parser_tokens__count <tokens>
 # Output token count.
 #
 # Output:
@@ -893,7 +893,7 @@ __parser_tokens__all_unbalanced() {
 #
 # Return:
 #   - 0 always
-__parser_tokens__count() {
+parser_tokens__count() {
     declare in_tokens="$1"
 
     # shellcheck disable=2155
@@ -903,7 +903,7 @@ __parser_tokens__count() {
     echo -n "$((count / 2))"
 }
 
-# __parser_tokens__value <tokens> <index>
+# parser_tokens__value <tokens> <index>
 # Output a token value.
 #
 # Output:
@@ -912,14 +912,14 @@ __parser_tokens__count() {
 # Return:
 #   - 0 <index> is valid
 #   - $PARSER_INVALID_ARGUMENT_CODE otherwise
-__parser_tokens__value() {
+parser_tokens__value() {
     declare in_tokens="$1"
     declare in_index="$2"
 
     ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     # shellcheck disable=2155
-    declare count="$(__parser_tokens__count "$in_tokens")"
+    declare count="$(parser_tokens__count "$in_tokens")"
     ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare -i line=0
@@ -935,7 +935,7 @@ __parser_tokens__value() {
     [[ -n "${tokens_array[line + 1]}" ]] && echo -n "${tokens_array[line + 1]}"
 }
 
-# __parser_tokens__type <tokens> <index>
+# parser_tokens__type <tokens> <index>
 # Output a token type.
 #
 # Output:
@@ -944,14 +944,14 @@ __parser_tokens__value() {
 # Return:
 #   - 0 <index> is valid
 #   - $PARSER_INVALID_ARGUMENT_CODE otherwise
-__parser_tokens__type() {
+parser_tokens__type() {
     declare in_tokens="$1"
     declare in_index="$2"
 
     ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     # shellcheck disable=2155
-    declare count="$(__parser_tokens__count "$in_tokens")"
+    declare count="$(parser_tokens__count "$in_tokens")"
     ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
 
     declare -i line=0
@@ -1022,14 +1022,14 @@ __parser_check_examples__description_mnemonic_token_values() {
     declare in_tokens="$1"
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_tokens__count "$in_tokens")"
+    declare -i count="$(parser_tokens__count "$in_tokens")"
 
     declare -i index=0
 
     # shellcheck disable=2155
     while ((index < count)); do
-        declare token_type="$(__parser_tokens__type "$in_tokens" "$index")"
-        declare token_value="$(__parser_tokens__value "$in_tokens" "$index")"
+        declare token_type="$(parser_tokens__type "$in_tokens" "$index")"
+        declare token_value="$(parser_tokens__value "$in_tokens" "$index")"
 
         if [[ "$token_type" == CONSTRUCT ]] && [[ "$token_value" =~ ' ' ]]; then
             return "$PARSER_INVALID_TOKENS_CODE"
@@ -1342,17 +1342,17 @@ parser_check_examples__code_allows_alternative_expansion() {
     fi
 
     # shellcheck disable=2155
-    declare -i description_tokens_count="$(__parser_tokens__count "$description_tokens")"
+    declare -i description_tokens_count="$(parser_tokens__count "$description_tokens")"
     # shellcheck disable=2155
-    declare -i code_tokens_count="$(__parser_tokens__count "$code_tokens")"
+    declare -i code_tokens_count="$(parser_tokens__count "$code_tokens")"
 
     declare -i index=0
     declare -i alternative_count=0
     declare description_alternative=
     
     while ((index < description_tokens_count && alternative_count < 1)); do
-        [[ "$(__parser_tokens__type "$description_tokens" "$index")" == CONSTRUCT ]] && {
-            description_alternative="$(__parser_tokens__value "$description_tokens" "$index")"
+        [[ "$(parser_tokens__type "$description_tokens" "$index")" == CONSTRUCT ]] && {
+            description_alternative="$(parser_tokens__value "$description_tokens" "$index")"
             alternative_count+=1
         }
         index+=1
@@ -1360,17 +1360,17 @@ parser_check_examples__code_allows_alternative_expansion() {
 
     ((alternative_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
     # shellcheck disable=2155
-    declare -i alternative_piece_count="$(__parser_tokens__count "$(parser_examples__description_alternative_token_pieces "$description_alternative")")"
+    declare -i alternative_piece_count="$(parser_tokens__count "$(parser_examples__description_alternative_token_pieces "$description_alternative")")"
     
     index=0
     declare -i conforming_placeholder_count=0
 
     # shellcheck disable=2155
     while ((index < code_tokens_count && conforming_placeholder_count < 1)); do
-        declare token_type="$(__parser_tokens__type "$code_tokens" "$index")"
-        declare token_value="$(__parser_tokens__value "$code_tokens" "$index")"
+        declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
+        declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
 
-        declare -i token_piece_count="$(__parser_tokens__count "$(parser_examples__code_placeholder_token_pieces "$token_value")")"
+        declare -i token_piece_count="$(parser_tokens__count "$(parser_examples__code_placeholder_token_pieces "$token_value")")"
 
         if [[ "$token_type" == CONSTRUCT ]] && ((token_piece_count == alternative_piece_count)); then
             conforming_placeholder_count+=1
