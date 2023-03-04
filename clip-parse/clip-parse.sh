@@ -11,7 +11,7 @@ declare -i PARSER_NOT_ALLOWED_CODE=6
 
 
 
-# __parser_string_join <separator> <strings>
+# __parser_string__join <separator> <strings>
 # Output joined strings.
 #
 # Output:
@@ -22,7 +22,7 @@ declare -i PARSER_NOT_ALLOWED_CODE=6
 #
 # Notes:
 #   - <string> should not contain trailing \n
-__parser_string_join() {
+__parser_string__join() {
   declare in_separator="$1"
   declare in_string="$2"
 
@@ -31,7 +31,7 @@ __parser_string_join() {
   fi
 }
 
-# __parser_string_unify <string>
+# __parser_string__unify <string>
 # Output string without repeated comma-separated items.
 #
 # Output:
@@ -42,18 +42,18 @@ __parser_string_join() {
 #
 # Notes:
 #   - <string> should not contain trailing \n
-__parser_string_unify() {
+__parser_string__unify() {
     declare string="$1"
 
     mapfile -t string_array < <(echo -n "$string" | sed -E 's/ +/ /g
     s/ *, */\n/g' | sort -r -u)
 
-    __parser_string_join ", " "${string_array[@]}"
+    __parser_string__join ", " "${string_array[@]}"
 }
 
 
 
-# __parser_check_content <content>
+# __parser_check__content <content>
 # Check whether a content is valid.
 #
 # Output:
@@ -65,7 +65,7 @@ __parser_string_unify() {
 #
 # Notes:
 #   - <content> should not contain trailing \n
-__parser_check_content() {
+__parser_check__content() {
     declare in_content="$1"
 
     # shellcheck disable=2016
@@ -76,8 +76,8 @@ __parser_check_content() {
         return "$PARSER_INVALID_CONTENT_CODE"
 }
 
-# parser_header <content>
-# Output a header from a content.
+# parser__header <content>
+# Output a header.
 #
 # Output:
 #   <header>
@@ -89,11 +89,11 @@ __parser_check_content() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_header() {
+parser__header() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
+        __parser_check__content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
     fi
 
     sed -nE '1 {
@@ -106,7 +106,7 @@ parser_header() {
 
 
 
-# __parser_check_summary <summary>
+# __parser_check__summary <summary>
 # Check whether a summary is valid.
 #
 # Output:
@@ -118,7 +118,7 @@ parser_header() {
 #
 # Notes:
 #   - <summary> should not contain trailing \n
-__parser_check_summary() {
+__parser_check__summary() {
     declare in_summary="$1"
 
     # shellcheck disable=2016
@@ -129,7 +129,7 @@ __parser_check_summary() {
         return "$PARSER_INVALID_SUMMARY_CODE"
 }
 
-# parser_summary_description <content>
+# parser_summary__description <content>
 # Output a description from a summary.
 #
 # Output:
@@ -143,17 +143,17 @@ __parser_check_summary() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_description() {
+parser_summary__description() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_content "$in_content" || return "$?"
+        __parser_check__content "$in_content" || return "$?"
     fi
     
     # shellcheck disable=2155
     declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary "$summary" || return "$?"
+        __parser_check__summary "$summary" || return "$?"
     fi
 
     sed -nE '/^> [^:]+$/ {
@@ -165,7 +165,7 @@ parser_summary_description() {
     }' <<<"$summary"
 }
 
-# __parser_check_summary_tag <tag>
+# __parser_check_summary__tag <tag>
 # Check whether a tag is valid.
 #
 # Output:
@@ -177,7 +177,7 @@ parser_summary_description() {
 #
 # Notes:
 #   - <tag> should not contain trailing \n
-__parser_check_summary_tag() {
+__parser_check_summary__tag() {
     declare in_tag="$1"
 
     [[ "$in_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases\
@@ -185,7 +185,7 @@ __parser_check_summary_tag() {
         return "$PARSER_INVALID_SUMMARY_CODE"
 }
 
-# __parser_check_summary_tag_value <tag> <tag-value>
+# __parser_check_summary__tag_value <tag> <tag-value>
 # Check whether a tag value is valid.
 #
 # Output:
@@ -197,7 +197,7 @@ __parser_check_summary_tag() {
 #
 # Notes:
 #   - <tag> and <tag-value> should not contain trailing \n
-__parser_check_summary_tag_value() {
+__parser_check_summary__tag_value() {
     declare in_tag="$1"
     declare in_tag_value="$2"
 
@@ -208,7 +208,7 @@ __parser_check_summary_tag_value() {
     fi
 }
 
-# __parser_check_summary_tags_values <tags>
+# __parser_check_summary__tags_values <tags>
 # Check whether tag values are valid.
 #
 # Output:
@@ -220,7 +220,7 @@ __parser_check_summary_tag_value() {
 #
 # Notes:
 #   - <tag> and <tag-value> should not contain trailing \n
-__parser_check_summary_tags_values() {
+__parser_check_summary__tags_values() {
     declare in_tags="$1"
 
     mapfile -t tags_array <<<"$in_tags"
@@ -231,14 +231,14 @@ __parser_check_summary_tags_values() {
         declare tag_value="${tags_array[index + 1]}"
         
         if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-            __parser_check_summary_tag "$tag" || return "$?"
-            __parser_check_summary_tag_value "$tag" "$tag_value" || return "$?"
+            __parser_check_summary__tag "$tag" || return "$?"
+            __parser_check_summary__tag_value "$tag" "$tag_value" || return "$?"
         fi
         index+=2
     done
 }
 
-# __parser_summary_tags <content>
+# __parser_summary__tags <content>
 # Output all tags from a summary.
 #
 # Output:
@@ -252,17 +252,17 @@ __parser_check_summary_tags_values() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-__parser_summary_tags() {
+__parser_summary__tags() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_content "$in_content" || return "$?"
+        __parser_check__content "$in_content" || return "$?"
     fi
     
     # shellcheck disable=2155
     declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary "$summary" || return "$?"
+        __parser_check__summary "$summary" || return "$?"
     fi
 
     # shellcheck disable=2155
@@ -277,13 +277,13 @@ __parser_summary_tags() {
     }' <<<"$summary")"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary_tags_values "$tags" || return "$?"
+        __parser_check_summary__tags_values "$tags" || return "$?"
     fi
 
     echo -n "$tags"
 }
 
-# __parser_summary_tag_value <content> <tag>
+# __parser_summary__tag_value <content> <tag>
 # Output a tag value from a summary.
 #
 # Output:
@@ -297,7 +297,7 @@ __parser_summary_tags() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-__parser_summary_tag_value() {
+__parser_summary__tag_value() {
     declare in_content="$1"
     # shellcheck disable=2155
     declare in_tag="$(sed -E 's/^ +//
@@ -305,11 +305,11 @@ __parser_summary_tag_value() {
         s/ +/ /g' <<<"$2")"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary_tag "$in_tag" || return "$?"
+        __parser_check_summary__tag "$in_tag" || return "$?"
     fi
 
     declare tags=
-    tags="$(__parser_summary_tags "$in_content")"
+    tags="$(__parser_summary__tags "$in_content")"
     declare -i status=$?
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$?"
@@ -331,7 +331,7 @@ __parser_summary_tag_value() {
     done
 }
 
-# parser_summary_more_information_value <content>
+# parser_summary__more_information_value <content>
 # Output "More information" tag value from a content.
 #
 # Output:
@@ -345,13 +345,13 @@ __parser_summary_tag_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_more_information_value() {
+parser_summary__more_information_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "More information"
+    __parser_summary__tag_value "$in_content" "More information"
 }
 
-# parser_summary_internal_value <content>
+# parser_summary__internal_value <content>
 # Output "Internal" tag value from a content.
 #
 # Output:
@@ -365,13 +365,13 @@ parser_summary_more_information_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_internal_value() {
+parser_summary__internal_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Internal"
+    __parser_summary__tag_value "$in_content" "Internal"
 }
 
-# parser_summary_internal_value_or_default <content>
+# parser_summary__internal_value_or_default <content>
 # Output "Internal" tag value from a content or default.
 #
 # Output:
@@ -385,11 +385,11 @@ parser_summary_internal_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_internal_value_or_default() {
+parser_summary__internal_value_or_default() {
     declare in_content="$1"
 
     declare tag_value=
-    tag_value="$(parser_summary_internal_value "$in_content")"
+    tag_value="$(parser_summary__internal_value "$in_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -397,7 +397,7 @@ parser_summary_internal_value_or_default() {
     echo -n "$tag_value"
 }
 
-# parser_summary_deprecated_value <content>
+# parser_summary__deprecated_value <content>
 # Output "Deprecated" tag value from a content.
 #
 # Output:
@@ -411,13 +411,13 @@ parser_summary_internal_value_or_default() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_deprecated_value() {
+parser_summary__deprecated_value() {
     declare in_content="$1"
 
-    __parser_summary_tag_value "$in_content" "Deprecated"
+    __parser_summary__tag_value "$in_content" "Deprecated"
 }
 
-# parser_summary_deprecated_value_or_default <content>
+# parser_summary__deprecated_value_or_default <content>
 # Output "Deprecated" tag value from a content or default.
 #
 # Output:
@@ -431,11 +431,11 @@ parser_summary_deprecated_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_deprecated_value_or_default() {
+parser_summary__deprecated_value_or_default() {
     declare in_content="$1"
 
     declare output=
-    output="$(parser_summary_deprecated_value "$in_content")"
+    output="$(parser_summary__deprecated_value "$in_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
 
@@ -443,7 +443,7 @@ parser_summary_deprecated_value_or_default() {
     echo -n "$output"
 }
 
-# parser_summary_see_also_value <content>
+# parser_summary__see_also_value <content>
 # Output "See also" tag value from a content.
 #
 # Output:
@@ -457,13 +457,13 @@ parser_summary_deprecated_value_or_default() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_see_also_value() {
+parser_summary__see_also_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "See also")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "See also")")"
 }
 
-# parser_summary_aliases_value <content>
+# parser_summary__aliases_value <content>
 # Output "Aliases" tag value from a content.
 #
 # Output:
@@ -477,13 +477,13 @@ parser_summary_see_also_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_aliases_value() {
+parser_summary__aliases_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Aliases")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Aliases")")"
 }
 
-# parser_summary_syntax_compatible_value <content>
+# parser_summary__syntax_compatible_value <content>
 # Output "Syntax compatible" tag value from a content.
 #
 # Output:
@@ -497,13 +497,13 @@ parser_summary_aliases_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_syntax_compatible_value() {
+parser_summary__syntax_compatible_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Syntax compatible")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Syntax compatible")")"
 }
 
-# parser_summary_help_value <content>
+# parser_summary__help_value <content>
 # Output "Help" tag value from a content.
 #
 # Output:
@@ -517,13 +517,13 @@ parser_summary_syntax_compatible_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_help_value() {
+parser_summary__help_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Help")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Help")")"
 }
 
-# parser_summary_version_value <content>
+# parser_summary__version_value <content>
 # Output "Version" tag value from a content.
 #
 # Output:
@@ -537,13 +537,13 @@ parser_summary_help_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_version_value() {
+parser_summary__version_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Version")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Version")")"
 }
 
-# parser_summary_structure_compatible_value <content>
+# parser_summary__structure_compatible_value <content>
 # Output "Structure compatible" tag value from a content.
 #
 # Output:
@@ -557,13 +557,13 @@ parser_summary_version_value() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_structure_compatible_value() {
-    declare in_page_content="$1"
+parser_summary__structure_compatible_value() {
+    declare in_content="$1"
 
-    echo -n "$(__parser_string_unify "$(__parser_summary_tag_value "$in_content" "Structure compatible")")"
+    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Structure compatible")")"
 }
 
-# __parser_summary_tag_definition <tag> <tag-value>
+# __parser_summary__tag_definition <tag> <tag-value>
 # Output a tag definition.
 #
 # Output:
@@ -574,7 +574,7 @@ parser_summary_structure_compatible_value() {
 #
 # Notes:
 #   - <tag> and <tag-value> should not contain trailing \n
-__parser_summary_tag_definition() {
+__parser_summary__tag_definition() {
     declare in_tag="$1"
     declare in_tag_value="$2"
 
@@ -585,7 +585,7 @@ __parser_summary_tag_definition() {
     echo -n "> $in_tag: $in_tag_value"
 }
 
-# parser_summary_cleaned_up <content>
+# parser_summary__cleaned_up <content>
 # Output summary with sorted tags and applied spacing and punctuation fixes.
 #
 # Output:
@@ -599,46 +599,46 @@ __parser_summary_tag_definition() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary_cleaned_up() {
+parser_summary__cleaned_up() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_summary_tags "$in_content" > /dev/null || return "$PARSER_INVALID_SUMMARY_CODE"
+        __parser_summary__tags "$in_content" > /dev/null || return "$PARSER_INVALID_SUMMARY_CODE"
     fi
 
     CHECK= # as we already checked input there is no need to do it in each data request
 
     # shellcheck disable=2155
-    declare description="$(parser_summary_description "$in_content")"
+    declare description="$(parser_summary__description "$in_content")"
     # shellcheck disable=2155
-    declare more_information_value="$(parser_summary_more_information_value "$in_content")"
+    declare more_information_value="$(parser_summary__more_information_value "$in_content")"
     # shellcheck disable=2155
-    declare internal_value="$(parser_summary_internal_value_or_default "$in_content")"
+    declare internal_value="$(parser_summary__internal_value_or_default "$in_content")"
     # shellcheck disable=2155
-    declare deprecated_value="$(parser_summary_deprecated_value_or_default "$in_content")"
+    declare deprecated_value="$(parser_summary__deprecated_value_or_default "$in_content")"
     # shellcheck disable=2155
-    declare see_also_value="$(parser_summary_see_also_value "$in_content")"
+    declare see_also_value="$(parser_summary__see_also_value "$in_content")"
     # shellcheck disable=2155
-    declare aliases_value="$(parser_summary_aliases_value "$in_content")"
+    declare aliases_value="$(parser_summary__aliases_value "$in_content")"
     # shellcheck disable=2155
-    declare syntax_compatible_value="$(parser_summary_syntax_compatible_value "$in_content")"
+    declare syntax_compatible_value="$(parser_summary__syntax_compatible_value "$in_content")"
     # shellcheck disable=2155
-    declare help_value="$(parser_summary_help_value "$in_content")"
+    declare help_value="$(parser_summary__help_value "$in_content")"
     # shellcheck disable=2155
-    declare version_value="$(parser_summary_version_value "$in_content")"
+    declare version_value="$(parser_summary__version_value "$in_content")"
     # shellcheck disable=2155
-    declare structure_compatible_value="$(parser_summary_structure_compatible_value "$in_content")"
+    declare structure_compatible_value="$(parser_summary__structure_compatible_value "$in_content")"
     
     echo -n "> $description
-$(__parser_summary_tag_definition "Internal" "$internal_value")
-$(__parser_summary_tag_definition "Deprecated" "$deprecated_value")
-$(__parser_summary_tag_definition "Help" "$help_value")
-$(__parser_summary_tag_definition "Version" "$version_value")
-$(__parser_summary_tag_definition "Syntax compatible" "$syntax_compatible_value")
-$(__parser_summary_tag_definition "Structure compatible" "$structure_compatible_value")
-$(__parser_summary_tag_definition "Aliases" "$aliases_value")
-$(__parser_summary_tag_definition "See also" "$see_also_value")
-$(__parser_summary_tag_definition "More information" "$more_information_value")" |
+$(__parser_summary__tag_definition "Internal" "$internal_value")
+$(__parser_summary__tag_definition "Deprecated" "$deprecated_value")
+$(__parser_summary__tag_definition "Help" "$help_value")
+$(__parser_summary__tag_definition "Version" "$version_value")
+$(__parser_summary__tag_definition "Syntax compatible" "$syntax_compatible_value")
+$(__parser_summary__tag_definition "Structure compatible" "$structure_compatible_value")
+$(__parser_summary__tag_definition "Aliases" "$aliases_value")
+$(__parser_summary__tag_definition "See also" "$see_also_value")
+$(__parser_summary__tag_definition "More information" "$more_information_value")" |
     sed -nE '/./ p'
 }
 
@@ -661,7 +661,7 @@ __parser_examples__all() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_content "$in_content" || return "$?"
+        __parser_check__content "$in_content" || return "$?"
     fi
     
     # shellcheck disable=2016
@@ -1285,7 +1285,7 @@ parser_examples__code_placeholder_piece_examples() {
     # shellcheck disable=2155
     declare description="$(__parser_tokens__current "$in_piece" 0 ":")"
     declare -i description_length="${#description} + 1"
-    echo -n "$(sed -E 's/^ +//' <<< "${in_placeholder_piece:description_length}")"
+    echo -n "$(sed -E 's/^ +//' <<< "${in_piece:description_length}")"
 }
 
 
