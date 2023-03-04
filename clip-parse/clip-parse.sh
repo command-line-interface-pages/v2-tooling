@@ -1174,6 +1174,37 @@ __parser_check_examples__code_placeholder_piece() {
         return "$PARSER_INVALID_TOKENS_CODE"
 }
 
+# __parser_check_examples__code_placeholder <placeholder>
+# Check whether a placeholder is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <piece> is valid
+#   - $PARSER_INVALID_TOKENS_CODE otherwise
+#
+# Notes:
+#   - <placeholder> should not contain trailing \n
+#   - escaping is not checked
+__parser_check_examples__code_placeholder() {
+    declare in_placeholder="$1"
+
+    # shellcheck disable=2155
+    declare pieces="$(__parser_tokens__all_unbalanced "$in_placeholder" "|")"
+    # shellcheck disable=2155
+    declare piece_count="$(parser_tokens__count "$pieces")"
+
+    declare -i index=0
+
+    # shellcheck disable=2155
+    while ((index < piece_count)); do
+        declare piece="$(parser_tokens__value "$pieces" "$index")"
+        __parser_check_examples__code_placeholder_piece "$piece" || return "$PARSER_INVALID_TOKENS_CODE"
+        index+=1
+    done
+}
+
 # parser_examples__code_placeholder_piece_type <piece>
 # Output a placeholder piece (alternative) type.
 #
@@ -1373,6 +1404,11 @@ parser_check_examples__code_allows_alternative_expansion() {
         declare -i token_piece_count="$(parser_tokens__count "$(parser_examples__code_placeholder_token_pieces "$token_value")")"
 
         if [[ "$token_type" == CONSTRUCT ]] && ((token_piece_count == alternative_piece_count)); then
+            __parser_check_examples__code_placeholder "$token_value"
+            declare -i status="$?"
+            if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+                ((status == 0)) || return "$status"
+            fi
             conforming_placeholder_count+=1
         fi
         
