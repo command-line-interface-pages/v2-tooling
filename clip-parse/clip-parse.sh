@@ -1390,6 +1390,11 @@ parser_check_examples__code_allows_alternative_expansion() {
     done
 
     ((alternative_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
+
+    # shellcheck disable=2155
+    declare alternative_pieces="$(__parser_tokens__all_unbalanced "$description_alternative" "|")"
+    (("$(parser_tokens__count "$alternative_pieces")" < 2)) && return "$PARSER_INVALID_TOKENS_CODE"
+
     # shellcheck disable=2155
     declare -i alternative_piece_count="$(parser_tokens__count "$(parser_examples__description_alternative_token_pieces "$description_alternative")")"
     
