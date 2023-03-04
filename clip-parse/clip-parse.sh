@@ -1338,7 +1338,7 @@ parser_examples__code_placeholder_piece_examples() {
     echo -n "$(sed -E 's/^ +//' <<< "${in_piece:description_length}")"
 }
 
-# parser_check_examples__code_allows_alternative_expansion <content> <index>
+# parser_check_examples__allows_alternative_expansion <content> <index>
 # Check whether an example allows expansion.
 #
 # Output:
@@ -1353,7 +1353,7 @@ parser_examples__code_placeholder_piece_examples() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_check_examples__code_allows_alternative_expansion() {
+parser_check_examples__allows_alternative_expansion() {
     declare in_content="$1"
     declare -i in_index="$2"
 
@@ -1421,4 +1421,97 @@ parser_check_examples__code_allows_alternative_expansion() {
     done
 
     ((conforming_placeholder_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
+}
+
+# __parser_examples__description_singular_alternative_token_index <content> <index>
+# Output a singular alternative when an alternative expansion is possible.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_examples__description_singular_alternative_token_index() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    parser_check_examples__allows_alternative_expansion "$in_content" "$in_index"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    # shellcheck disable=2155
+    declare tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
+    # shellcheck disable=2155
+    declare token_count="$(parser_tokens__count "$tokens")"
+
+    declare -i index=0
+    while ((index < token_count)); do
+        [[ "$(parser_tokens__type "$tokens" "$index")" == CONSTRUCT ]] && {
+            echo -n "$index"
+            return "$SUCCESS"
+        }
+        index+=1
+    done
+}
+
+# __parser_examples__description_singular_placeholder_token_index <content> <index>
+# Output a singular alternative when an alternative expansion is possible.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_examples__description_singular_placeholder_token_index() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare -i alternative_index=
+    alternative_index="$(__parser_examples__description_singular_alternative_token_index "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    # shellcheck disable=2155
+    declare alternative_pieces="$(parser_tokens__value "$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")" "$alternative_index")"
+    # shellcheck disable=2155
+    declare alternative_piece_count="$(parser_tokens__count "$(__parser_tokens__all_unbalanced "$alternative_pieces" "|")")"
+    
+    # shellcheck disable=2155
+    declare code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
+    # shellcheck disable=2155
+    declare -i code_token_count="$(parser_tokens__count "$code_tokens")"
+
+    declare -i index=0
+    # shellcheck disable=2155
+    while ((index < code_token_count)); do
+        declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
+        declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
+
+        if [[ "$token_type" == CONSTRUCT ]]; then
+            declare placeholder_pieces="$(__parser_tokens__all_unbalanced "$token_value" "|")"
+            declare placeholder_piece_count="$(parser_tokens__count "$placeholder_pieces")"
+
+            ((placeholder_piece_count == alternative_piece_count)) && echo -n "$index"
+        fi
+
+        index+=1
+    done
 }
