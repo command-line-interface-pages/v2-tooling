@@ -11,6 +11,12 @@ declare -i PARSER_NOT_ALLOWED_CODE=6
 
 
 
+parser__version() {
+    echo "1.0.0"
+}
+
+
+
 # __parser_string__join <separator> <strings>
 # Output joined strings.
 #
