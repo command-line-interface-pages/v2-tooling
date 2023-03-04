@@ -1515,3 +1515,196 @@ __parser_examples__description_singular_placeholder_token_index() {
         index+=1
     done
 }
+
+# __parser_examples__token_definition <token> <token-value>
+# Output a token definition.
+#
+# Output:
+#   <token-definition>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <token> and <token-value> should not contain trailing \n
+__parser_examples__token_definition() {
+    declare in_token="$1"
+    declare in_token_value="$2"
+
+    if [[ "$in_token" == CONSTRUCT ]]; then
+        echo -n "{$in_token_value}"
+    else
+        echo -n "$in_token_value"
+    fi
+}
+
+# parser_examples__expand_at <content> <index>
+# Output an expanded example.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__expand_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare -i description_alternative_index=
+    description_alternative_index="$(__parser_examples__description_singular_alternative_token_index "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    declare -i code_placeholder_index=
+    code_placeholder_index="$(__parser_examples__description_singular_placeholder_token_index "$in_content" "$in_index")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    # shellcheck disable=2155
+    declare description_tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
+    # shellcheck disable=2155
+    declare code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
+
+    # shellcheck disable=2155
+    declare description_alternative_value="$(parser_tokens__value "$description_tokens" "$description_alternative_index")"
+    # shellcheck disable=2155
+    declare code_placeholder_value="$(parser_tokens__value "$code_tokens" "$code_placeholder_index")"
+
+    # shellcheck disable=2155
+    declare description_alternative_pieces="$(__parser_tokens__all_unbalanced "$description_alternative_value" "|")"
+    # shellcheck disable=2155
+    declare code_placeholder_pieces="$(__parser_tokens__all_unbalanced "$code_placeholder_value" "|")"
+
+    # shellcheck disable=2155
+    declare -i pieces_count="$(parser_tokens__count "$description_alternative_pieces")"
+
+    declare -i piece_index=0
+
+    # shellcheck disable=2155
+    while ((piece_index < pieces_count)); do
+        declare generated_description=
+        declare generated_code=
+
+        declare -i index=0
+
+        while ((index < description_alternative_index)); do
+            generated_description+="$(parser_tokens__value "$description_tokens" "$index")"
+            index+=1
+        done
+
+        generated_description+="$(parser_tokens__value "$description_alternative_pieces" "$piece_index")"
+        index+=1
+
+        while ((index < "$(parser_tokens__count "$description_tokens")")); do
+            generated_description+="$(parser_tokens__value "$description_tokens" "$index")"
+            index+=1
+        done
+
+        declare -i index=0
+
+        
+        while ((index < code_placeholder_index)); do
+            declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
+            declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
+
+            generated_code+="$(__parser_examples__token_definition "$token_type" "$token_value")"
+            index+=1
+        done
+
+        generated_code+="{$(parser_tokens__value "$code_placeholder_pieces" "$piece_index")}"
+        index+=1
+
+        while ((index < "$(parser_tokens__count "$code_tokens")")); do
+            declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
+            declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
+
+            generated_code+="$(__parser_examples__token_definition "$token_type" "$token_value")"
+            index+=1
+        done
+
+        echo -n '- '
+        # shellcheck disable=2016
+        printf '%s:\n\n`%s`\n\n' "$generated_description" "$generated_code"
+
+        piece_index+=1
+    done
+}
+
+# parser_examples__expanded_or_original_at <content> <index>
+# Output an expanded example or original if expansion is not possible.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__expanded_or_original_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare example=
+    example="$(parser_examples__expand_at "$in_content" "$in_index")"
+    declare -i status="$?"
+
+    # shellcheck disable=2155
+    if ((status != 0)); then
+        declare original_description="$(parser_examples__description_at "$in_content" "$in_index")"
+        declare original_code="$(parser_examples__code_at "$in_content" "$in_index")"
+        echo -n '- '
+        # shellcheck disable=2016
+        printf '%s:\n\n`%s`\n\n' "$original_description" "$original_code"
+    else
+        echo "$example"
+        echo
+    fi
+}
+
+# parser_examples__expand_all <content>
+# Output a expanded examples.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <content> is valid and expansion is allowed
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
+#   
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__expand_all() {
+    declare in_content="$1"
+
+    declare -i index=0
+
+    declare example_count=
+    example_count="$(__parser_examples__all_count "$in_content")"
+    declare -i status="$?"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    while ((index < example_count)); do
+        parser_examples__expanded_or_original_at "$in_content" "$index"
+        index+=1
+    done
+}
