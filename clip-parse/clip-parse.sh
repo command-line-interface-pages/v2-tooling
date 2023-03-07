@@ -9,6 +9,10 @@ declare -i PARSER_INVALID_TOKENS_CODE=4
 declare -i PARSER_INVALID_ARGUMENT_CODE=5
 declare -i PARSER_NOT_ALLOWED_CODE=6
 
+# For cases where developer forgets to check something and messes up with
+# function argument values
+declare -i PARSER_INTERNAL_FAILURE_CODE=7
+
 
 
 # parser__version
@@ -20,7 +24,7 @@ declare -i PARSER_NOT_ALLOWED_CODE=6
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.0.0"
+    echo "1.0.1"
 }
 
 
@@ -46,7 +50,7 @@ __parser_string__join() {
 }
 
 # __parser_string__unify <string>
-# Output string without repeated comma-separated items.
+# Output a string without repeated comma-separated items.
 #
 # Output:
 #   <string>
@@ -57,9 +61,9 @@ __parser_string__join() {
 # Notes:
 #   - <string> should not contain trailing \n
 __parser_string__unify() {
-    declare string="$1"
+    declare in_string="$1"
 
-    mapfile -t string_array < <(echo -n "$string" | sed -E 's/ +/ /g
+    mapfile -t string_array < <(echo -n "$in_string" | sed -E 's/ +/ /g
     s/ *, */\n/g' | sort -r -u)
 
     __parser_string__join ", " "${string_array[@]}"
@@ -218,12 +222,14 @@ __parser_check_summary__tag_value() {
     if [[ "$in_tag" =~ ^(Internal|Deprecated)$ ]]; then
         [[ "$in_tag_value" =~ ^(true|false)$ ]] || return "$PARSER_INVALID_SUMMARY_CODE"
     elif [[ "$in_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
-        ! [[ "$in_tag_value" =~ ,, ]] || return "$PARSER_INVALID_SUMMARY_CODE"
+        [[ ! "$in_tag_value" =~ ,, ]] || return "$PARSER_INVALID_SUMMARY_CODE"
+    else
+        return "$PARSER_INTERNAL_FAILURE_CODE"
     fi
 }
 
-# __parser_check_summary__tags_values <tags>
-# Check whether tag values are valid.
+# __parser_check_summary__tag_values <tags>
+# Check whether all tag values are valid.
 #
 # Output:
 #   <empty-string>
@@ -234,7 +240,7 @@ __parser_check_summary__tag_value() {
 #
 # Notes:
 #   - <tag> and <tag-value> should not contain trailing \n
-__parser_check_summary__tags_values() {
+__parser_check_summary__tag_values() {
     declare in_tags="$1"
 
     mapfile -t tags_array <<<"$in_tags"
@@ -291,7 +297,7 @@ __parser_summary__tags() {
     }' <<<"$summary")"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary__tags_values "$tags" || return "$?"
+        __parser_check_summary__tag_values "$tags" || return "$?"
     fi
 
     echo -n "$tags"
@@ -346,7 +352,7 @@ __parser_summary__tag_value() {
 }
 
 # parser_summary__more_information_value <content>
-# Output "More information" tag value from a content.
+# Output "More information" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -366,7 +372,7 @@ parser_summary__more_information_value() {
 }
 
 # parser_summary__internal_value <content>
-# Output "Internal" tag value from a content.
+# Output "Internal" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -386,7 +392,7 @@ parser_summary__internal_value() {
 }
 
 # parser_summary__internal_value_or_default <content>
-# Output "Internal" tag value from a content or default.
+# Output "Internal" tag value from a summary or default.
 #
 # Output:
 #   <tag-value>
@@ -412,7 +418,7 @@ parser_summary__internal_value_or_default() {
 }
 
 # parser_summary__deprecated_value <content>
-# Output "Deprecated" tag value from a content.
+# Output "Deprecated" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -432,7 +438,7 @@ parser_summary__deprecated_value() {
 }
 
 # parser_summary__deprecated_value_or_default <content>
-# Output "Deprecated" tag value from a content or default.
+# Output "Deprecated" tag value from a summary or default.
 #
 # Output:
 #   <tag-value>
@@ -458,7 +464,7 @@ parser_summary__deprecated_value_or_default() {
 }
 
 # parser_summary__see_also_value <content>
-# Output "See also" tag value from a content.
+# Output "See also" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -478,7 +484,7 @@ parser_summary__see_also_value() {
 }
 
 # parser_summary__aliases_value <content>
-# Output "Aliases" tag value from a content.
+# Output "Aliases" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -498,7 +504,7 @@ parser_summary__aliases_value() {
 }
 
 # parser_summary__syntax_compatible_value <content>
-# Output "Syntax compatible" tag value from a content.
+# Output "Syntax compatible" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -518,7 +524,7 @@ parser_summary__syntax_compatible_value() {
 }
 
 # parser_summary__help_value <content>
-# Output "Help" tag value from a content.
+# Output "Help" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -538,7 +544,7 @@ parser_summary__help_value() {
 }
 
 # parser_summary__version_value <content>
-# Output "Version" tag value from a content.
+# Output "Version" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -558,7 +564,7 @@ parser_summary__version_value() {
 }
 
 # parser_summary__structure_compatible_value <content>
-# Output "Structure compatible" tag value from a content.
+# Output "Structure compatible" tag value from a summary.
 #
 # Output:
 #   <tag-value>
@@ -659,7 +665,7 @@ $(__parser_summary__tag_definition "More information" "$more_information_value")
 
 
 # __parser_examples__all <content>
-# Output examples.
+# Output all examples.
 #
 # Output:
 #   <examples>
@@ -688,7 +694,7 @@ __parser_examples__all() {
     }' <<<"$in_content"
 }
 
-# __parser_examples__all_count <content>
+# parser_examples__count <content>
 # Output an example count.
 #
 # Output:
@@ -701,7 +707,7 @@ __parser_examples__all() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-__parser_examples__all_count() {
+parser_examples__count() {
     declare in_content="$1"
 
     declare examples=
@@ -736,7 +742,9 @@ parser_examples__description_at() {
     declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare examples=
     examples="$(__parser_examples__all "$in_content")"
@@ -746,8 +754,10 @@ parser_examples__description_at() {
     fi
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_examples__all_count "$in_content")"
-    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    declare -i count="$(parser_examples__count "$in_content")"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     sed -nE "$((in_index * 2 + 1)) p" <<<"$examples"
 }
@@ -770,7 +780,9 @@ parser_examples__code_at() {
     declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare examples=
     examples="$(__parser_examples__all "$in_content")"
@@ -780,8 +792,10 @@ parser_examples__code_at() {
     fi
 
     # shellcheck disable=2155
-    declare -i count="$(__parser_examples__all_count "$in_content")"
-    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    declare -i count="$(parser_examples__count "$in_content")"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
 }
@@ -803,7 +817,9 @@ __parser_tokens__current() {
     declare -i in_index="$2"
     declare in_next_token_start="${3:0:1}"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare current_token=
 
@@ -930,11 +946,15 @@ parser_tokens__value() {
     declare in_tokens="$1"
     declare in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     # shellcheck disable=2155
     declare count="$(parser_tokens__count "$in_tokens")"
-    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare -i line=0
     declare -i index=0
@@ -962,11 +982,15 @@ parser_tokens__type() {
     declare in_tokens="$1"
     declare in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     # shellcheck disable=2155
     declare count="$(parser_tokens__count "$in_tokens")"
-    ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare -i line=0
     declare -i index=0
@@ -1001,13 +1025,15 @@ parser_examples__description_alternative_tokens_at() {
     declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare description=
     description="$(parser_examples__description_at "$in_content" "$in_index")"
     declare -i status="$?"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+        ((status == 0)) || return "$status"
     fi
 
     declare tokens=
@@ -1073,13 +1099,15 @@ parser_examples__description_mnemonic_tokens_at() {
     declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare description=
     description="$(parser_examples__description_at "$in_content" "$in_index")"
     declare -i status="$?"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+        ((status == 0)) || return "$status"
     fi
 
     declare tokens=
@@ -1129,13 +1157,15 @@ parser_examples__code_placeholder_tokens_at() {
     declare in_content="$1"
     declare -i in_index="$2"
 
-    ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((in_index < 0)) && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
 
     declare code=
     code="$(parser_examples__code_at "$in_content" "$in_index")"
     declare -i status="$?"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        ((status == PARSER_INVALID_CONTENT_CODE)) && return "$status"
+        ((status == 0)) || return "$status"
     fi
 
     declare tokens=
@@ -1281,7 +1311,6 @@ s/^ +//" <<<"$in_piece"
 #   - 0 if <piece> is valid and repetition is allowed
 #   - $PARSER_INVALID_TOKENS_CODE if <piece> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <piece> should not contain trailing \n
@@ -1363,7 +1392,6 @@ parser_examples__code_placeholder_piece_examples() {
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1448,7 +1476,6 @@ parser_check_examples__allows_alternative_expansion() {
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1488,7 +1515,6 @@ __parser_examples__description_singular_alternative_token_index() {
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1562,7 +1588,6 @@ __parser_examples__token_definition() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <content> should not contain trailing \n
@@ -1665,7 +1690,6 @@ parser_examples__expand_at() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1700,7 +1724,6 @@ parser_examples__expanded_or_original_at() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <content> should not contain trailing \n
@@ -1711,7 +1734,7 @@ parser_examples__expand_all() {
     declare -i index=0
 
     declare example_count=
-    example_count="$(__parser_examples__all_count "$in_content")"
+    example_count="$(parser_examples__count "$in_content")"
     declare -i status="$?"
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
