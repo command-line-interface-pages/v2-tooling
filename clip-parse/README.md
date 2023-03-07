@@ -123,14 +123,18 @@ Let's say we put it in `$page` variable.
   :bulb: **answer**
 
   ```bash
-  parser_examples__description_mnemonic_tokens_at "$page" 0
+  parser_examples__description_mnemonic_tokens_at "$page" 2
   ```
 
   :checkered_flag: **output**
 
   ```md
   LITERAL
-  Test if a specific variable is (equal|not equal) to a string
+  Test if a specific variable has (an empty|a 
+  CONSTRUCT
+  n
+  LITERAL
+  on-empty) value
   ```
 
 - :question: **question** How to get tokens for placeholders?  
