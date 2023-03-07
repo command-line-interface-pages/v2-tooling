@@ -48,50 +48,50 @@ Let's say we put it in `$page` variable.
 
 ### Basic usage
 
-- Question: How to get a page header?
-  Answer:
+- :question: **question** How to get a page header?  
+  :bulb: **answer**
 
   ```bash
   parser__header "$page"
   ```
 
-- Question: How to get a page description?
-  Answer:
+- :question: **question** How to get a page description?  
+  :bulb: **answer**
 
   ```bash
   parser_summary__description "$page"
   ```
 
-- Question: How to get an example description?
-  Answer:
+- :question: **question** How to get an example description?  
+  :bulb: **answer**
 
   ```bash
   parser_examples__description_at "$page" 0
   ```
 
-- Question: How to get an example code?
-  Answer:
+- :question: **question** How to get an example code?  
+  :bulb: **answer**
 
   ```bash
   parser_examples__code_at "$page" 0
   ```
 
-- Question: How to get tokens for alternatives?
-  Answer:
+- :question: **question** How to get tokens for alternatives?  
+  :bulb: **answer**
 
   ```bash
   parser_examples__description_alternative_tokens_at "$page" 0
   ```
 
-- Question: How to get tokens for mnemonics?
-  Answer:
+- :question: **question** How to get tokens for mnemonics?  
+  :bulb: **answer**
 
   ```bash
   parser_examples__description_mnemonic_tokens_at "$page" 0
   ```
 
-- Question: How to get tokens for placeholders?
-  Answer:
+- :question: **question** How to get tokens for placeholders?  
+  :bulb: **answer**
 
   ```bash
   parser_examples__code_placeholder_tokens_at "$page" 0
@@ -99,45 +99,45 @@ Let's say we put it in `$page` variable.
 
 ### Advanced usage
 
-- Question: How to get a token count?
-  Answer:
+- :question: **question** How to get a token count?  
+  :bulb: **answer**
 
   ```bash
   parser_tokens__count "$(parser_examples__description_alternative_tokens_at "$page" 0)"
   ```
 
-- Question: How to get a token value?
-  Answer:
+- :question: **question** How to get a token value?  
+  :bulb: **answer**
 
   ```bash
   parser_tokens__value "$(parser_examples__description_alternative_tokens_at "$page" 0)" 0
   ```
 
-- Question: How to get a token type?
-  Answer:
+- :question: **question** How to get a token type?  
+  :bulb: **answer**
 
   ```bash
   parser_tokens__type "$(parser_examples__description_alternative_tokens_at "$page" 0)" 0
   ```
 
-- Question: How to get pieces (parts listed via unescaped `|`) for alternatives?
-  Answer:
+- :question: **question** How to get pieces (parts listed via unescaped `|`) for alternatives?  
+  :bulb: **answer**
 
   ```bash
   value="$(parser_tokens__value "$(parser_examples__description_alternative_tokens_at "$page" 0)" 1)"
   parser_examples__description_alternative_token_pieces "$value"
   ```
 
-- Question: How to get pieces (parts listed via unescaped `|`) for placeholder?
-  Answer:
+- :question: **question** How to get pieces (parts listed via unescaped `|`) for placeholder?  
+  :bulb: **answer**
 
   ```bash
   value="$(parser_tokens__value "$(parser_examples__code_placeholder_tokens_at "$page" 0)" 3)"
   parser_examples__code_placeholder_token_pieces "$value"
   ```
 
-- Question: How to get placeholder type?
-  Answer:
+- :question: **question** How to get placeholder type?  
+  :bulb: **answer**
 
   ```bash
   value="$(parser_tokens__value "$(parser_examples__code_placeholder_tokens_at "$page" 0)" 1)"
