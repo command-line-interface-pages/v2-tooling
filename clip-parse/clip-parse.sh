@@ -1311,7 +1311,6 @@ s/^ +//" <<<"$in_piece"
 #   - 0 if <piece> is valid and repetition is allowed
 #   - $PARSER_INVALID_TOKENS_CODE if <piece> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <piece> should not contain trailing \n
@@ -1516,7 +1515,6 @@ __parser_examples__description_singular_alternative_token_index() {
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1590,7 +1588,6 @@ __parser_examples__token_definition() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <content> should not contain trailing \n
@@ -1693,7 +1690,6 @@ parser_examples__expand_at() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   
-#
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
@@ -1728,7 +1724,6 @@ parser_examples__expanded_or_original_at() {
 #   - 0 if <content> is valid and expansion is allowed
 #   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
 #   - $PARSER_NOT_ALLOWED_CODE if repetition is not allowed
-#   
 #
 # Notes:
 #   - <content> should not contain trailing \n
