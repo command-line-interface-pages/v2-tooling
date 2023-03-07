@@ -25,6 +25,7 @@ declare -i PARSER_INTERNAL_FAILURE_CODE=7
 #   - 0 always
 parser__version() {
     echo "1.0.1"
+    return "$SUCCESS"
 }
 
 
@@ -47,6 +48,8 @@ __parser_string__join() {
   if shift 2; then
     printf '%s' "$in_string" "${@/#/$in_separator}"
   fi
+
+  return "$SUCCESS"
 }
 
 # __parser_string__unify <string>
@@ -67,6 +70,7 @@ __parser_string__unify() {
     s/ *, */\n/g' | sort -r -u)
 
     __parser_string__join ", " "${string_array[@]}"
+    return "$SUCCESS"
 }
 
 
@@ -92,6 +96,8 @@ __parser_check__content() {
         $! bx
         /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$in_content"$'\n\n' ||
         return "$PARSER_INVALID_CONTENT_CODE"
+    
+    return "$SUCCESS"
 }
 
 # parser__header <content>
@@ -120,6 +126,8 @@ parser__header() {
         s/ +/ /g
         p
     }' <<<"$in_content"
+
+    return "$SUCCESS"
 }
 
 
@@ -145,6 +153,8 @@ __parser_check__summary() {
         $! bx
         /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$in_summary"$'\n' ||
         return "$PARSER_INVALID_SUMMARY_CODE"
+    
+    return "$SUCCESS"
 }
 
 # parser_summary__description <content>
@@ -170,6 +180,7 @@ parser_summary__description() {
     
     # shellcheck disable=2155
     declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         __parser_check__summary "$summary" || return "$?"
     fi
@@ -181,6 +192,8 @@ parser_summary__description() {
         s/  +/ /g
         p
     }' <<<"$summary"
+
+    return "$SUCCESS"
 }
 
 # __parser_check_summary__tag <tag>
@@ -201,6 +214,8 @@ __parser_check_summary__tag() {
     [[ "$in_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases\
 |Syntax compatible|Help|Version|Structure compatible)$ ]] ||
         return "$PARSER_INVALID_SUMMARY_CODE"
+    
+    return "$SUCCESS"
 }
 
 # __parser_check_summary__tag_value <tag> <tag-value>
@@ -224,8 +239,10 @@ __parser_check_summary__tag_value() {
     elif [[ "$in_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
         [[ ! "$in_tag_value" =~ ,, ]] || return "$PARSER_INVALID_SUMMARY_CODE"
     else
-        return "$PARSER_INTERNAL_FAILURE_CODE"
+        [[ ! "$in_tag" =~ ^(More information)$ ]] && return "$PARSER_INTERNAL_FAILURE_CODE"
     fi
+    
+    echo "$SUCCESS"
 }
 
 # __parser_check_summary__tag_values <tags>
@@ -246,6 +263,7 @@ __parser_check_summary__tag_values() {
     mapfile -t tags_array <<<"$in_tags"
 
     declare -i index=0
+
     while ((index < "${#tags_array[@]}")); do
         declare tag="${tags_array[index]}"
         declare tag_value="${tags_array[index + 1]}"
@@ -254,8 +272,11 @@ __parser_check_summary__tag_values() {
             __parser_check_summary__tag "$tag" || return "$?"
             __parser_check_summary__tag_value "$tag" "$tag_value" || return "$?"
         fi
+
         index+=2
     done
+
+    return "$SUCCESS"
 }
 
 # __parser_summary__tags <content>
@@ -281,6 +302,7 @@ __parser_summary__tags() {
     
     # shellcheck disable=2155
     declare summary="$(sed -nE '/^>/ p' <<<"$in_content")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         __parser_check__summary "$summary" || return "$?"
     fi
@@ -301,6 +323,7 @@ __parser_summary__tags() {
     fi
 
     echo -n "$tags"
+    return "$SUCCESS"
 }
 
 # __parser_summary__tag_value <content> <tag>
@@ -331,13 +354,14 @@ __parser_summary__tag_value() {
     declare tags=
     tags="$(__parser_summary__tags "$in_content")"
     declare -i status=$?
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$?"
     fi
 
     mapfile -t tags_array <<< "$tags"
-
     declare -i index=0
+
     while ((index < "${#tags_array[@]}")); do
         declare tag="${tags_array[index]}"
         declare value="${tags_array[index + 1]}"
@@ -349,6 +373,8 @@ __parser_summary__tag_value() {
 
         index+=2
     done
+
+    return "$SUCCESS"
 }
 
 # parser_summary__more_information_value <content>
@@ -369,6 +395,7 @@ parser_summary__more_information_value() {
     declare in_content="$1"
 
     __parser_summary__tag_value "$in_content" "More information"
+    return "$SUCCESS"
 }
 
 # parser_summary__internal_value <content>
@@ -389,6 +416,7 @@ parser_summary__internal_value() {
     declare in_content="$1"
 
     __parser_summary__tag_value "$in_content" "Internal"
+    return "$SUCCESS"
 }
 
 # parser_summary__internal_value_or_default <content>
@@ -412,9 +440,9 @@ parser_summary__internal_value_or_default() {
     tag_value="$(parser_summary__internal_value "$in_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
-
     [[ -z "$tag_value" ]] && tag_value=false
     echo -n "$tag_value"
+    return "$SUCCESS"
 }
 
 # parser_summary__deprecated_value <content>
@@ -435,6 +463,7 @@ parser_summary__deprecated_value() {
     declare in_content="$1"
 
     __parser_summary__tag_value "$in_content" "Deprecated"
+    return "$SUCCESS"
 }
 
 # parser_summary__deprecated_value_or_default <content>
@@ -458,9 +487,9 @@ parser_summary__deprecated_value_or_default() {
     output="$(parser_summary__deprecated_value "$in_content")"
     # shellcheck disable=2181
     (($? == 0)) || return "$?"
-
     [[ -z "$output" ]] && output=false
     echo -n "$output"
+    return "$SUCCESS"
 }
 
 # parser_summary__see_also_value <content>
@@ -481,6 +510,7 @@ parser_summary__see_also_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "See also")")"
+    return "$SUCCESS"
 }
 
 # parser_summary__aliases_value <content>
@@ -501,6 +531,7 @@ parser_summary__aliases_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Aliases")")"
+    return "$SUCCESS"
 }
 
 # parser_summary__syntax_compatible_value <content>
@@ -521,6 +552,7 @@ parser_summary__syntax_compatible_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Syntax compatible")")"
+    return "$SUCCESS"
 }
 
 # parser_summary__help_value <content>
@@ -541,6 +573,7 @@ parser_summary__help_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Help")")"
+    return "$SUCCESS"
 }
 
 # parser_summary__version_value <content>
@@ -561,6 +594,7 @@ parser_summary__version_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Version")")"
+    return "$SUCCESS"
 }
 
 # parser_summary__structure_compatible_value <content>
@@ -581,6 +615,7 @@ parser_summary__structure_compatible_value() {
     declare in_content="$1"
 
     echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Structure compatible")")"
+    return "$SUCCESS"
 }
 
 # __parser_summary__tag_definition <tag> <tag-value>
@@ -599,10 +634,9 @@ __parser_summary__tag_definition() {
     declare in_tag_value="$2"
 
     [[ -z "$in_tag" || -z "$in_tag_value" ]] && return "$SUCCESS"
-
     [[ "$in_tag" =~ ^(Internal|Deprecated)$ && "$in_tag_value" == false ]] && return "$SUCCESS"
-
     echo -n "> $in_tag: $in_tag_value"
+    return "$SUCCESS"
 }
 
 # parser_summary__cleaned_up <content>
@@ -627,7 +661,6 @@ parser_summary__cleaned_up() {
     fi
 
     CHECK= # as we already checked input there is no need to do it in each data request
-
     # shellcheck disable=2155
     declare description="$(parser_summary__description "$in_content")"
     # shellcheck disable=2155
@@ -649,7 +682,7 @@ parser_summary__cleaned_up() {
     # shellcheck disable=2155
     declare structure_compatible_value="$(parser_summary__structure_compatible_value "$in_content")"
     
-    echo -n "> $description
+    echo -n "$(sed -E 's/^/> /' <<<"$description")
 $(__parser_summary__tag_definition "Internal" "$internal_value")
 $(__parser_summary__tag_definition "Deprecated" "$deprecated_value")
 $(__parser_summary__tag_definition "Help" "$help_value")
@@ -660,6 +693,8 @@ $(__parser_summary__tag_definition "Aliases" "$aliases_value")
 $(__parser_summary__tag_definition "See also" "$see_also_value")
 $(__parser_summary__tag_definition "More information" "$more_information_value")" |
     sed -nE '/./ p'
+
+    return "$SUCCESS"
 }
 
 
@@ -685,13 +720,18 @@ __parser_examples__all() {
     fi
     
     # shellcheck disable=2016
-    sed -nE '/^[-`]/ {
+    sed -nE '/^-/ {
         s/^- +//
         s/ *:$//
+        p
+    }
+    /^`/ {
         s/^` *//
         s/ *`$//
         p
     }' <<<"$in_content"
+
+    return "$SUCCESS"
 }
 
 # parser_examples__count <content>
@@ -713,6 +753,7 @@ parser_examples__count() {
     declare examples=
     examples="$(__parser_examples__all "$in_content")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -720,8 +761,8 @@ parser_examples__count() {
     # shellcheck disable=2155
     declare -i count="$(echo "$examples" | wc -l)"
     ((count % 2 == 0)) || count+=1
-
     echo -n "$((count / 2))"
+    return "$SUCCESS"
 }
 
 # parser_examples__description_at <content> <index>
@@ -749,17 +790,20 @@ parser_examples__description_at() {
     declare examples=
     examples="$(__parser_examples__all "$in_content")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
 
     # shellcheck disable=2155
     declare -i count="$(parser_examples__count "$in_content")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
     fi
 
     sed -nE "$((in_index * 2 + 1)) p" <<<"$examples"
+    return "$SUCCESS"
 }
 
 # parser_examples__code_at <content> <index>
@@ -787,17 +831,20 @@ parser_examples__code_at() {
     declare examples=
     examples="$(__parser_examples__all "$in_content")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
 
     # shellcheck disable=2155
     declare -i count="$(parser_examples__count "$in_content")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
     fi
 
     sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
+    return "$SUCCESS"
 }
 
 # __parser_tokens__current <string> <index> <next-token-start>
@@ -866,10 +913,8 @@ __parser_tokens__all_balanced() {
         declare literal_token=
         literal_token="$(__parser_tokens__current "$in_string" "$index" "$construct_start")"
         index="$?"
-
         printf "%s\n%s\n" LITERAL "$literal_token"
         index+=1
-
         declare construct_token=
         construct_token="$(__parser_tokens__current "$in_string" "$index" "$construct_end")"
         index="$?"
@@ -878,6 +923,7 @@ __parser_tokens__all_balanced() {
             if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
                 [[ "${in_string:index:1}" == "$construct_end" ]] || return "$PARSER_INVALID_TOKENS_CODE"
             fi
+
             printf "%s\n%s\n" CONSTRUCT "$construct_token"
         }
         index+=1
@@ -909,7 +955,6 @@ __parser_tokens__all_unbalanced() {
         declare literal_token=
         literal_token="$(__parser_tokens__current "$in_string" "$index" "$in_construct_delimiter")"
         index="$?"
-
         [[ -n "$literal_token" ]] && printf "%s\n%s\n" CONSTRUCT "$literal_token"
         index+=1
     done
@@ -929,8 +974,8 @@ parser_tokens__count() {
     # shellcheck disable=2155
     declare -i count="$(echo -n "$in_tokens" | wc -l)"
     ((count % 2 == 0)) || count+=1
-
     echo -n "$((count / 2))"
+    return "$SUCCESS"
 }
 
 # parser_tokens__value <tokens> <index>
@@ -952,13 +997,13 @@ parser_tokens__value() {
 
     # shellcheck disable=2155
     declare count="$(parser_tokens__count "$in_tokens")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
     fi
 
     declare -i line=0
     declare -i index=0
-
     mapfile -t tokens_array <<<"$in_tokens"
 
     while ((line < count * 2)) && ((index != in_index)); do
@@ -967,6 +1012,7 @@ parser_tokens__value() {
     done
 
     [[ -n "${tokens_array[line + 1]}" ]] && echo -n "${tokens_array[line + 1]}"
+    return "$SUCCESS"
 }
 
 # parser_tokens__type <tokens> <index>
@@ -988,13 +1034,13 @@ parser_tokens__type() {
 
     # shellcheck disable=2155
     declare count="$(parser_tokens__count "$in_tokens")"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((in_index >= count)) && return "$PARSER_INVALID_ARGUMENT_CODE"
     fi
 
     declare -i line=0
     declare -i index=0
-
     mapfile -t tokens_array <<<"$in_tokens"
 
     while ((line < count * 2)) && ((index != in_index)); do
@@ -1003,6 +1049,7 @@ parser_tokens__type() {
     done
 
     [[ -n "${tokens_array[line]}" ]] && echo -n "${tokens_array[line]}"
+    return "$SUCCESS"
 }
 
 # parser_examples__description_alternative_tokens_at <content> <index>
@@ -1032,6 +1079,7 @@ parser_examples__description_alternative_tokens_at() {
     declare description=
     description="$(parser_examples__description_at "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1039,11 +1087,13 @@ parser_examples__description_alternative_tokens_at() {
     declare tokens=
     tokens="$(__parser_tokens__all_balanced "$description" "()")"
     status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
 
     echo -n "$tokens"
+    return "$SUCCESS"
 }
 
 # __parser_check_examples__description_mnemonic_token_values <tokens>
@@ -1063,7 +1113,6 @@ __parser_check_examples__description_mnemonic_token_values() {
 
     # shellcheck disable=2155
     declare -i count="$(parser_tokens__count "$in_tokens")"
-
     declare -i index=0
 
     # shellcheck disable=2155
@@ -1077,6 +1126,8 @@ __parser_check_examples__description_mnemonic_token_values() {
 
         index+=1
     done
+
+    return "$SUCCESS"
 }
 
 # parser_examples__description_mnemonic_tokens_at <content> <index>
@@ -1106,6 +1157,7 @@ parser_examples__description_mnemonic_tokens_at() {
     declare description=
     description="$(parser_examples__description_at "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1113,12 +1165,14 @@ parser_examples__description_mnemonic_tokens_at() {
     declare tokens=
     tokens="$(__parser_tokens__all_balanced "$description" "[]")"
     status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
         __parser_check_examples__description_mnemonic_token_values "$tokens" || return "$?"
     fi
 
     echo -n "$tokens"
+    return "$SUCCESS"
 }
 
 # parser_examples__description_alternative_token_pieces <token>
@@ -1136,6 +1190,7 @@ parser_examples__description_alternative_token_pieces() {
     declare in_alternative="$1"
 
     __parser_tokens__all_unbalanced "$in_alternative" "|"
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_tokens_at <content> <index>
@@ -1164,6 +1219,7 @@ parser_examples__code_placeholder_tokens_at() {
     declare code=
     code="$(parser_examples__code_at "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1171,11 +1227,13 @@ parser_examples__code_placeholder_tokens_at() {
     declare tokens=
     tokens="$(__parser_tokens__all_balanced "$code" "{}")"
     status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
 
     echo -n "$tokens"
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_token_pieces <placeholder>
@@ -1193,6 +1251,7 @@ parser_examples__code_placeholder_token_pieces() {
     declare in_placeholder="$1"
 
     __parser_tokens__all_unbalanced "$in_placeholder" "|"
+    return "$SUCCESS"
 }
 
 
@@ -1216,6 +1275,8 @@ __parser_check_examples__code_placeholder_piece() {
     # shellcheck disable=2016
     sed -nE '/^(bool|int|float|char|string|command|option|(\/|\/\?)?file|(\/|\/\?)?directory|(\/|\/\?)?path|(\/|\/\?)?remote-file|(\/|\/\?)?remote-directory|(\/|\/\?)?remote-path|any|remote-any)([*+?]!?)? +[^{}]+$/! Q1' <<<"$in_piece" ||
         return "$PARSER_INVALID_TOKENS_CODE"
+    
+    return "$SUCCESS"
 }
 
 # __parser_check_examples__code_placeholder <placeholder>
@@ -1238,7 +1299,6 @@ __parser_check_examples__code_placeholder() {
     declare pieces="$(__parser_tokens__all_unbalanced "$in_placeholder" "|")"
     # shellcheck disable=2155
     declare piece_count="$(parser_tokens__count "$pieces")"
-
     declare -i index=0
 
     # shellcheck disable=2155
@@ -1247,6 +1307,8 @@ __parser_check_examples__code_placeholder() {
         __parser_check_examples__code_placeholder_piece "$piece" || return "$PARSER_INVALID_TOKENS_CODE"
         index+=1
     done
+
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_piece_type <piece>
@@ -1271,6 +1333,7 @@ parser_examples__code_placeholder_piece_type() {
     fi
 
     sed -E 's/^((\/|\/\?)?[^ *+?]+).+$/\1/' <<<"$in_piece"
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_piece_quantifier <piece>
@@ -1299,6 +1362,8 @@ parser_examples__code_placeholder_piece_quantifier() {
 
     sed -E "s/^$beginning.+$/\2/
 s/^ +//" <<<"$in_piece"
+
+    return "$SUCCESS"
 }
 
 # parser_check_examples__code_placeholder_piece_allows_repetitions <piece>
@@ -1326,6 +1391,8 @@ parser_check_examples__code_placeholder_piece_allows_repetitions() {
     
     ! sed -nE '/^(\/|\/\?)?[^ *+?]+([*+?]| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+))!/! Q1' <<<"$in_piece" ||
         return "$PARSER_NOT_ALLOWED_CODE"
+    
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_piece_description <piece>
@@ -1350,8 +1417,8 @@ parser_examples__code_placeholder_piece_description() {
     fi
     
     in_piece="$(sed -E 's/^(\/|\/\?)?[^ *+?]+([*+?]!?| +([[:digit:]]+\.\.[[:digit:]]+|[[:digit:]]+\.\.|\.\.[[:digit:]]+)!?)? +//' <<<"$in_piece")"
-    
     echo -n "$(__parser_tokens__current "$in_piece" 0 ":")"
+    return "$SUCCESS"
 }
 
 # parser_examples__code_placeholder_piece_examples <piece>
@@ -1379,6 +1446,7 @@ parser_examples__code_placeholder_piece_examples() {
     declare description="$(__parser_tokens__current "$in_piece" 0 ":")"
     declare -i description_length="${#description} + 1"
     echo -n "$(sed -E 's/^ +//' <<< "${in_piece:description_length}")"
+    return "$SUCCESS"
 }
 
 # parser_check_examples__allows_alternative_expansion <content> <index>
@@ -1401,15 +1469,16 @@ parser_check_examples__allows_alternative_expansion() {
 
     declare description_tokens=
     declare code_tokens=
-
     description_tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
 
     code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1418,7 +1487,6 @@ parser_check_examples__allows_alternative_expansion() {
     declare -i description_tokens_count="$(parser_tokens__count "$description_tokens")"
     # shellcheck disable=2155
     declare -i code_tokens_count="$(parser_tokens__count "$code_tokens")"
-
     declare -i index=0
     declare -i alternative_count=0
     declare description_alternative=
@@ -1432,14 +1500,11 @@ parser_check_examples__allows_alternative_expansion() {
     done
 
     ((alternative_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
-
     # shellcheck disable=2155
     declare alternative_pieces="$(__parser_tokens__all_unbalanced "$description_alternative" "|")"
     (("$(parser_tokens__count "$alternative_pieces")" < 2)) && return "$PARSER_INVALID_TOKENS_CODE"
-
     # shellcheck disable=2155
     declare -i alternative_piece_count="$(parser_tokens__count "$(parser_examples__description_alternative_token_pieces "$description_alternative")")"
-    
     index=0
     declare -i conforming_placeholder_count=0
 
@@ -1447,15 +1512,16 @@ parser_check_examples__allows_alternative_expansion() {
     while ((index < code_tokens_count && conforming_placeholder_count < 1)); do
         declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
         declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
-
         declare -i token_piece_count="$(parser_tokens__count "$(parser_examples__code_placeholder_token_pieces "$token_value")")"
 
         if [[ "$token_type" == CONSTRUCT ]] && ((token_piece_count == alternative_piece_count)); then
             __parser_check_examples__code_placeholder "$token_value"
             declare -i status="$?"
+
             if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
                 ((status == 0)) || return "$status"
             fi
+
             conforming_placeholder_count+=1
         fi
         
@@ -1463,6 +1529,7 @@ parser_check_examples__allows_alternative_expansion() {
     done
 
     ((conforming_placeholder_count == 1)) || return "$PARSER_NOT_ALLOWED_CODE"
+    return "$SUCCESS"
 }
 
 # __parser_examples__description_singular_alternative_token_index <content> <index>
@@ -1485,6 +1552,7 @@ __parser_examples__description_singular_alternative_token_index() {
 
     parser_check_examples__allows_alternative_expansion "$in_content" "$in_index"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1493,15 +1561,18 @@ __parser_examples__description_singular_alternative_token_index() {
     declare tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
     # shellcheck disable=2155
     declare token_count="$(parser_tokens__count "$tokens")"
-
     declare -i index=0
+
     while ((index < token_count)); do
         [[ "$(parser_tokens__type "$tokens" "$index")" == CONSTRUCT ]] && {
             echo -n "$index"
             return "$SUCCESS"
         }
+
         index+=1
     done
+
+    return "$SUCCESS"
 }
 
 # __parser_examples__description_singular_placeholder_token_index <content> <index>
@@ -1525,6 +1596,7 @@ __parser_examples__description_singular_placeholder_token_index() {
     declare -i alternative_index=
     alternative_index="$(__parser_examples__description_singular_alternative_token_index "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1533,13 +1605,12 @@ __parser_examples__description_singular_placeholder_token_index() {
     declare alternative_pieces="$(parser_tokens__value "$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")" "$alternative_index")"
     # shellcheck disable=2155
     declare alternative_piece_count="$(parser_tokens__count "$(__parser_tokens__all_unbalanced "$alternative_pieces" "|")")"
-    
     # shellcheck disable=2155
     declare code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
     # shellcheck disable=2155
     declare -i code_token_count="$(parser_tokens__count "$code_tokens")"
-
     declare -i index=0
+
     # shellcheck disable=2155
     while ((index < code_token_count)); do
         declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
@@ -1548,12 +1619,13 @@ __parser_examples__description_singular_placeholder_token_index() {
         if [[ "$token_type" == CONSTRUCT ]]; then
             declare placeholder_pieces="$(__parser_tokens__all_unbalanced "$token_value" "|")"
             declare placeholder_piece_count="$(parser_tokens__count "$placeholder_pieces")"
-
             ((placeholder_piece_count == alternative_piece_count)) && echo -n "$index"
         fi
 
         index+=1
     done
+
+    return "$SUCCESS"
 }
 
 # __parser_examples__token_definition <token> <token-value>
@@ -1576,6 +1648,8 @@ __parser_examples__token_definition() {
     else
         echo -n "$in_token_value"
     fi
+
+    return "$SUCCESS"
 }
 
 # parser_examples__expand_at <content> <index>
@@ -1599,6 +1673,7 @@ parser_examples__expand_at() {
     declare -i description_alternative_index=
     description_alternative_index="$(__parser_examples__description_singular_alternative_token_index "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1606,6 +1681,7 @@ parser_examples__expand_at() {
     declare -i code_placeholder_index=
     code_placeholder_index="$(__parser_examples__description_singular_placeholder_token_index "$in_content" "$in_index")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1614,27 +1690,22 @@ parser_examples__expand_at() {
     declare description_tokens="$(parser_examples__description_alternative_tokens_at "$in_content" "$in_index")"
     # shellcheck disable=2155
     declare code_tokens="$(parser_examples__code_placeholder_tokens_at "$in_content" "$in_index")"
-
     # shellcheck disable=2155
     declare description_alternative_value="$(parser_tokens__value "$description_tokens" "$description_alternative_index")"
     # shellcheck disable=2155
     declare code_placeholder_value="$(parser_tokens__value "$code_tokens" "$code_placeholder_index")"
-
     # shellcheck disable=2155
     declare description_alternative_pieces="$(__parser_tokens__all_unbalanced "$description_alternative_value" "|")"
     # shellcheck disable=2155
     declare code_placeholder_pieces="$(__parser_tokens__all_unbalanced "$code_placeholder_value" "|")"
-
     # shellcheck disable=2155
     declare -i pieces_count="$(parser_tokens__count "$description_alternative_pieces")"
-
     declare -i piece_index=0
 
     # shellcheck disable=2155
     while ((piece_index < pieces_count)); do
         declare generated_description=
         declare generated_code=
-
         declare -i index=0
 
         while ((index < description_alternative_index)); do
@@ -1651,12 +1722,10 @@ parser_examples__expand_at() {
         done
 
         declare -i index=0
-
         
         while ((index < code_placeholder_index)); do
             declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
             declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
-
             generated_code+="$(__parser_examples__token_definition "$token_type" "$token_value")"
             index+=1
         done
@@ -1667,7 +1736,6 @@ parser_examples__expand_at() {
         while ((index < "$(parser_tokens__count "$code_tokens")")); do
             declare token_type="$(parser_tokens__type "$code_tokens" "$index")"
             declare token_value="$(parser_tokens__value "$code_tokens" "$index")"
-
             generated_code+="$(__parser_examples__token_definition "$token_type" "$token_value")"
             index+=1
         done
@@ -1675,9 +1743,10 @@ parser_examples__expand_at() {
         echo -n '- '
         # shellcheck disable=2016
         printf '%s:\n\n`%s`\n\n' "$generated_description" "$generated_code"
-
         piece_index+=1
     done
+
+    return "$SUCCESS"
 }
 
 # parser_examples__expanded_or_original_at <content> <index>
@@ -1712,6 +1781,8 @@ parser_examples__expanded_or_original_at() {
         echo "$example"
         echo
     fi
+
+    return "$SUCCESS"
 }
 
 # parser_examples__expand_all <content>
@@ -1736,6 +1807,7 @@ parser_examples__expand_all() {
     declare example_count=
     example_count="$(parser_examples__count "$in_content")"
     declare -i status="$?"
+
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
         ((status == 0)) || return "$status"
     fi
@@ -1744,4 +1816,6 @@ parser_examples__expand_all() {
         parser_examples__expanded_or_original_at "$in_content" "$index"
         index+=1
     done
+
+    return "$SUCCESS"
 }
