@@ -27,7 +27,7 @@ Input Command Line Interface Page:
 
 `[ "${string variable: foo}" {string operator: -eq|string operator: -ne|string operator: -gt|string operator: -lt|string operator: -ge|string operator: -le} {string number: 1} ]`
 
-- Test if a specific variable has (an empty/a [n]on-empty) value:
+- Test if a specific variable has (an empty|a [n]on-empty) value:
 
 `[ {string operator: -z|string operator: -n} "${string variable: foo}" ]`
 
