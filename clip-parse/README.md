@@ -55,11 +55,24 @@ Let's say we put it in `$page` variable.
   parser__header "$page"
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  [
+  ```
+
 - :question: **question** How to get a page description?  
   :bulb: **answer**
 
   ```bash
   parser_summary__description "$page"
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  Check file types and compare values
+  Returns 0 if the condition evaluates to true, 1 if it evaluates to false
   ```
 
 - :question: **question** How to get an example description?  
@@ -69,11 +82,23 @@ Let's say we put it in `$page` variable.
   parser_examples__description_at "$page" 0
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  Test if a specific variable is (equal|not equal) to a string
+  ```
+
 - :question: **question** How to get an example code?  
   :bulb: **answer**
 
   ```bash
   parser_examples__code_at "$page" 0
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  [ "${string variable: foo}" {string operator: ==|string operator: !=} "{string string: Hello world!}" ]
   ```
 
 - :question: **question** How to get tokens for alternatives?  
@@ -83,6 +108,17 @@ Let's say we put it in `$page` variable.
   parser_examples__description_alternative_tokens_at "$page" 0
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  LITERAL
+  Test if a specific variable is 
+  CONSTRUCT
+  equal|not equal
+  LITERAL
+   to a string
+  ```
+
 - :question: **question** How to get tokens for mnemonics?  
   :bulb: **answer**
 
@@ -90,11 +126,24 @@ Let's say we put it in `$page` variable.
   parser_examples__description_mnemonic_tokens_at "$page" 0
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  LITERAL
+  Test if a specific variable is (equal|not equal) to a string
+  ```
+
 - :question: **question** How to get tokens for placeholders?  
   :bulb: **answer**
 
   ```bash
   parser_examples__code_placeholder_tokens_at "$page" 0
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  [
   ```
 
 ### Advanced usage
@@ -106,6 +155,12 @@ Let's say we put it in `$page` variable.
   parser_tokens__count "$(parser_examples__description_alternative_tokens_at "$page" 0)"
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  3
+  ```
+
 - :question: **question** How to get a token value?  
   :bulb: **answer**
 
@@ -113,11 +168,23 @@ Let's say we put it in `$page` variable.
   parser_tokens__value "$(parser_examples__description_alternative_tokens_at "$page" 0)" 0
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  Test if a specific variable is 
+  ```
+
 - :question: **question** How to get a token type?  
   :bulb: **answer**
 
   ```bash
   parser_tokens__type "$(parser_examples__description_alternative_tokens_at "$page" 0)" 0
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  LITERAL
   ```
 
 - :question: **question** How to get pieces (parts listed via unescaped `|`) for an alternative?  
@@ -128,6 +195,15 @@ Let's say we put it in `$page` variable.
   parser_examples__description_alternative_token_pieces "$value"
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  CONSTRUCT
+  equal
+  CONSTRUCT
+  not equal
+  ```
+
 - :question: **question** How to get pieces (parts listed via unescaped `|`) for a placeholder?  
   :bulb: **answer**
 
@@ -136,10 +212,25 @@ Let's say we put it in `$page` variable.
   parser_examples__code_placeholder_token_pieces "$value"
   ```
 
+  :checkered_flag: **output**
+
+  ```md
+  CONSTRUCT
+  string operator: ==
+  CONSTRUCT
+  string operator: !=
+  ```
+
 - :question: **question** How to get a placeholder type?  
   :bulb: **answer**
 
   ```bash
   value="$(parser_tokens__value "$(parser_examples__code_placeholder_tokens_at "$page" 0)" 1)"
   parser_examples__code_placeholder_piece_type "$value"
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  string
   ```
