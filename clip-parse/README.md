@@ -120,7 +120,7 @@ Let's say we put it in `$page` variable.
   parser_tokens__type "$(parser_examples__description_alternative_tokens_at "$page" 0)" 0
   ```
 
-- :question: **question** How to get pieces (parts listed via unescaped `|`) for alternatives?  
+- :question: **question** How to get pieces (parts listed via unescaped `|`) for an alternative?  
   :bulb: **answer**
 
   ```bash
@@ -128,7 +128,7 @@ Let's say we put it in `$page` variable.
   parser_examples__description_alternative_token_pieces "$value"
   ```
 
-- :question: **question** How to get pieces (parts listed via unescaped `|`) for placeholder?  
+- :question: **question** How to get pieces (parts listed via unescaped `|`) for a placeholder?  
   :bulb: **answer**
 
   ```bash
@@ -136,7 +136,7 @@ Let's say we put it in `$page` variable.
   parser_examples__code_placeholder_token_pieces "$value"
   ```
 
-- :question: **question** How to get placeholder type?  
+- :question: **question** How to get a placeholder type?  
   :bulb: **answer**
 
   ```bash
