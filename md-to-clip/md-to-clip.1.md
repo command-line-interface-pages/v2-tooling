@@ -38,6 +38,8 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
     - converts special placeholders defined in *$HOME/.md-to-clip.yaml*
     - converts integer, float, option, device, path, file, directory, boolean
       character and string placeholders
+    - expands placeholders with *(one|two|...|nine)_or_more* to placeholders with
+      range quantifier like *{/?file 2.. some description}*
 
 All placeholders are required by default as there is no standardized way in TlDr
 to present optional placeholders. Most TlDr placeholders with alternatives like
