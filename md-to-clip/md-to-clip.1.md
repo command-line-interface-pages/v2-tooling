@@ -43,7 +43,7 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 
 # BUGS
 
-https://github.com/command-line-interface-pages/prototypes/issues?q=is%3Aissue+is%3Aopen+label%3A%22for%3A+tldr+-%3E+clip+converter%22
+https://github.com/command-line-interface-pages/v2-tooling/tree/main/md-to-clip
 
 # EXIT VALUES
 
