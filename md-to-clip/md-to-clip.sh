@@ -144,6 +144,12 @@ check_page_is_alias() {
   ! sed -nE '/^- View documentation for the original command:$/ Q1' <<<"$content"
 }
 
+check_page_has_more_information_tag() {
+  declare content="$1"$'\n\n'
+
+  ! sed -nE '/^> More information:/ Q1' <<<"$content"
+}
+
 convert_summary() {
   declare in_file_content="$1"
 
@@ -153,7 +159,7 @@ convert_summary() {
     done
   }
 
-  sed -E '/^>/ {
+  in_file_content="$(sed -E '/^>/ {
     s/\.$//
     s/More +information: <(.*)>$/More information: \1/
 
@@ -161,7 +167,17 @@ convert_summary() {
       s/[, ] +or +/, /g
       s/`//g
     }
-  }' <<<"$in_file_content"
+  }' <<<"$in_file_content")"
+  
+  if check_page_has_more_information_tag "$in_file_content"; then
+    in_file_content="$(sed -E ':x
+      N
+      $! bx
+      s/\n(> More information: [^\n]+)(\n.+)\n\n- (Show|Display|Print)( a| the)? help:\n\n`[^ \n]+ (--help|-h|-\?)`/\n> Help: \5\n\1\2/
+      s/\n(> More information: [^\n]+)(\n.+)\n\n- (Show|Display|Print)( a| the)? version:\n\n`[^ \n]+ (--version|-v)`/\n> Version: \5\n\1\2/' <<<"$in_file_content")"
+  fi
+
+  echo "$in_file_content"
 }
 
 convert_code_descriptions() {
