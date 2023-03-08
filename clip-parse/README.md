@@ -251,3 +251,17 @@ Let's say we put it in `$page` variable.
   ```md
   2
   ```
+
+- :question: **question** How to get a rendered placeholder piece?  
+  :bulb: **answer**
+
+  ```bash
+  value="$(parser_tokens__value "$(parser_examples__code_placeholder_tokens_at "$page" 0)" 1)"
+  parser_converters__code_placeholder_piece_to_rendered "$value" # as this placeholder contains just one piece this code works
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  "variable"
+  ```
