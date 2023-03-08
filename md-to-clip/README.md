@@ -63,24 +63,3 @@ for category_path in "$tldr_pages/"*; do
     done
 done
 ```
-
-## Implementation details
-
-- `file`, `executable`, `program`, `script`, `source` are recognized as keywords just
-  right before `}}` or a file extension. It means that in `{{path/to/image_file}}`
-  `file` is a keyword, but in `{{path/to/excluded_file_or_directory}}` just `directory`
-  is a keyword. `{{path/to/file_or_directory}}`, `{{path/to/executable_or_directory}}`,
-  `{{path/to/program_or_directory}}`, `{{path/to/script_or_directory}}`, `{{path/to/source_or_directory}}`
-  are exceptions and handled separately.
-- Everything before these keywords is treated as a placeholder description. It means
-  that in `{{path/to/image_file}}` `image` is a description. The same applies to
-  `{{path/to/excluded_file_or_directory}}` where `excluded_file_or` is treated as
-  a description.
-
-## Notes
-
-- All Command Line Interface Page placeholders are required by default as there is no special syntax
-  to present optional placeholders in TlDr pages.
-- All Command Line Interface Page repeated placeholders allow 0 or more arguments to be substituted
-  by default as there is no special syntax to present placeholders requiring other
-  argument count in TlDr pages.
