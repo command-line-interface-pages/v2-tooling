@@ -34,10 +34,15 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 - code example:
   - placeholders:
     - removes *{{...}}*
-    - expands placeholders ending with *(s)* or smth like *{1,2,...}*
+    - expands placeholders ending with *(s)* or smth like *{1,2,...}* like
+      *{{file(s)}}* to placeholders with asterisk quantifier like
+      *{file\* some description}*
     - converts special placeholders defined in *$HOME/.md-to-clip.yaml*
     - converts integer, float, option, device, path, file, directory, boolean
       character and string placeholders
+    - expands placeholders with *one_or_more*/*two_or_more*/.../*nine_or_more*
+      like **{{one_or_more_files}}* to placeholders with range quantifier like
+      *{/?file 2.. some description}*
 
 All placeholders are required by default as there is no standardized way in TlDr
 to present optional placeholders. Most TlDr placeholders with alternatives like

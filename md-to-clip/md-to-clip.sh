@@ -114,7 +114,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "2.0.7" >&2
+  echo "2.1.0" >&2
 }
 
 author() {
@@ -130,17 +130,16 @@ throw_if_dependencies_are_not_satisfied() {
 }
 
 check_layout_correctness() {
-  declare content="$1
+  declare content="$1"$'\n\n'
 
-"
-
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$content"
+  sed -nE ':x
+    N
+    $! bx
+    /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$content"
 }
 
 check_page_is_alias() {
-  declare content="$1
-
-"
+  declare content="$1"$'\n\n'
 
   ! sed -nE '/^- View documentation for the original command:$/ Q1' <<<"$content"
 }
@@ -226,9 +225,7 @@ convert_code_examples_convert_special_placeholders() {
   declare -i input_index=0
   declare output_type=
   declare output_description=
-  
   declare suffix=value
-
   shift
   while [[ -n "$1" ]]; do
     declare option="$1"
@@ -266,9 +263,7 @@ convert_code_examples_convert_special_placeholders() {
 
   [[ -z "$input_placeholder" ]] && return "$FAIL"
   [[ -z "$output_type" ]] && return "$FAIL"
-
   [[ -z "$output_description" ]] && output_description="$input_placeholder"
-
   declare input_placeholder_initial="$input_placeholder"
 
   declare -i group_multiplier=0
@@ -665,7 +660,6 @@ convert() {
   declare in_file="$1"
 
   declare file_content="$(cat "$in_file")"
-
   check_layout_correctness "$file_content" || throw_error "$in_file" "valid layout expected"
   check_page_is_alias "$file_content" && throw_error "$in_file" "non-alias page expected"
 
@@ -696,7 +690,6 @@ convert() {
     [[ "$in_allow_prefix" == true ]] && convert_args+=(-iap)
     convert_args+=(-od "$out_description")
     [[ "$out_is_name" == true ]] && convert_args+=(-oin)
-
     file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
 
@@ -711,7 +704,7 @@ convert() {
     convert_code_examples_convert_boolean_placeholders |
     convert_code_examples_convert_character_placeholders)"
 
-  sed -E '/^`/ {
+  file_content="$(sed -E '/^`/ {
     # Processing file placeholders with sample values.
     ## Conversion
     ### General cases
@@ -721,7 +714,58 @@ convert() {
     ## Conversion
     s|\{\{([^{}]+)([[:digit:]]+)\}\}|{string some description \2: \1}|g
     s|\{\{([^{}]+)\}\}|{string some description: \1}|g
-  }' <<<"$file_content"
+  }' <<<"$file_content")"
+
+  file_content="$(sed -E '/^`/ {
+    # Processing placeholders with *_or_more prefix.
+    ## Conversion
+    ## Cases with prefix one_or_more
+    s#\{string ([^{}:]+): one_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 1.. \1}#g
+    s#\{string ([^{}:]+): /one_or_more_(files|directories|paths)\}#{/\2 1.. \1}#g
+    s#\{string ([^{}:]+): /\?one_or_more_(files|directories|paths)\}#{/?\2 1.. \1}#g
+
+    ## Cases with prefix two_or_more
+    s#\{string ([^{}:]+): two_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 2.. \1}#g
+    s#\{string ([^{}:]+): /two_or_more_(files|directories|paths)\}#{/\2 2.. \1}#g
+    s#\{string ([^{}:]+): /\?two_or_more_(files|directories|paths)\}#{/?\2 2.. \1}#g
+
+    ## Cases with prefix three_or_more
+    s#\{string ([^{}:]+): three_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 3.. \1}#g
+    s#\{string ([^{}:]+): /three_or_more_(files|directories|paths)\}#{/\2 3.. \1}#g
+    s#\{string ([^{}:]+): /\?three_or_more_(files|directories|paths)\}#{/?\2 3.. \1}#g
+
+    ## Cases with prefix four_or_more
+    s#\{string ([^{}:]+): four_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 4.. \1}#g
+    s#\{string ([^{}:]+): /four_or_more_(files|directories|paths)\}#{/\2 4.. \1}#g
+    s#\{string ([^{}:]+): /\?four_or_more_(files|directories|paths)\}#{/?\2 4.. \1}#g
+
+    ## Cases with prefix five_or_more
+    s#\{string ([^{}:]+): five_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 5.. \1}#g
+    s#\{string ([^{}:]+): /five_or_more_(files|directories|paths)\}#{/\2 5.. \1}#g
+    s#\{string ([^{}:]+): /\?five_or_more_(files|directories|paths)\}#{/?\2 5.. \1}#g
+
+    ## Cases with prefix six_or_more
+    s#\{string ([^{}:]+): six_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 6.. \1}#g
+    s#\{string ([^{}:]+): /six_or_more_(files|directories|paths)\}#{/\2 6.. \1}#g
+    s#\{string ([^{}:]+): /\?six_or_more_(files|directories|paths)\}#{/?\2 6.. \1}#g
+
+    ## Cases with prefix seven_or_more
+    s#\{string ([^{}:]+): seven_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 7.. \1}#g
+    s#\{string ([^{}:]+): /seven_or_more_(files|directories|paths)\}#{/\2 7.. \1}#g
+    s#\{string ([^{}:]+): /\?seven_or_more_(files|directories|paths)\}#{/?\2 7.. \1}#g
+
+    ## Cases with prefix eight_or_more
+    s#\{string ([^{}:]+): eight_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 8.. \1}#g
+    s#\{string ([^{}:]+): /eight_or_more_(files|directories|paths)\}#{/\2 8.. \1}#g
+    s#\{string ([^{}:]+): /\?eight_or_more_(files|directories|paths)\}#{/?\2 8.. \1}#g
+
+    ## Cases with prefix nine_or_more
+    s#\{string ([^{}:]+): nine_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 9.. \1}#g
+    s#\{string ([^{}:]+): /nine_or_more_(files|directories|paths)\}#{/\2 9.. \1}#g
+    s#\{string ([^{}:]+): /\?nine_or_more_(files|directories|paths)\}#{/?\2 9.. \1}#g
+  }' <<<"$file_content")"
+
+  echo -n "$file_content"
 }
 
 handle_page() {
@@ -808,4 +852,3 @@ throw_if_dependencies_are_not_satisfied
 
 parse_options "$@"
 exit "$SUCCESS"
-
