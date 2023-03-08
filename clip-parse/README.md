@@ -21,15 +21,15 @@ Input Command Line Interface Page:
 
 - Test if a specific variable is (equal|not equal) to a string:
 
-`[ "${string variable: foo}" {string operator: ==|string operator !=} "{string string: Hello world!}" ]`
+`[ "{string $variable: $foo}" {string operator: ==|string operator !=} "{string string: Hello world!}" ]`
 
 - Test if a specific variable is ([eq]ual|[n]ot [e]qual|[g]reater [t]han|[l]ess [t]han|[g]reater than or [e]qual|[l]ess than or [e]qual) to a number:
 
-`[ "${string variable: foo}" {string operator: -eq|string operator: -ne|string operator: -gt|string operator: -lt|string operator: -ge|string operator: -le} {string number: 1} ]`
+`[ "{string $variable: $foo}" {string operator: -eq|string operator: -ne|string operator: -gt|string operator: -lt|string operator: -ge|string operator: -le} {string number: 1} ]`
 
 - Test if a specific variable has (an empty|a [n]on-empty) value:
 
-`[ {string operator: -z|string operator: -n} "${string variable: foo}" ]`
+`[ {string operator: -z|string operator: -n} "{string $variable: $foo}" ]`
 
 - Test if a specific [f]ile exists:
 
@@ -98,7 +98,7 @@ Let's say we put it in `$page` variable.
   :checkered_flag: **output**
 
   ```md
-  [ "${string variable: foo}" {string operator: ==|string operator: !=} "{string string: Hello world!}" ]
+  [ "{string $variable: $foo}" {string operator: ==|string operator: !=} "{string string: Hello world!}" ]
   ```
 
 - :question: **question** How to get tokens for alternatives?  
@@ -147,7 +147,20 @@ Let's say we put it in `$page` variable.
   :checkered_flag: **output**
 
   ```md
-  [
+  LITERAL
+  [ "
+  CONSTRUCT
+  string $variable: $foo
+  LITERAL
+  " 
+  CONSTRUCT
+  string operator: ==|string operator !=
+  LITERAL
+   "
+  CONSTRUCT
+  string string: Hello world!
+  LITERAL
+  " ]
   ```
 
 ### Advanced usage
@@ -263,5 +276,5 @@ Let's say we put it in `$page` variable.
   :checkered_flag: **output**
 
   ```md
-  "variable"
+  "$variable"
   ```
