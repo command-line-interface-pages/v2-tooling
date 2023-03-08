@@ -711,7 +711,7 @@ convert() {
     convert_code_examples_convert_boolean_placeholders |
     convert_code_examples_convert_character_placeholders)"
 
-  sed -E '/^`/ {
+  file_content="$(sed -E '/^`/ {
     # Processing file placeholders with sample values.
     ## Conversion
     ### General cases
@@ -721,7 +721,58 @@ convert() {
     ## Conversion
     s|\{\{([^{}]+)([[:digit:]]+)\}\}|{string some description \2: \1}|g
     s|\{\{([^{}]+)\}\}|{string some description: \1}|g
-  }' <<<"$file_content"
+  }' <<<"$file_content")"
+
+  file_content="$(sed -E '/^`/ {
+    # Processing placeholders with *_or_more prefix.
+    ## Conversion
+    ## Cases with prefix one_or_more
+    s#\{string ([^{}:]+): one_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 1.. \1}#g
+    s#\{string ([^{}:]+): /one_or_more_(file|directory|path)\}#{/\2 1.. \1}#g
+    s#\{string ([^{}:]+): /\?one_or_more_(file|directory|path)\}#{/?\2 1.. \1}#g
+
+    ## Cases with prefix two_or_more
+    s#\{string ([^{}:]+): two_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 2.. \1}#g
+    s#\{string ([^{}:]+): /two_or_more_(file|directory|path)\}#{/\2 2.. \1}#g
+    s#\{string ([^{}:]+): /\?two_or_more_(file|directory|path)\}#{/?\2 2.. \1}#g
+
+    ## Cases with prefix three_or_more
+    s#\{string ([^{}:]+): three_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 3.. \1}#g
+    s#\{string ([^{}:]+): /three_or_more_(file|directory|path)\}#{/\2 3.. \1}#g
+    s#\{string ([^{}:]+): /\?three_or_more_(file|directory|path)\}#{/?\2 3.. \1}#g
+
+    ## Cases with prefix four_or_more
+    s#\{string ([^{}:]+): four_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 4.. \1}#g
+    s#\{string ([^{}:]+): /four_or_more_(file|directory|path)\}#{/\2 4.. \1}#g
+    s#\{string ([^{}:]+): /\?four_or_more_(file|directory|path)\}#{/?\2 4.. \1}#g
+
+    ## Cases with prefix five_or_more
+    s#\{string ([^{}:]+): five_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 5.. \1}#g
+    s#\{string ([^{}:]+): /five_or_more_(file|directory|path)\}#{/\2 5.. \1}#g
+    s#\{string ([^{}:]+): /\?five_or_more_(file|directory|path)\}#{/?\2 5.. \1}#g
+
+    ## Cases with prefix six_or_more
+    s#\{string ([^{}:]+): six_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 6.. \1}#g
+    s#\{string ([^{}:]+): /six_or_more_(file|directory|path)\}#{/\2 6.. \1}#g
+    s#\{string ([^{}:]+): /\?six_or_more_(file|directory|path)\}#{/?\2 6.. \1}#g
+
+    ## Cases with prefix seven_or_more
+    s#\{string ([^{}:]+): seven_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 7.. \1}#g
+    s#\{string ([^{}:]+): /seven_or_more_(file|directory|path)\}#{/\2 7.. \1}#g
+    s#\{string ([^{}:]+): /\?seven_or_more_(file|directory|path)\}#{/?\2 7.. \1}#g
+
+    ## Cases with prefix eight_or_more
+    s#\{string ([^{}:]+): eight_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 8.. \1}#g
+    s#\{string ([^{}:]+): /eight_or_more_(file|directory|path)\}#{/\2 8.. \1}#g
+    s#\{string ([^{}:]+): /\?eight_or_more_(file|directory|path)\}#{/?\2 8.. \1}#g
+
+    ## Cases with prefix nine_or_more
+    s#\{string ([^{}:]+): nine_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 9.. \1}#g
+    s#\{string ([^{}:]+): /nine_or_more_(file|directory|path)\}#{/\2 9.. \1}#g
+    s#\{string ([^{}:]+): /\?nine_or_more_(file|directory|path)\}#{/?\2 9.. \1}#g
+  }' <<<"$file_content")"
+
+  echo -n "$file_content"
 }
 
 handle_page() {
