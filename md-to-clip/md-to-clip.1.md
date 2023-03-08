@@ -34,7 +34,9 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 - code example:
   - placeholders:
     - removes *{{...}}*
-    - expands placeholders ending with *(s)* or smth like *{1,2,...}* to ellipsis
+    - expands placeholders ending with *(s)* or smth like *{1,2,...}* like
+      *{{file(s)}}* to placeholders with asterisk quantifier like
+      *{file\* some description}*
     - converts special placeholders defined in *$HOME/.md-to-clip.yaml*
     - converts integer, float, option, device, path, file, directory, boolean
       character and string placeholders
