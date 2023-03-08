@@ -727,49 +727,49 @@ convert() {
     # Processing placeholders with *_or_more prefix.
     ## Conversion
     ## Cases with prefix one_or_more
-    s#\{string ([^{}:]+): one_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 1.. \1}#g
-    s#\{string ([^{}:]+): /one_or_more_(file|directory|path)\}#{/\2 1.. \1}#g
-    s#\{string ([^{}:]+): /\?one_or_more_(file|directory|path)\}#{/?\2 1.. \1}#g
+    s#\{string ([^{}:]+): one_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 1.. \1}#g
+    s#\{string ([^{}:]+): /one_or_more_(files|directories|paths)\}#{/\2 1.. \1}#g
+    s#\{string ([^{}:]+): /\?one_or_more_(files|directories|paths)\}#{/?\2 1.. \1}#g
 
     ## Cases with prefix two_or_more
-    s#\{string ([^{}:]+): two_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 2.. \1}#g
-    s#\{string ([^{}:]+): /two_or_more_(file|directory|path)\}#{/\2 2.. \1}#g
-    s#\{string ([^{}:]+): /\?two_or_more_(file|directory|path)\}#{/?\2 2.. \1}#g
+    s#\{string ([^{}:]+): two_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 2.. \1}#g
+    s#\{string ([^{}:]+): /two_or_more_(files|directories|paths)\}#{/\2 2.. \1}#g
+    s#\{string ([^{}:]+): /\?two_or_more_(files|directories|paths)\}#{/?\2 2.. \1}#g
 
     ## Cases with prefix three_or_more
-    s#\{string ([^{}:]+): three_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 3.. \1}#g
-    s#\{string ([^{}:]+): /three_or_more_(file|directory|path)\}#{/\2 3.. \1}#g
-    s#\{string ([^{}:]+): /\?three_or_more_(file|directory|path)\}#{/?\2 3.. \1}#g
+    s#\{string ([^{}:]+): three_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 3.. \1}#g
+    s#\{string ([^{}:]+): /three_or_more_(files|directories|paths)\}#{/\2 3.. \1}#g
+    s#\{string ([^{}:]+): /\?three_or_more_(files|directories|paths)\}#{/?\2 3.. \1}#g
 
     ## Cases with prefix four_or_more
-    s#\{string ([^{}:]+): four_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 4.. \1}#g
-    s#\{string ([^{}:]+): /four_or_more_(file|directory|path)\}#{/\2 4.. \1}#g
-    s#\{string ([^{}:]+): /\?four_or_more_(file|directory|path)\}#{/?\2 4.. \1}#g
+    s#\{string ([^{}:]+): four_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 4.. \1}#g
+    s#\{string ([^{}:]+): /four_or_more_(files|directories|paths)\}#{/\2 4.. \1}#g
+    s#\{string ([^{}:]+): /\?four_or_more_(files|directories|paths)\}#{/?\2 4.. \1}#g
 
     ## Cases with prefix five_or_more
-    s#\{string ([^{}:]+): five_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 5.. \1}#g
-    s#\{string ([^{}:]+): /five_or_more_(file|directory|path)\}#{/\2 5.. \1}#g
-    s#\{string ([^{}:]+): /\?five_or_more_(file|directory|path)\}#{/?\2 5.. \1}#g
+    s#\{string ([^{}:]+): five_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 5.. \1}#g
+    s#\{string ([^{}:]+): /five_or_more_(files|directories|paths)\}#{/\2 5.. \1}#g
+    s#\{string ([^{}:]+): /\?five_or_more_(files|directories|paths)\}#{/?\2 5.. \1}#g
 
     ## Cases with prefix six_or_more
-    s#\{string ([^{}:]+): six_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 6.. \1}#g
-    s#\{string ([^{}:]+): /six_or_more_(file|directory|path)\}#{/\2 6.. \1}#g
-    s#\{string ([^{}:]+): /\?six_or_more_(file|directory|path)\}#{/?\2 6.. \1}#g
+    s#\{string ([^{}:]+): six_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 6.. \1}#g
+    s#\{string ([^{}:]+): /six_or_more_(files|directories|paths)\}#{/\2 6.. \1}#g
+    s#\{string ([^{}:]+): /\?six_or_more_(files|directories|paths)\}#{/?\2 6.. \1}#g
 
     ## Cases with prefix seven_or_more
-    s#\{string ([^{}:]+): seven_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 7.. \1}#g
-    s#\{string ([^{}:]+): /seven_or_more_(file|directory|path)\}#{/\2 7.. \1}#g
-    s#\{string ([^{}:]+): /\?seven_or_more_(file|directory|path)\}#{/?\2 7.. \1}#g
+    s#\{string ([^{}:]+): seven_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 7.. \1}#g
+    s#\{string ([^{}:]+): /seven_or_more_(files|directories|paths)\}#{/\2 7.. \1}#g
+    s#\{string ([^{}:]+): /\?seven_or_more_(files|directories|paths)\}#{/?\2 7.. \1}#g
 
     ## Cases with prefix eight_or_more
-    s#\{string ([^{}:]+): eight_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 8.. \1}#g
-    s#\{string ([^{}:]+): /eight_or_more_(file|directory|path)\}#{/\2 8.. \1}#g
-    s#\{string ([^{}:]+): /\?eight_or_more_(file|directory|path)\}#{/?\2 8.. \1}#g
+    s#\{string ([^{}:]+): eight_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 8.. \1}#g
+    s#\{string ([^{}:]+): /eight_or_more_(files|directories|paths)\}#{/\2 8.. \1}#g
+    s#\{string ([^{}:]+): /\?eight_or_more_(files|directories|paths)\}#{/?\2 8.. \1}#g
 
     ## Cases with prefix nine_or_more
-    s#\{string ([^{}:]+): nine_or_more_(bool|int|float|char|string|file|directory|path|any)\}#{\2 9.. \1}#g
-    s#\{string ([^{}:]+): /nine_or_more_(file|directory|path)\}#{/\2 9.. \1}#g
-    s#\{string ([^{}:]+): /\?nine_or_more_(file|directory|path)\}#{/?\2 9.. \1}#g
+    s#\{string ([^{}:]+): nine_or_more_(bools|ints|floats|chars|strings|files|directories|paths|anys)\}#{\2 9.. \1}#g
+    s#\{string ([^{}:]+): /nine_or_more_(files|directories|paths)\}#{/\2 9.. \1}#g
+    s#\{string ([^{}:]+): /\?nine_or_more_(files|directories|paths)\}#{/?\2 9.. \1}#g
   }' <<<"$file_content")"
 
   echo -n "$file_content"
