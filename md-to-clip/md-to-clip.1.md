@@ -19,13 +19,29 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 
 **md-to-clip** converts pages in the following manner:
 
-- removes trailing dots in summary description and after tag values
-- removes backticks around *See also* tag value
-- removes *or* keyword from *See also* tag value
-- converts I/O stream references in example descriptions to *stdin*/*stdout*/*stderr*
-- converts *a*/*the* *given*/*specified* with *a specific*
-- removes *{{...}}* placeholders
-- expands placeholders with *(s)*, *{1,2,...}*
+- summary:
+  - all tags: removes trailing dot
+  - *More information*: removes angle brackets
+  - *See also*:
+    - removes spaces around commas
+    - removes *or* keyword
+    - removes backticks around command names
+- code description:
+  - I/O streams:
+    - replaces all references with *stdin*/*stdout*/*stderr*
+    - removes backticks around references
+  - rewording: replaces *given*/*specified* with *specific*
+- code example:
+  - placeholders:
+    - removes *{{...}}*
+    - expands placeholders ending with *(s)* or smth like *{1,2,...}*
+    - converts special placeholders defined in *$HOME/.md-to-clip.yaml*
+    - converts integer, float, option, device, path, file, directory, boolean
+      character and string placeholders
+
+All placeholders are required by default as there is no standardized way in TlDr
+to present optional placeholders. Most TlDr placeholders with alternatives like
+*{{boolean|integer}}* are recognized as strings.
 
 # EXAMPLES
 
