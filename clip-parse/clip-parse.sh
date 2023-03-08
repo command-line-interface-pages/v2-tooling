@@ -24,7 +24,7 @@ declare -i PARSER_INTERNAL_FAILURE_CODE=7
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.0.1"
+    echo "1.2.0"
     return "$SUCCESS"
 }
 
@@ -1818,4 +1818,76 @@ parser_examples__expand_all() {
     done
 
     return "$SUCCESS"
+}
+
+
+
+# __parser_check_ranges__content <range>
+# Check whether a range is valid.
+#
+# Output:
+#   <empty-string>
+#
+# Return:
+#   - 0 if <range> is valid
+#   - $PARSER_INVALID_EXAMPLES_CODE otherwise
+#
+# Notes:
+#   - <content> should not contain trailing \n
+__parser_check_ranges__content() {
+    declare in_range="$1"
+
+    # shellcheck disable=2016
+    sed -nE '/^([[:digit:]]+\.\.|\.\.[[:digit:]]+|[[:digit:]]+\.\.[[:digit:]]+)$/! Q1' <<<"$in_range" ||
+        return "$PARSER_INVALID_EXAMPLES_CODE"
+    
+    return "$SUCCESS"
+}
+
+# parser_ranges__from_or_default <range>
+# Output a range lowest bound or default.
+#
+# Output:
+#   <lowest-bound>
+#
+# Return:
+#   - 0 if <range> is valid
+#   - $PARSER_INVALID_EXAMPLES_CODE otherwise
+#
+# Notes:
+#   - <range> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_ranges__from_or_default() {
+    declare in_range="$1"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_ranges__content "$in_range" || return "$PARSER_INVALID_EXAMPLES_CODE"
+    fi
+
+    sed -E 's/^\.\.[[:digit:]]+$/0/
+        s/^([[:digit:]]+)\.\.([[:digit:]]+)?$/\1/' <<<"$in_range"
+}
+
+# parser_ranges__to_or_default <range>
+# Output a range highest bound or default.
+#
+# Output:
+#   <highest-bound>
+#
+# Return:
+#   - 0 if <range> is valid
+#   - $PARSER_INVALID_EXAMPLES_CODE otherwise
+#
+# Notes:
+#   - <range> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_ranges__to_or_default() {
+    declare in_range="$1"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        __parser_check_ranges__content "$in_range" || return "$PARSER_INVALID_EXAMPLES_CODE"
+    fi
+
+    sed -E 's/^[[:digit:]]+\.\.$/infinity/
+        s/^([[:digit:]]+)?\.\.([[:digit:]]+)$/\2/' <<<"$in_range"
 }

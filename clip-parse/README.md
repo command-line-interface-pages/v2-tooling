@@ -238,3 +238,16 @@ Let's say we put it in `$page` variable.
   ```md
   string
   ```
+
+- :question: **question** How to get a lowest range boundary?  
+  :bulb: **answer**
+
+  ```bash
+  parser_ranges__from_or_default "2..4"
+  ```
+
+  :checkered_flag: **output**
+
+  ```md
+  2
+  ```
