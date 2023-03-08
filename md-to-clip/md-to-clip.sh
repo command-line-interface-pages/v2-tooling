@@ -130,17 +130,16 @@ throw_if_dependencies_are_not_satisfied() {
 }
 
 check_layout_correctness() {
-  declare content="$1
+  declare content="$1"$'\n\n'
 
-"
-
-  sed -nE ':x; N; $! bx; /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$content"
+  sed -nE ':x
+    N
+    $! bx
+    /^# [^\n]+\n\n(> [^\n]+\n)+\n(- [^\n]+:\n\n`[^\n]+`\n\n)+$/! Q1' <<<"$content"
 }
 
 check_page_is_alias() {
-  declare content="$1
-
-"
+  declare content="$1"$'\n\n'
 
   ! sed -nE '/^- View documentation for the original command:$/ Q1' <<<"$content"
 }
@@ -226,9 +225,7 @@ convert_code_examples_convert_special_placeholders() {
   declare -i input_index=0
   declare output_type=
   declare output_description=
-  
   declare suffix=value
-
   shift
   while [[ -n "$1" ]]; do
     declare option="$1"
@@ -266,9 +263,7 @@ convert_code_examples_convert_special_placeholders() {
 
   [[ -z "$input_placeholder" ]] && return "$FAIL"
   [[ -z "$output_type" ]] && return "$FAIL"
-
   [[ -z "$output_description" ]] && output_description="$input_placeholder"
-
   declare input_placeholder_initial="$input_placeholder"
 
   declare -i group_multiplier=0
@@ -665,7 +660,6 @@ convert() {
   declare in_file="$1"
 
   declare file_content="$(cat "$in_file")"
-
   check_layout_correctness "$file_content" || throw_error "$in_file" "valid layout expected"
   check_page_is_alias "$file_content" && throw_error "$in_file" "non-alias page expected"
 
@@ -696,7 +690,6 @@ convert() {
     [[ "$in_allow_prefix" == true ]] && convert_args+=(-iap)
     convert_args+=(-od "$out_description")
     [[ "$out_is_name" == true ]] && convert_args+=(-oin)
-
     file_content="$(convert_code_examples_convert_special_placeholders "$file_content" "${convert_args[@]}")"
   done
 
@@ -859,4 +852,3 @@ throw_if_dependencies_are_not_satisfied
 
 parse_options "$@"
 exit "$SUCCESS"
-
