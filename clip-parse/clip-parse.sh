@@ -24,7 +24,7 @@ declare -i PARSER_INTERNAL_FAILURE_CODE=7
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.2.0"
+    echo "1.3.0"
     return "$SUCCESS"
 }
 
@@ -1890,4 +1890,103 @@ parser_ranges__to_or_default() {
 
     sed -E 's/^[[:digit:]]+\.\.$/infinity/
         s/^([[:digit:]]+)?\.\.([[:digit:]]+)$/\2/' <<<"$in_range"
+}
+
+
+
+# parser_converters__code_placeholder_piece_to_rendered <piece> [<option-style>]
+# Output a rendered placeholder piece.
+#
+# Output:
+#   <rendered-piece>
+#
+# Return:
+#   - 0 if <range> is valid
+#   - $PARSER_INVALID_TOKENS_CODE if <piece> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <option-style> is invalid
+#
+# Notes:
+#   - <piece> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_converters__code_placeholder_piece_to_rendered() {
+    declare in_piece="$1"
+    declare in_option_style="${2:-short}"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        [[ ! "$in_option_style" =~ ^(short|long)$ ]] && return "$PARSER_INVALID_ARGUMENT_CODE"
+    fi
+
+    declare type=
+    type="$(parser_examples__code_placeholder_piece_type "$in_piece")"
+    declare -i status="$?"
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$status"
+    fi
+
+    CHECK=
+    # shellcheck disable=2155
+    declare description="$(parser_examples__code_placeholder_piece_description "$in_piece")"
+    declare rendered=
+
+    # shellcheck disable=2155
+    case "$type" in
+        bool|int|float|char|command)
+            rendered="$(sed -E 's/ +/_/g' <<<"$description")"
+        ;;
+        string|any)
+            rendered="\"$(sed -E 's/ +/_/g' <<<"$description")\""
+        ;;
+        option)
+            declare examples="$(parser_examples__code_placeholder_piece_examples "$in_piece")"
+            [[ ! "$examples" =~ ^[^,]+,[^,]+$ ]] && return "$PARSER_INVALID_EXAMPLES_CODE"
+            
+            case "$in_option_style" in
+                short)
+                    rendered="$(sed -E 's/^[^,]+,([^,]+)$/\1/g' <<<"$examples")"
+                ;;
+                long)
+                    rendered="$(sed -E 's/^([^,]+),[^,]+$/\1/g' <<<"$examples")"
+                ;;
+            esac
+
+            rendered="$(sed -E 's/^ +//
+                s/ +$//g' <<<"$rendered")"
+        ;;
+        file|directory|/?file|/?directory)
+            type="$(sed -E 's|^/\?||' <<<"$type")"
+            rendered="\"path/to/$(sed -E 's/ +/_/g' <<<"$description")_$type\""
+        ;;
+        path|/?path)
+            rendered="\"path/to/$(sed -E 's/ +/_/g' <<<"$description")_file|path/to/$(sed -E 's/ +/_/g' <<<"$description")_directory\""
+        ;;
+        /file|/directory)
+            type="$(sed -E 's|^/||' <<<"$type")"
+            rendered="\"/path/to/$(sed -E 's/ +/_/g' <<<"$description")_$type\""
+        ;;
+        /path)
+            rendered="\"/path/to/$(sed -E 's/ +/_/g' <<<"$description")_file|/path/to/$(sed -E 's/ +/_/g' <<<"$description")_directory\""
+        ;;
+        remote-file|remote-directory|/?remote-file|/?remote-directory)
+            type="$(sed -E 's|^(/\?)?remote-||' <<<"$type")"
+            rendered="\"remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_$type\""
+        ;;
+        remote-path|/?remote-path)
+            rendered="\"remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_file|remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_directory\""
+        ;;
+        /remote-file|/remote-directory)
+            type="$(sed -E 's|^/remote-||' <<<"$type")"
+            rendered="\"/remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_$type\""
+        ;;
+        /remote-path)
+            rendered="\"/remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_file|/remote/path/to/$(sed -E 's/ +/_/g' <<<"$description")_directory\""
+        ;;
+        remote-any)
+            type="$(sed -E 's|^remote-||' <<<"$type")"
+            rendered="\"remote $(sed -E 's/ +/_/g' <<<"$description")\""
+        ;;
+    esac
+
+    echo "$rendered"
+    return "$SUCCESS"
 }
