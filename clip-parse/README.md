@@ -225,7 +225,7 @@ Let's say we put it in `$page` variable.
   string operator: !=
   ```
 
-- :question: **question** How to get a placeholder type?  
+- :question: **question** How to get a placeholder piece type?  
   :bulb: **answer**
 
   ```bash
