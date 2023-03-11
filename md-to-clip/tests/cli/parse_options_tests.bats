@@ -54,3 +54,11 @@
     run ./md-to-clip.sh --special-placeholder-config $(mktemp -d)
     ((status == 1))
 }
+
+@test "expect error when invalid option passed" {
+    run ./md-to-clip.sh --invalid
+    ((status == 1))
+
+    run ./md-to-clip.sh -i
+    ((status == 1))
+}
