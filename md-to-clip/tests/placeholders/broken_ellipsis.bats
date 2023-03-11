@@ -1,0 +1,22 @@
+#!/usr/bin/env bats
+
+@test "expect empty ellipsis removal when code with empty ellipsis passed" {
+    declare page="# command
+
+> Some description.
+> More information: <https://example.com>.
+
+- Some description:
+
+\\\`some code with {{...}}\\\`"
+
+    declare expected_output="> Some description
+> More information: https://example.com
+
+- Some description:
+
+\`some code with \`"
+
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
+    [[ "$output" == "$expected_output" ]]
+}
