@@ -835,15 +835,15 @@ parse_options() {
       shift
       ;;
     --output-directory | -od)
-      [[ -z "$value" ]] && throw_error "$option" "directory expected"
-      [[ -d "$value" ]] || throw_error "$option" "existing directory expected"
+      [[ -z "$value" ]] && throw_error "$option" "existing directory expected"
+      [[ -d "$value" ]] || throw_error "$option" "directory expected"
 
       output_directory="$value"
       shift 2
       ;;
     --special-placeholder-config | -spc)
-      [[ -z "$value" ]] && throw_error "$option" "config expected"
-      [[ -d "$value" ]] || throw_error "$option" "existing config expected"
+      [[ -z "$value" ]] && throw_error "$option" "existing config expected"
+      [[ -d "$value" ]] || throw_error "$option" "config expected"
 
       special_placeholder_config="$value"
       shift 2
