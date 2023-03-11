@@ -15,7 +15,7 @@
 > See also: awk, ed
 > More information: https://keith.github.io/xcode-man-pages/sed.1.html"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
     [[ "$output" == "$expected_output" ]]
 }
 
@@ -34,7 +34,7 @@
 > See also: awk, ed
 > More information: https://keith.github.io/xcode-man-pages/sed.1.html"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
     [[ "$output" == "$expected_output" ]]
 }
 
@@ -53,7 +53,7 @@
 > See also: awk, ed
 > More information: https://keith.github.io/xcode-man-pages/sed.1.html"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '/^>/ p'"
     [[ "$output" == "$expected_output" ]]
 }
 
@@ -81,7 +81,7 @@
 
 \`{string some description: command} | sed 's/apple/mango/g'\`"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '1,2! p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
@@ -109,7 +109,7 @@
 
 \`{string some description: command} | sed 's/apple/mango/g'\`"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '1,2! p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
@@ -142,6 +142,6 @@
 
 \`{string some description: command} | sed 's/apple/mango/g'\`"
 
-    run bash -c "./md-to-clip.sh -nfs <(echo \"$page\") | sed -nE '1,2! p'"
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
