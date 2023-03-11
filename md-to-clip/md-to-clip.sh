@@ -352,13 +352,13 @@ convert_code_examples_convert_integer_placeholders() {
     # Conversion
     ## General cases
     s|\{\{integer\}\}|{int some description}|g
-    s|\{\{integer([[:digit:]])\}\}|{int some description \1}|g
+    s|\{\{integer([[:digit:]]+)\}\}|{int some description \1}|g
     s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* some description}|g
     s|\{\{([-+]?[[:digit:]]+)\}\}|{int some description: \1}|g
 
     ## Cases with prefix like positive_integer
     s|\{\{([^{}_ ]+)_+integer\}\}|{int \1 integer}|g
-    s|\{\{([^{}_ ]+)_+integer([[:digit:]])\}\}|{int \1 integer \2}|g
+    s|\{\{([^{}_ ]+)_+integer([[:digit:]]+)\}\}|{int \1 integer \2}|g
     s|\{\{([^{}_ ]+)_+integer[[:digit:]]* +\1_+integer[[:digit:]]* +\.\.\.\}\}|{int* \1 integer}|g
   }' <<<"$in_file_content"
 }
