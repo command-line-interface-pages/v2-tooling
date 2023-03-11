@@ -164,7 +164,8 @@ convert_summary() {
     s/More +information: <(.*)>$/More information: \1/
 
     /See +also/ {
-      s/[, ] +or +/, /g
+      s/,? +or +/, /g
+      s/,,+/,/g
       s/`//g
     }
   }' <<<"$in_file_content")"
