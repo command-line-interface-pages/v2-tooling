@@ -30,7 +30,27 @@
     ((status == 0))
 }
 
+@test "expect error when nothing to --output-directory option passed" {
+    run ./md-to-clip.sh --output-directory
+    ((status == 1))
+}
+
+@test "expect error when file to --output-directory option passed" {
+    run ./md-to-clip.sh --output-directory placeholders.yaml
+    ((status == 1))
+}
+
 @test "expect no error when --special-placeholder-config option passed" {
     run bash -c './md-to-clip.sh --special-placeholder-config placeholders.yaml && ./md-to-clip.sh -spc placeholders.yaml'
     ((status == 0))
+}
+
+@test "expect error when nothing to --special-placeholder-config option passed" {
+    run ./md-to-clip.sh --special-placeholder-config
+    ((status == 1))
+}
+
+@test "expect error when directory to --special-placeholder-config option passed" {
+    run ./md-to-clip.sh --special-placeholder-config $(mktemp -d)
+    ((status == 1))
 }
