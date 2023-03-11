@@ -42,7 +42,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect 'int<digit>' conversion when code with 'int<digit>' passed" {
+@test "expect 'int<digits>' conversion when code with 'int<digits>' passed" {
     declare page="# command
 
 > Some description.
@@ -63,7 +63,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect 'integer<digit>' conversion when code with 'integer<digit>' passed" {
+@test "expect 'integer<digits>' conversion when code with 'integer<digits>' passed" {
     declare page="# command
 
 > Some description.
@@ -170,7 +170,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect '<adjective>_int<digit>' conversion when code with '<adjective>_int<digit>' passed" {
+@test "expect '<adjective>_int<digits>' conversion when code with '<adjective>_int<digits>' passed" {
     declare page="# command
 
 > Some description.
@@ -191,7 +191,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect '<adjective>_integer<digit>' conversion when code with '<adjective>_integer<digit>' passed" {
+@test "expect '<adjective>_integer<digits>' conversion when code with '<adjective>_integer<digits>' passed" {
     declare page="# command
 
 > Some description.
