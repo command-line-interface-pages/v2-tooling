@@ -15,7 +15,7 @@
 
 - Some description:
 
-\`some code with {float some description}\`"
+\`some code with {float float}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
@@ -36,13 +36,13 @@
 
 - Some description:
 
-\`some code with {float some description 12}\`"
+\`some code with {float float 12}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect 'floats' conversion when code with 'floats' passed" {
+@test "expect 'float1 float2 ...' conversion when code with 'float1 float2 ...' passed" {
     declare page="# command
 
 > Some description.
@@ -50,14 +50,35 @@
 
 - Some description:
 
-\\\`some code with {{floats}}\\\`"
+\\\`some code with {{float1 float2 ...}}\\\`"
 
     declare expected_output="> Some description
 > More information: https://example.com
 
 - Some description:
 
-\`some code with {float* some description}\`"
+\`some code with {float* float}\`"
+
+    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
+    [[ "$output" == "$expected_output" ]]
+}
+
+@test "expect '<float-value>' conversion when code with '<float-value>' passed" {
+    declare page="# command
+
+> Some description.
+> More information: <https://example.com>.
+
+- Some description:
+
+\\\`some code with {{12.1}}\\\`"
+
+    declare expected_output="> Some description
+> More information: https://example.com
+
+- Some description:
+
+\`some code with {float float: 12.1}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
@@ -107,9 +128,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-
-
-@test "expect '<float-value>' conversion when code with '<float-value>' passed" {
+@test "expect '<adjective>_float1 <adjective>_float2 ...' conversion when code with '<adjective>_float1 <adjective>_float2 ...' passed" {
     declare page="# command
 
 > Some description.
@@ -117,14 +136,14 @@
 
 - Some description:
 
-\\\`some code with {{12.1}}\\\`"
+\\\`some code with {{positive_float1 positive_float2 ...}}\\\`"
 
     declare expected_output="> Some description
 > More information: https://example.com
 
 - Some description:
 
-\`some code with {float some description: 12.1}\`"
+\`some code with {float* positive float}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
