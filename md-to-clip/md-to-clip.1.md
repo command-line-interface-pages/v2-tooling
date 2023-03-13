@@ -1,4 +1,4 @@
-% MD-TO-CLIP(1) md-to-clip 2.0.7
+% MD-TO-CLIP(1) md-to-clip 2.15.0
 % Emily Grace Seville
 % February 2023
 
@@ -8,11 +8,11 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 
 # SYNOPSIS
 
-**md-to-clip** *--help*|*-h*\
-**md-to-clip** *--version*|*-v*\
-**md-to-clip** *--author*|*-a*\
-**md-to-clip** *--email*|*-e*\
-**md-to-clip** *--no-file-save*|*-nfs*\
+**md-to-clip** *--help*|*-h*  
+**md-to-clip** *--version*|*-v*  
+**md-to-clip** *--author*|*-a*  
+**md-to-clip** *--email*|*-e*  
+**md-to-clip** *--no-file-save*|*-nfs*  
 **md-to-clip** [*--output-directory*|*-od* *DIRECTORY*] [*--special-placeholder-config*|*-spc* *FILE.yaml*] <FILE.md FILE2.md ...>
 
 # DESCRIPTION
@@ -34,9 +34,9 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 - code example:
   - placeholders:
     - removes *{{...}}*
-    - expands placeholders ending with *(s)* or smth like *{1,2,...}* like
+    - expands placeholders ending with *(s)* or something like *{1,2,...}* like
       *{{file(s)}}* to placeholders with asterisk quantifier like
-      *{file\* some description}*
+      *{file\* file}*
     - converts special placeholders defined in *$HOME/.md-to-clip.yaml*
     - converts integer, float, option, device, path, file, directory, boolean
       character and string placeholders
@@ -75,4 +75,5 @@ https://github.com/command-line-interface-pages/v2-tooling/tree/main/md-to-clip
 : Failure
 
 # COPYRIGHT
+
 Copyright ©️ 2023 Emily Grace Seville
