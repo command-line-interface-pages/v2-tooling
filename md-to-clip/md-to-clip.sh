@@ -479,9 +479,9 @@ convert_code_examples_convert_path_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path some description}|g
-    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path some description \2}|g
-    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* some description}|g
+    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path file or directory}|g
+    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path file or directory \2}|g
+    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* file or directory}|g
 
     ## Cases with prefix like excluded_path_or_directory
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
