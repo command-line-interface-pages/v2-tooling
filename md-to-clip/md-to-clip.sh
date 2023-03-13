@@ -661,14 +661,14 @@ convert_code_examples_convert_character_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{character\}\}|{char some description}|g
-    s|\{\{character([[:digit:]])\}\}|{char some description \1}|g
-    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* some description}|g
-    s|\{\{([^0-9])\}\}|{char some description: \1}|g
+    s|\{\{character\}\}|{char character}|g
+    s|\{\{character([[:digit:]]+)\}\}|{char character \1}|g
+    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* character}|g
+    s|\{\{([^0-9])\}\}|{char character: \1}|g
 
     ## Cases with prefix like default_character
     s|\{\{([^{}_ ]+)_+character\}\}|{char \1 character}|g
-    s|\{\{([^{}_ ]+)_+character([[:digit:]])\}\}|{char \1 character \2}|g
+    s|\{\{([^{}_ ]+)_+character([[:digit:]]+)\}\}|{char \1 character \2}|g
     s|\{\{([^{}_ ]+)_+character[[:digit:]]* +\1_+character[[:digit:]]* +\.\.\.\}\}|{char* \1 character}|g
   }' <<<"$in_file_content"
 }
