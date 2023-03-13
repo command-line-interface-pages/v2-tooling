@@ -533,9 +533,9 @@ convert_code_examples_convert_file_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file\}\}|{\1file some description}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file some description \2}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* some description}|g
+    s|\{\{(\/?)path/to/file\}\}|{\1file file}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file file \2}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* file}|g
 
     ## Cases with prefix like excluded_file
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
