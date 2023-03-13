@@ -625,15 +625,15 @@ convert_code_examples_convert_boolean_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{boolean\}\}|{bool some description}|g
-    s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
-    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
-    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool some description: \1}|g
-    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool some description: \1, \2}/g
+    s|\{\{boolean\}\}|{bool boolean}|g
+    s|\{\{boolean([[:digit:]]+)\}\}|{bool boolean \1}|g
+    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* boolean}|g
+    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool boolean: \1}|ig
+    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool boolean: \1, \2}/ig
 
     ## Cases with prefix like default_boolean
     s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
-    s|\{\{([^{}_ ]+)_+boolean([[:digit:]])\}\}|{bool \1 boolean \2}|g
+    s|\{\{([^{}_ ]+)_+boolean([[:digit:]]+)\}\}|{bool \1 boolean \2}|g
     s|\{\{([^{}_ ]+)_+boolean[[:digit:]]* +\1_+boolean[[:digit:]]* +\.\.\.\}\}|{bool* \1 boolean}|g
   }' <<<"$in_file_content"
 }
