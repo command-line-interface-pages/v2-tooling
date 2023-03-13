@@ -1,26 +1,5 @@
 #!/usr/bin/env bats
 
-@test "expect 'int' conversion when code with 'int' passed" {
-    declare page="# command
-
-> Some description.
-> More information: <https://example.com>.
-
-- Some description:
-
-\\\`some code with {{int}}\\\`"
-
-    declare expected_output="> Some description
-> More information: https://example.com
-
-- Some description:
-
-\`some code with {int some description}\`"
-
-    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
-    [[ "$output" == "$expected_output" ]]
-}
-
 @test "expect 'integer' conversion when code with 'integer' passed" {
     declare page="# command
 
@@ -36,28 +15,7 @@
 
 - Some description:
 
-\`some code with {int some description}\`"
-
-    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
-    [[ "$output" == "$expected_output" ]]
-}
-
-@test "expect 'int<digits>' conversion when code with 'int<digits>' passed" {
-    declare page="# command
-
-> Some description.
-> More information: <https://example.com>.
-
-- Some description:
-
-\\\`some code with {{int12}}\\\`"
-
-    declare expected_output="> Some description
-> More information: https://example.com
-
-- Some description:
-
-\`some code with {int some description 12}\`"
+\`some code with {int integer}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
@@ -78,13 +36,13 @@
 
 - Some description:
 
-\`some code with {int some description 12}\`"
+\`some code with {int integer 12}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect 'ints' conversion when code with 'ints' passed" {
+@test "expect 'integer1 integer2 ...' conversion when code with 'integer1 integer2 ...' passed" {
     declare page="# command
 
 > Some description.
@@ -92,20 +50,20 @@
 
 - Some description:
 
-\\\`some code with {{ints}}\\\`"
+\\\`some code with {{integer1 integer2 ...}}\\\`"
 
     declare expected_output="> Some description
 > More information: https://example.com
 
 - Some description:
 
-\`some code with {int* some description}\`"
+\`some code with {int* integer}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
-@test "expect 'integers' conversion when code with 'integers' passed" {
+@test "expect '<integer-value>' conversion when code with '<integer-value>' passed" {
     declare page="# command
 
 > Some description.
@@ -113,41 +71,20 @@
 
 - Some description:
 
-\\\`some code with {{integers}}\\\`"
+\\\`some code with {{12}}\\\`"
 
     declare expected_output="> Some description
 > More information: https://example.com
 
 - Some description:
 
-\`some code with {int* some description}\`"
+\`some code with {int integer: 12}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
 }
 
 
-
-@test "expect '<adjective>_int' conversion when code with '<adjective>_int' passed" {
-    declare page="# command
-
-> Some description.
-> More information: <https://example.com>.
-
-- Some description:
-
-\\\`some code with {{positive_int}}\\\`"
-
-    declare expected_output="> Some description
-> More information: https://example.com
-
-- Some description:
-
-\`some code with {int positive integer}\`"
-
-    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
-    [[ "$output" == "$expected_output" ]]
-}
 
 @test "expect '<adjective>_integer' conversion when code with '<adjective>_integer' passed" {
     declare page="# command
@@ -165,27 +102,6 @@
 - Some description:
 
 \`some code with {int positive integer}\`"
-
-    run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
-    [[ "$output" == "$expected_output" ]]
-}
-
-@test "expect '<adjective>_int<digits>' conversion when code with '<adjective>_int<digits>' passed" {
-    declare page="# command
-
-> Some description.
-> More information: <https://example.com>.
-
-- Some description:
-
-\\\`some code with {{positive_int12}}\\\`"
-
-    declare expected_output="> Some description
-> More information: https://example.com
-
-- Some description:
-
-\`some code with {int positive integer 12}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
@@ -212,9 +128,7 @@
     [[ "$output" == "$expected_output" ]]
 }
 
-
-
-@test "expect '<integer-value>' conversion when code with '<integer-value>' passed" {
+@test "expect '<adjective>_integer1 <adjective>_integer2 ...' conversion when code with '<adjective>_integer1 <adjective>_integer2 ...' passed" {
     declare page="# command
 
 > Some description.
@@ -222,14 +136,14 @@
 
 - Some description:
 
-\\\`some code with {{12}}\\\`"
+\\\`some code with {{positive_integer1 positive_integer2 ...}}\\\`"
 
     declare expected_output="> Some description
 > More information: https://example.com
 
 - Some description:
 
-\`some code with {int some description: 12}\`"
+\`some code with {int* positive integer}\`"
 
     run bash -c "./md-to-clip.sh -spc placeholders.yaml -nfs <(echo \"$page\") | sed -nE '1,2! p'"
     [[ "$output" == "$expected_output" ]]
