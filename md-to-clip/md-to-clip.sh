@@ -725,7 +725,7 @@ convert() {
     # Processing file placeholders with sample values.
     ## Conversion
     ### General cases
-    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file some description: \1}|g
+    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file file: \1}|g
 
     # Processing all remaining placeholders.
     ## Conversion
