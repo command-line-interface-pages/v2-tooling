@@ -591,9 +591,9 @@ convert_code_examples_convert_directory_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/directory\}\}|{\1directory some description}|g
-    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory some description \2}|g
-    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* some description}|g
+    s|\{\{(\/?)path/to/directory\}\}|{\1directory directory}|g
+    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory directory \2}|g
+    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* directory}|g
 
     ## Cases with prefix like excluded_file
     s|\{\{(\/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
