@@ -386,10 +386,10 @@ convert_code_examples_convert_float_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{float\}\}|{float some description}|g
-    s|\{\{float([[:digit:]]+)\}\}|{float some description \1}|g
-    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* some description}|g
-    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float some description: \1}|g
+    s|\{\{float\}\}|{float float}|g
+    s|\{\{float([[:digit:]]+)\}\}|{float float \1}|g
+    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* float}|g
+    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float float: \1}|g
 
     ## Cases with prefix like positive_float
     s|\{\{([^{}_ ]+)_+float\}\}|{float \1 float}|g
