@@ -435,14 +435,14 @@ convert_code_examples_convert_device_placeholders() {
   sed -E '/^`/ {
     # Expansion
     ## General cases
-    s|\{\{(\/?)(path/to/\|/dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
 
     ## Cases with prefix like drive_device
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
 
     # Conversion
     s|\{\{(\/?)(device\|dev/sd[[:alpha:]])\}\}|{\1file device}|g
