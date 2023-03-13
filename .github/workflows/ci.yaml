@@ -22,5 +22,4 @@ jobs:
         with:
           bats-version: 1.8.2
       - run: |
-          cp ./md-to-clip/placeholders.yaml ~/.md-to-clip.yaml
-          env -C md-to-clip bats --print-output-on-failure tests.bats
+          env -C md-to-clip/ make tests

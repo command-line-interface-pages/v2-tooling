@@ -30,4 +30,4 @@ reinstall: uninstall install
 
 .PHONY: tests
 tests:
-	bats tests.bats
+	@bats --print-output-on-failure $(shell find ./tests/ -type f -name '*.bats')

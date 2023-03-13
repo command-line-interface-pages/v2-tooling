@@ -114,7 +114,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "2.1.0" >&2
+  echo "2.15.0" >&2
 }
 
 author() {
@@ -164,7 +164,8 @@ convert_summary() {
     s/More +information: <(.*)>$/More information: \1/
 
     /See +also/ {
-      s/[, ] +or +/, /g
+      s/,? +or +/, /g
+      s/,,+/,/g
       s/`//g
     }
   }' <<<"$in_file_content")"
@@ -350,14 +351,14 @@ convert_code_examples_convert_integer_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{integer\}\}|{int some description}|g
-    s|\{\{integer([[:digit:]])\}\}|{int some description \1}|g
-    s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* some description}|g
-    s|\{\{([-+]?[[:digit:]]+)\}\}|{int some description: \1}|g
+    s|\{\{integer\}\}|{int integer}|g
+    s|\{\{integer([[:digit:]]+)\}\}|{int integer \1}|g
+    s|\{\{integer[[:digit:]]* +integer[[:digit:]]* +\.\.\.\}\}|{int* integer}|g
+    s|\{\{([-+]?[[:digit:]]+)\}\}|{int integer: \1}|g
 
     ## Cases with prefix like positive_integer
     s|\{\{([^{}_ ]+)_+integer\}\}|{int \1 integer}|g
-    s|\{\{([^{}_ ]+)_+integer([[:digit:]])\}\}|{int \1 integer \2}|g
+    s|\{\{([^{}_ ]+)_+integer([[:digit:]]+)\}\}|{int \1 integer \2}|g
     s|\{\{([^{}_ ]+)_+integer[[:digit:]]* +\1_+integer[[:digit:]]* +\.\.\.\}\}|{int* \1 integer}|g
   }' <<<"$in_file_content"
 }
@@ -385,14 +386,14 @@ convert_code_examples_convert_float_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{float\}\}|{float some description}|g
-    s|\{\{float([[:digit:]])\}\}|{float some description \1}|g
-    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* some description}|g
-    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float some description: \1}|g
+    s|\{\{float\}\}|{float float}|g
+    s|\{\{float([[:digit:]]+)\}\}|{float float \1}|g
+    s|\{\{float[[:digit:]]* +float[[:digit:]]* +\.\.\.\}\}|{float* float}|g
+    s|\{\{([-+]?[[:digit:]]+[.,][[:digit:]]+)\}\}|{float float: \1}|g
 
     ## Cases with prefix like positive_float
     s|\{\{([^{}_ ]+)_+float\}\}|{float \1 float}|g
-    s|\{\{([^{}_ ]+)_+float([[:digit:]])\}\}|{float \1 float \2}|g
+    s|\{\{([^{}_ ]+)_+float([[:digit:]]+)\}\}|{float \1 float \2}|g
     s|\{\{([^{}_ ]+)_+float[[:digit:]]* +\1_+float[[:digit:]]* +\.\.\.\}\}|{float* \1 float}|g
   }' <<<"$in_file_content"
 }
@@ -414,11 +415,11 @@ convert_code_examples_convert_option_placeholders() {
 
     # Conversion
     s|\{\{option\}\}|{string option}|g
-    s|\{\{option([[:digit:]])\}\}|{string option \1}|g
+    s|\{\{option([[:digit:]]+)\}\}|{string option \1}|g
     s|\{\{option[[:digit:]]* +option[[:digit:]]* +\.\.\.\}\}|{string* option}|g
-    s|\{\{(--?[^{}=: ]+)\}\}|{option some description: \1}|g
-    s|\{\{(--?[^{}=: ]+(([:=]\| +)[^{} ]*)?( +--?[^{}=: ]+(([:=]\| +)[^{} ]*)?)+)\}\}|{option* some description: \1}|g
-    s|\{\{(--?[^{}=: ]+)([:=]\| +)[^{} ]*\}\}|{option some description: \1}|g
+    s|\{\{(--?[^{}=: ]+)\}\}|{string option: \1}|g
+    s|\{\{(--?[^{}=: ]+(([:=]\| +)[^{} ]*)?( +--?[^{}=: ]+(([:=]\| +)[^{} ]*)?)+)\}\}|{string* option: \1}|g
+    s|\{\{(--?[^{}=: ]+)([:=]\| +)[^{} ]*\}\}|{string option: \1}|g
   }' <<<"$in_file_content"
 }
 
@@ -434,14 +435,14 @@ convert_code_examples_convert_device_placeholders() {
   sed -E '/^`/ {
     # Expansion
     ## General cases
-    s|\{\{(\/?)(path/to/\|/dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?device(_*name)?([[:digit:]]*)\}\}|{{\1device\4}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?(devices\|device_*names)[[:digit:]]*\}\}|{{\1device1 \1device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?device(_*name)?[[:digit:]]* +\1(path/to/\|dev/)?device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1device1 \1device2 ...}}|g
 
     ## Cases with prefix like drive_device
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
-    s|\{\{(\/?)(path/to/\|/dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|/dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+device(_*name)?([[:digit:]]*)\}\}|{{\1\3_device\5}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+(devices\|device_*names)[[:digit:]]*\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
+    s|\{\{(\/?)(path/to/\|dev/)?([^{}_/ ]+)_+device(_*name)?[[:digit:]]* +\1(path/to/\|dev/)?\3_+device(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1\3_device1 \1\3_device2 ...}}|g
 
     # Conversion
     s|\{\{(\/?)(device\|dev/sd[[:alpha:]])\}\}|{\1file device}|g
@@ -478,9 +479,9 @@ convert_code_examples_convert_path_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path some description}|g
-    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path some description \2}|g
-    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* some description}|g
+    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path file or directory}|g
+    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path file or directory \2}|g
+    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* file or directory}|g
 
     ## Cases with prefix like excluded_path_or_directory
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
@@ -511,30 +512,30 @@ convert_code_examples_convert_file_placeholders() {
     s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
 
     ## Cases with optional extensions
-    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.[^{}| ]+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.[^{}| ]+)\]\}\}|{{\1path/to/file\4[\5]}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.[^{}| ]+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file\4[\5]}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
 
     ## Cases with mandatory extension
-    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*(\.[^{}| ]+)\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)(\.[^{}| ]+)\}\}|{{\1path/to/file\4\5}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*(\.[^{}| ]+) +\1(path/to/)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/file\4\5}}|g
+    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
 
     ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\[(\.[^{}| ]+)\]\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\[(\.[^{}| ]+)\]\}\}|{{\1path/to/\3_file\5[\6]}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*\[(\.[^{}| ]+)\] +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file\5[\6]}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
 
     ## Cases with mandatory extension and prefix like excluded_file.txt
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*(\.[^{}| ]+)\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)(\.[^{}| ]+)\}\}|{{\1path/to/\3_file\5\6}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*(\.[^{}| ]+) +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file\5\6}}|g
+    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file\}\}|{\1file some description}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file some description \2}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* some description}|g
+    s|\{\{(\/?)path/to/file\}\}|{\1file file}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file file \2}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* file}|g
 
     ## Cases with prefix like excluded_file
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
@@ -542,24 +543,24 @@ convert_code_examples_convert_file_placeholders() {
     s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]* +\1path/to/\2_+file[[:digit:]]* +\.\.\.\}\}|{\1file* \2 file}|g
 
     ## Cases with optional extensions
-    s|\{\{(\/?)path/to/file\[(\.[^{}| ]+)\]\}\}|{\1file file with optional \2 extensions}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.[^{}| ]+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
+    s|\{\{(\/?)path/to/file\[(\.([^{}]\| ])+)\]\}\}|{\1file file with optional \2 extensions}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
 
     ## Cases with mandatory extension
-    s|\{\{(\/?)path/to/file(\.[^{}| ]+)\}\}|{\1file file with mandatory \2 extension}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)(\.[^{}| ]+)\}\}|{\1file file \2 with mandatory \3 extension}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]*(\.[^{}| ]+) +\1path/to/+file[[:digit:]]*\2 +\.\.\.\}\}|{\1file* file with mandatory \2 extension}|g
+    s|\{\{(\/?)path/to/file\((\.([^{}]\| ])+)\)\}\}|{\1file file with mandatory \2 extensions}|g
+    s|\{\{(\/?)path/to/file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file file \2 with mandatory \3 extensions}|g
+    s|\{\{(\/?)path/to/file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{\1file* file with mandatory \2 extensions}|g
 
     ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\[(\.[^{}| ]+)\]\}\}|{\1file \2 file with optional \3 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\[(\.[^{}| ]+)\]\}\}|{\1file \2 file \3 with optional \4 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\[(\.[^{}| ]+)\] +\1path/to/\2_+file[[:digit:]]*\[\3\] +\.\.\.\}\}|{\1file* \2 file with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file with optional \3 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file \3 with optional \4 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/\2_+file[[:digit:]]*\[\3\] +\.\.\.\}\}|{\1file* \2 file with optional \3 extensions}|g
 
     ## Cases with mandatory extension and prefix like excluded_file.txt
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file(\.[^{}| ]+)\}\}|{\1file \2 file with mandatory \3 extension}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)(\.[^{}| ]+)\}\}|{\1file \2 file \3 with mandatory \4 extension}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*(\.[^{}| ]+) +\1path/to/\2_+file[[:digit:]]*\3 +\.\.\.\}\}|{\1file* \2 file with mandatory \3 extension}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file with mandatory \3 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file \3 with mandatory \4 extensions}|g
+    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/\2_+file[[:digit:]]*\(\3\) +\.\.\.\}\}|{\1file* \2 file with mandatory \3 extensions}|g
   }' <<<"$in_file_content"
 }
 
@@ -590,9 +591,9 @@ convert_code_examples_convert_directory_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/directory\}\}|{\1directory some description}|g
-    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory some description \2}|g
-    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* some description}|g
+    s|\{\{(\/?)path/to/directory\}\}|{\1directory directory}|g
+    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory directory \2}|g
+    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* directory}|g
 
     ## Cases with prefix like excluded_file
     s|\{\{(\/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
@@ -624,15 +625,15 @@ convert_code_examples_convert_boolean_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{boolean\}\}|{bool some description}|g
-    s|\{\{boolean([[:digit:]])\}\}|{bool some description \1}|g
-    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* some description}|g
-    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool some description: \1}|g
-    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool some description: \1, \2}/g
+    s|\{\{boolean\}\}|{bool boolean}|g
+    s|\{\{boolean([[:digit:]]+)\}\}|{bool boolean \1}|g
+    s|\{\{boolean[[:digit:]]* +boolean[[:digit:]]* +\.\.\.\}\}|{bool* boolean}|g
+    s|\{\{(true\|false\|yes\|no\|on\|off)\}\}|{bool boolean: \1}|ig
+    s/\{\{(true|false|yes|no|on|off)\|(true|false|yes|no|on|off)\}\}/{bool boolean: \1, \2}/ig
 
     ## Cases with prefix like default_boolean
     s|\{\{([^{}_ ]+)_+boolean\}\}|{bool \1 boolean}|g
-    s|\{\{([^{}_ ]+)_+boolean([[:digit:]])\}\}|{bool \1 boolean \2}|g
+    s|\{\{([^{}_ ]+)_+boolean([[:digit:]]+)\}\}|{bool \1 boolean \2}|g
     s|\{\{([^{}_ ]+)_+boolean[[:digit:]]* +\1_+boolean[[:digit:]]* +\.\.\.\}\}|{bool* \1 boolean}|g
   }' <<<"$in_file_content"
 }
@@ -660,14 +661,14 @@ convert_code_examples_convert_character_placeholders() {
 
     # Conversion
     ## General cases
-    s|\{\{character\}\}|{char some description}|g
-    s|\{\{character([[:digit:]])\}\}|{char some description \1}|g
-    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* some description}|g
-    s|\{\{([^0-9])\}\}|{char some description: \1}|g
+    s|\{\{character\}\}|{char character}|g
+    s|\{\{character([[:digit:]]+)\}\}|{char character \1}|g
+    s|\{\{character[[:digit:]]* +character[[:digit:]]* +\.\.\.\}\}|{char* character}|g
+    s|\{\{([^0-9])\}\}|{char character: \1}|g
 
     ## Cases with prefix like default_character
     s|\{\{([^{}_ ]+)_+character\}\}|{char \1 character}|g
-    s|\{\{([^{}_ ]+)_+character([[:digit:]])\}\}|{char \1 character \2}|g
+    s|\{\{([^{}_ ]+)_+character([[:digit:]]+)\}\}|{char \1 character \2}|g
     s|\{\{([^{}_ ]+)_+character[[:digit:]]* +\1_+character[[:digit:]]* +\.\.\.\}\}|{char* \1 character}|g
   }' <<<"$in_file_content"
 }
@@ -724,7 +725,7 @@ convert() {
     # Processing file placeholders with sample values.
     ## Conversion
     ### General cases
-    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file some description: \1}|g
+    s|\{\{(~/[^{}/]+(/[^{}/]+)*/?)\}\}|{file file: \1}|g
 
     # Processing all remaining placeholders.
     ## Conversion
@@ -835,15 +836,15 @@ parse_options() {
       shift
       ;;
     --output-directory | -od)
-      [[ -z "$value" ]] && throw_error "$option" "directory expected"
-      [[ -d "$value" ]] || throw_error "$option" "existing directory expected"
+      [[ -z "$value" ]] && throw_error "$option" "existing directory expected"
+      [[ ! -d "$value" ]] && throw_error "$option" "directory expected"
 
       output_directory="$value"
       shift 2
       ;;
     --special-placeholder-config | -spc)
-      [[ -z "$value" ]] && throw_error "$option" "config expected"
-      [[ -d "$value" ]] || throw_error "$option" "existing config expected"
+      [[ -z "$value" ]] && throw_error "$option" "existing config expected"
+      [[ ! -f "$value" ]] && throw_error "$option" "config expected"
 
       special_placeholder_config="$value"
       shift 2
