@@ -530,6 +530,88 @@ convert_code_examples_convert_file_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
+    # Expansion
+    ## General cases
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path\\to\\file1 \1path\\to\\file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\file\4}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]* +\1(path\\to\\)?file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\file1 \1path\\to\\file2 ...}}|g
+
+    ## Cases with prefix like excluded_file
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_file1 \1path\\to\\\3_file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_file\5}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_file1 \1path\\to\\\3_file2 ...}}|g
+
+    ## Cases with optional extensions
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\file1[\4] \1path\\to\\file2[\4] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\file\4[\5]}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path\\to\\)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path\\to\\file1[\4] \1path\\to\\file2[\4] ...}}|g
+
+    ## Cases with mandatory extension
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path\\to\\file1\4 \1path\\to\\file2\4 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path\\to\\file\4\5}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path\\to\\)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path\\to\\file1\4 \1path\\to\\file2\4 ...}}|g
+
+    ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\\3_file1[\5] \1path\\to\\\3_file2[\5] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\\3_file\5[\6]}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path\\to\\\3_file1[\5] \1path\\to\\\3_file2[\5] ...}}|g
+
+    ## Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path\\to\\\3_file1\5 \1path\\to\\\3_file2\5 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path\\to\\\3_file\5\6}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path\\to\\\3_file1\5 \1path\\to\\\3_file2\5 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{path\\to\\file\}\}|{file file}|g
+    s|\{\{\\path\\to\\file\}\}|{/file file}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\}\}|{file file \1}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\}\}|{/file file \1}|g
+    s|\{\{path\\to\\file[[:digit:]]* +path\\to\\file[[:digit:]]* +\.\.\.\}\}|{file* file}|g
+    s|\{\{\\path\\to\\file[[:digit:]]* +\\path\\to\\file[[:digit:]]* +\.\.\.\}\}|{/file* file}|g
+
+    ## Cases with prefix like excluded_file
+    s|\{\{path\\to\\([^{}_ /]+)_+file\}\}|{file \1 file}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\}\}|{/file \1 file}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\}\}|{file \1 file \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\}\}|{/file \1 file \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]* +path\\to\\\1_+file[[:digit:]]* +\.\.\.\}\}|{file* \1 file}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]* +\\path\\to\\\1_+file[[:digit:]]* +\.\.\.\}\}|{/file* \1 file}|g
+
+    ## Cases with optional extensions
+    s|\{\{path\\to\\file\[(\.([^{}]\| ])+)\]\}\}|{file file with optional \1 extensions}|g
+    s|\{\{\\path\\to\\file\[(\.([^{}]\| ])+)\]\}\}|{/file file with optional \1 extensions}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{file file \1 with optional \2 extensions}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{/file file \1 with optional \2 extensions}|g
+    s|\{\{path\\to\\file[[:digit:]]*\[(\.([^{}]\| ])+)\] +path\\to\\file[[:digit:]]*\[\1\] +\.\.\.\}\}|{file* file with optional \1 extensions}|g
+    s|\{\{\\path\\to\\file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\\path\\to\\file[[:digit:]]*\[\1\] +\.\.\.\}\}|{/file* file with optional \1 extensions}|g
+
+    ## Cases with mandatory extension
+    s|\{\{path\\to\\file\((\.([^{}]\| ])+)\)\}\}|{file file with mandatory \1 extensions}|g
+    s|\{\{\\path\\to\\file\((\.([^{}]\| ])+)\)\}\}|{/file file with mandatory \1 extensions}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{file file \1 with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{/file file \1 with mandatory \2 extensions}|g
+    s|\{\{path\\to\\file[[:digit:]]*\((\.([^{}]\| ])+)\) +path\\to\\+file[[:digit:]]*\(\1\) +\.\.\.\}\}|{file* file with mandatory \1 extensions}|g
+    s|\{\{\\path\\to\\file[[:digit:]]*\((\.([^{}]\| ])+)\) +\\path\\to\\+file[[:digit:]]*\(\1\) +\.\.\.\}\}|{/file* file with mandatory \1 extensions}|g
+
+    ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{path\\to\\([^{}_ /]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{file \1 file with optional \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{/file \1 file with optional \2 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{file \1 file \2 with optional \3 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{/file \1 file \2 with optional \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +path\\to\\\1_+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{file* \1 file with optional \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\\path\\to\\\1_+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{/file* \1 file with optional \2 extensions}|g
+
+    ## Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{path\\to\\([^{}_ /]+)_+file\((\.([^{}]\| ])+)\)\}\}|{file \1 file with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\((\.([^{}]\| ])+)\)\}\}|{/file \1 file with mandatory \2 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{file \1 file \2 with mandatory \3 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{/file \1 file \2 with mandatory \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +path\\to\\\1_+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{file* \1 file with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +\\path\\to\\\1_+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{/file* \1 file with mandatory \2 extensions}|g
+
+    # --- Linux & Mac OS ---
     # Expansion
     ## General cases
     s|\{\{(/?)(path/to/)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
