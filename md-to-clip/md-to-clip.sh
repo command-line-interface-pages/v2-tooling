@@ -692,7 +692,7 @@ convert_code_examples_convert_directory_placeholders() {
     s|\{\{(/?)(path/to/)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/directory\5}}|g
     s|\{\{(/?)(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
 
-    ## Cases with prefix like excluded_file
+    ## Cases with prefix like excluded_directory
     s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
     s|\{\{(/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_directory\6}}|g
     s|\{\{(/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
@@ -703,7 +703,7 @@ convert_code_examples_convert_directory_placeholders() {
     s|\{\{(/?)path/to/directory([[:digit:]]+)\}\}|{\1directory directory \2}|g
     s|\{\{(/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* directory}|g
 
-    ## Cases with prefix like excluded_file
+    ## Cases with prefix like excluded_directory
     s|\{\{(/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
     s|\{\{(/?)path/to/([^{}_ ]+)_+directory([[:digit:]]+)\}\}|{\1directory \2 directory \3}|g
     s|\{\{(/?)path/to/([^{}_ ]+)_+directory[[:digit:]]* +\1path/to/\2_+directory[[:digit:]]* +\.\.\.\}\}|{\1directory* \2 directory}|g
