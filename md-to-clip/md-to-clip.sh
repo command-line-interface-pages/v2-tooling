@@ -114,7 +114,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "2.15.0" >&2
+  echo "2.16.0" >&2
 }
 
 author() {
