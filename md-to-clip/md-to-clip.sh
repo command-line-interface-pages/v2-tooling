@@ -466,6 +466,36 @@ convert_code_examples_convert_path_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
+    # Expansion
+    ## General cases
+    s|\{\{(\\?)(path\\to\\)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\file_or_directory1 \1path\\to\\file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\file_or_directory\6}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\file_or_directory1 \1path\\to\\file_or_directory2 ...}}|g
+
+    ## Cases with prefix like excluded_path_or_directory
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_file_or_directory1 \1path\\to\\\3_file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_file_or_directory\7}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_file_or_directory1 \1path\\to\\\3_file_or_directory2 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{path\\to\\file_or_directory\}\}|{path file or directory}|g
+    s|\{\{\\path\\to\\file_or_directory\}\}|{/path file or directory}|g
+    s|\{\{path\\to\\file_or_directory([[:digit:]]+)\}\}|{path file or directory \1}|g
+    s|\{\{\\path\\to\\file_or_directory([[:digit:]]+)\}\}|{/path file or directory \1}|g
+    s|\{\{path\\to\\file_or_directory[[:digit:]]* +path\\to\\file_or_directory[[:digit:]]* +\.\.\.\}\}|{path* file or directory}|g
+    s|\{\{\\path\\to\\file_or_directory[[:digit:]]* +\\path\\to\\file_or_directory[[:digit:]]* +\.\.\.\}\}|{/path* file or directory}|g
+
+    ## Cases with prefix like excluded_path_or_directory
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory\}\}|{path \1 file or directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory\}\}|{/path \1 file or directory}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{path \1 file or directory \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{/path \1 file or directory \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory[[:digit:]]* +path\\to\\\1_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{path* \1 file or directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory[[:digit:]]* +\\path\\to\\\1_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{/path* \1 file or directory}|g
+
+    # --- Linux & Mac OS ---
     # Expansion
     ## General cases
     s|\{\{(/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
@@ -473,9 +503,9 @@ convert_code_examples_convert_path_placeholders() {
     s|\{\{(/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
 
     ## Cases with prefix like excluded_path_or_directory
-    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
-    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file_or_directory\7}}|g
-    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file_or_directory\7}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
 
     # Conversion
     ## General cases
@@ -484,9 +514,9 @@ convert_code_examples_convert_path_placeholders() {
     s|\{\{(/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* file or directory}|g
 
     ## Cases with prefix like excluded_path_or_directory
-    s|\{\{(/?)path/to/([^{}_ ]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
-    s|\{\{(/?)path/to/([^{}_ ]+)_+file_or_directory([[:digit:]]+)\}\}|{\1path \2 file or directory \3}|g
-    s|\{\{(/?)path/to/([^{}_ ]+)_+file_or_directory[[:digit:]]* +\1path/to/\2_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* \2 file or directory}|g
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{\1path \2 file or directory \3}|g
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory[[:digit:]]* +\1path/to/\2_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* \2 file or directory}|g
   }' <<<"$in_file_content"
 }
 
