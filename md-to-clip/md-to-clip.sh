@@ -686,6 +686,36 @@ convert_code_examples_convert_directory_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
+    # Expansion
+    ## General cases
+    s|\{\{(\\?)(path\\to\\)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\directory1 \1path\\to\\directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\directory\5}}|g
+    s|\{\{(\\?)(path\\to\\)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\directory1 \1path\\to\\directory2 ...}}|g
+
+    ## Cases with prefix like excluded_directory
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_directory1 \1path\\to\\\3_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_directory\6}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_directory1 \1path\\to\\\3_directory2 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{path\\to\\directory\}\}|{directory directory}|g
+    s|\{\{\\path\\to\\directory\}\}|{/directory directory}|g
+    s|\{\{path\\to\\directory([[:digit:]]+)\}\}|{directory directory \1}|g
+    s|\{\{\\path\\to\\directory([[:digit:]]+)\}\}|{/directory directory \1}|g
+    s|\{\{path\\to\\directory[[:digit:]]* +path\\to\\directory[[:digit:]]* +\.\.\.\}\}|{directory* directory}|g
+    s|\{\{\\path\\to\\directory[[:digit:]]* +\\path\\to\\directory[[:digit:]]* +\.\.\.\}\}|{/directory* directory}|g
+
+    ## Cases with prefix like excluded_directory
+    s|\{\{path\\to\\([^{}_ /]+)_+directory\}\}|{directory \1 directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory\}\}|{/directory \1 directory}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+directory([[:digit:]]+)\}\}|{directory \1 directory \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory([[:digit:]]+)\}\}|{/directory \1 directory \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+directory[[:digit:]]* +path\\to\\\1_+directory[[:digit:]]* +\.\.\.\}\}|{directory* \1 directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory[[:digit:]]* +\\path\\to\\\1_+directory[[:digit:]]* +\.\.\.\}\}|{/directory* \1 directory}|g
+
+    # --- Linux & Mac OS ---
     # Expansion
     ## General cases
     s|\{\{(/?)(path/to/)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
