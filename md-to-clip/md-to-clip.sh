@@ -99,7 +99,7 @@ help() {
 }
 
 version() {
-  echo "2.16.0" >&2
+  echo "2.17.0" >&2
 }
 
 author() {
