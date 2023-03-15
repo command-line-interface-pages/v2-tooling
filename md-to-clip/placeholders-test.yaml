@@ -1,0 +1,10 @@
+- in-placeholder: width
+  out-type: float
+
+- in-placeholder: position
+  in-allow-prefix: true
+  out-type: int
+  
+- in-placeholder: argument
+  in-index: 3
+  out-type: string

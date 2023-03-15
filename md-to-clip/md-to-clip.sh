@@ -99,7 +99,7 @@ help() {
 }
 
 version() {
-  echo "2.17.0" >&2
+  echo "2.17.1" >&2
 }
 
 author() {
@@ -266,51 +266,96 @@ convert_code_examples_convert_special_placeholders() {
   [[ -z "$input_placeholder" ]] && return "$FAIL"
   [[ -z "$output_type" ]] && return "$FAIL"
   [[ -z "$output_description" ]] && output_description="$input_placeholder"
-  declare input_placeholder_initial="$input_placeholder"
 
-  declare -i group_multiplier=0
+  declare truncated_input_placeholder="${input_placeholder:0:input_index}"
+
+  declare singular_inputs=( # without [[:digit:]] as it is gonna to be captured
+    "${input_placeholder}"
+    "${input_placeholder}_*${suffix}"
+  )
+
+  declare plural_inputs=(
+    "${input_placeholder}s"
+    "${input_placeholder}s[[:digit:]]*"
+    "${input_placeholder}_*${suffix}s"
+    "${input_placeholder}_*${suffix}s[[:digit:]]*"
+  )
+
   ((input_index > 0)) && {
-    input_placeholder="${input_placeholder:0:input_index}(${input_placeholder:input_index})?"
-    group_multiplier=1
+    singular_inputs+=(
+      "${truncated_input_placeholder}"
+      "${truncated_input_placeholder}_*${suffix}"
+    )
+
+    plural_inputs+=(
+      "${truncated_input_placeholder}s"
+      "${truncated_input_placeholder}s[[:digit:]]*"
+      "${truncated_input_placeholder}_*${suffix}s"
+      "${truncated_input_placeholder}_*${suffix}s[[:digit:]]*"
+    )
   }
 
+  [[ "$input_allow_prefix" == false ]] && {
+    plural_inputs+=(
+      "${input_placeholder}_*${suffix}[[:digit:]]* +${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+      "${input_placeholder}[[:digit:]]* +${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+      "${input_placeholder}_*${suffix}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\."
+      "${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\."
+    )
+
+    ((input_index > 0)) &&
+      plural_inputs+=(
+        "${truncated_input_placeholder}_*${suffix}[[:digit:]]* +${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}[[:digit:]]* +${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}_*${suffix}[[:digit:]]* +${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}[[:digit:]]* +${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+      )
+  }
+
+  for sigular_term in "${singular_inputs[@]}"; do
+    in_file_content="$(sed -E "/^\`/ {
+      s|\{\{$sigular_term\}\}|{$output_type $output_description}|g
+      s|\{\{$sigular_term([[:digit:]]+)\}\}|{$output_type \1 $output_description}|g
+    }" <<<"$in_file_content")"
+  done
+
+  for plural_term in "${plural_inputs[@]}"; do
+    in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* $output_description}|g" <<<"$in_file_content")"
+  done
+
   if [[ "$input_allow_prefix" == true ]]; then
-    sed -E "/^\`/ {
-      # Expansion
-      ## General cases
-      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
-      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder}\\$((2 + group_multiplier))}}|g
-      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder}1 ${input_placeholder}2 ...}}|g
+    for sigular_term in "${singular_inputs[@]}"; do
+      in_file_content="$(sed -E "/^\`/ {
+        s|\{\{([^{}_ ]+)_+$sigular_term\}\}|{$output_type \1 $output_description}|g
+        s|\{\{([^{}_ ]+)_+$sigular_term([[:digit:]]+)\}\}|{$output_type \2 \1 $output_description}|g
+      }" <<<"$in_file_content")"
+    done
 
-      ## Cases with prefix like positive_integers
-      s|\{\{([^{}_ ]+)_+(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
-      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{\1_${input_placeholder}\\$((3 + group_multiplier))}}|g
-      s|\{\{([^{}_ ]+)_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\1_+${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{\1_${input_placeholder}1 \1_${input_placeholder}2 ...}}|g
+    for plural_term in "${plural_inputs[@]}"; do
+      in_file_content="$(sed -E "/^\`/ s|\{\{([^{}_ ]+)_+$plural_term\}\}|{$output_type* \1 $output_description}|g" <<<"$in_file_content")"
+    done
 
-      # Conversion
-      ## General cases
-      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
-      s|\{\{${input_placeholder}([[:digit:]])\}\}|{${output_type} ${output_description} \1}|g
-      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
+    plural_inputs=(
+      "([^{}_ ]+)_+${input_placeholder}_*${suffix}[[:digit:]]* +\1_+${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+      "([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+      "([^{}_ ]+)_+${input_placeholder}_*${suffix}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\."
+      "([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\."
+    )
 
-      ## Cases with prefix like positive_integers
-      s|\{\{([^{}_ ]+)_+${input_placeholder}\}\}|{${output_type} \1 ${output_description}}|g
-      s|\{\{([^{}_ ]+)_+${input_placeholder}([[:digit:]])\}\}|{${output_type} \1 ${output_description} \2}|g
-      s|\{\{([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* \1 ${output_description}}|g
-    }" <<<"$in_file_content"
-  else
-    sed -E "/^\`/ {
-      # Expansion
-      s|\{\{(${input_placeholder}s\|${input_placeholder}_*${suffix}s)[[:digit:]]*\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
-      s|\{\{${input_placeholder}(_*${suffix})?([[:digit:]]*)\}\}|{{${input_placeholder_initial}\\$((2 + group_multiplier))}}|g
-      s|\{\{${input_placeholder}(_*${suffix})?[[:digit:]]* +${input_placeholder}(_*${suffix})?[[:digit:]]* +\.\.\.\}\}|{{${input_placeholder_initial}1 ${input_placeholder_initial}2 ...}}|g
+    ((input_index > 0)) &&
+      plural_inputs+=(
+        "([^{}_ ]+)_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\1_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}[[:digit:]]* +\1_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\1_+${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}[[:digit:]]* +\1_+${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+      )
 
-      # Conversion
-      s|\{\{${input_placeholder}\}\}|{${output_type} ${output_description}}|g
-      s|\{\{${input_placeholder}([[:digit:]]+)\}\}|{${output_type} ${output_description} \1}|g
-      s|\{\{${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\.\}\}|{${output_type}* ${output_description}}|g
-    }" <<<"$in_file_content"
+    for plural_term in "${plural_inputs[@]}"; do
+      in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* \1 $output_description}|g" <<<"$in_file_content")"
+    done
   fi
+
+  echo "$in_file_content"
 }
 
 convert_code_examples_convert_integer_placeholders() {
