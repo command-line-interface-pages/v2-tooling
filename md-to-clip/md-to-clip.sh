@@ -114,7 +114,7 @@ ${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
 }
 
 version() {
-  echo "2.15.0" >&2
+  echo "2.16.0" >&2
 }
 
 author() {
@@ -466,27 +466,57 @@ convert_code_examples_convert_path_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
     # Expansion
     ## General cases
-    s|\{\{(\/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file_or_directory\6}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\file_or_directory1 \1path\\to\\file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\file_or_directory\6}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\file_or_directory1 \1path\\to\\file_or_directory2 ...}}|g
 
     ## Cases with prefix like excluded_path_or_directory
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file_or_directory\7}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_file_or_directory1 \1path\\to\\\3_file_or_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_file_or_directory\7}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_file_or_directory1 \1path\\to\\\3_file_or_directory2 ...}}|g
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file_or_directory\}\}|{\1path file or directory}|g
-    s|\{\{(\/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path file or directory \2}|g
-    s|\{\{(\/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* file or directory}|g
+    s|\{\{path\\to\\file_or_directory\}\}|{path file or directory}|g
+    s|\{\{\\path\\to\\file_or_directory\}\}|{/path file or directory}|g
+    s|\{\{path\\to\\file_or_directory([[:digit:]]+)\}\}|{path file or directory \1}|g
+    s|\{\{\\path\\to\\file_or_directory([[:digit:]]+)\}\}|{/path file or directory \1}|g
+    s|\{\{path\\to\\file_or_directory[[:digit:]]* +path\\to\\file_or_directory[[:digit:]]* +\.\.\.\}\}|{path* file or directory}|g
+    s|\{\{\\path\\to\\file_or_directory[[:digit:]]* +\\path\\to\\file_or_directory[[:digit:]]* +\.\.\.\}\}|{/path* file or directory}|g
 
     ## Cases with prefix like excluded_path_or_directory
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory([[:digit:]]+)\}\}|{\1path \2 file or directory \3}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file_or_directory[[:digit:]]* +\1path/to/\2_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* \2 file or directory}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory\}\}|{path \1 file or directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory\}\}|{/path \1 file or directory}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{path \1 file or directory \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{/path \1 file or directory \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file_or_directory[[:digit:]]* +path\\to\\\1_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{path* \1 file or directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file_or_directory[[:digit:]]* +\\path\\to\\\1_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{/path* \1 file or directory}|g
+
+    # --- Linux & Mac OS ---
+    # Expansion
+    ## General cases
+    s|\{\{(/?)(path/to/)?(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file_or_directory\6}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file_or_directory1 \1path/to/file_or_directory2 ...}}|g
+
+    ## Cases with prefix like excluded_path_or_directory
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+(files_+or_+dir(ectorie)?s\|file_*names_+or_+dir(ectorie)?s\|files_+or_+dir(ectory)?_*names\|file_*names_+or_+dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file_or_directory\7}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ /]+)_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?_+or_+dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file_or_directory1 \1path/to/\3_file_or_directory2 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{(/?)path/to/file_or_directory\}\}|{\1path file or directory}|g
+    s|\{\{(/?)path/to/file_or_directory([[:digit:]]+)\}\}|{\1path file or directory \2}|g
+    s|\{\{(/?)path/to/file_or_directory[[:digit:]]* +\1path/to/file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* file or directory}|g
+
+    ## Cases with prefix like excluded_path_or_directory
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory\}\}|{\1path \2 file or directory}|g
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory([[:digit:]]+)\}\}|{\1path \2 file or directory \3}|g
+    s|\{\{(/?)path/to/([^{}_ /]+)_+file_or_directory[[:digit:]]* +\1path/to/\2_+file_or_directory[[:digit:]]* +\.\.\.\}\}|{\1path* \2 file or directory}|g
   }' <<<"$in_file_content"
 }
 
@@ -500,67 +530,149 @@ convert_code_examples_convert_file_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
     # Expansion
     ## General cases
-    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file\4}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path\\to\\file1 \1path\\to\\file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\file\4}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]* +\1(path\\to\\)?file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\file1 \1path\\to\\file2 ...}}|g
 
     ## Cases with prefix like excluded_file
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_file1 \1path\\to\\\3_file2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_file\5}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_file1 \1path\\to\\\3_file2 ...}}|g
 
     ## Cases with optional extensions
-    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file\4[\5]}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\file1[\4] \1path\\to\\file2[\4] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\file\4[\5]}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path\\to\\)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path\\to\\file1[\4] \1path\\to\\file2[\4] ...}}|g
 
     ## Cases with mandatory extension
-    s|\{\{(\/?)(path/to/)?(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/file\4\5}}|g
-    s|\{\{(\/?)(path/to/)?file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path\\to\\file1\4 \1path\\to\\file2\4 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path\\to\\file\4\5}}|g
+    s|\{\{(\\?)(path\\to\\)?file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path\\to\\)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path\\to\\file1\4 \1path\\to\\file2\4 ...}}|g
 
     ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file\5[\6]}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\\3_file1[\5] \1path\\to\\\3_file2[\5] ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path\\to\\\3_file\5[\6]}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path\\to\\\3_file1[\5] \1path\\to\\\3_file2[\5] ...}}|g
 
     ## Cases with mandatory extension and prefix like excluded_file.txt
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file\5\6}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path\\to\\\3_file1\5 \1path\\to\\\3_file2\5 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path\\to\\\3_file\5\6}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path\\to\\)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path\\to\\\3_file1\5 \1path\\to\\\3_file2\5 ...}}|g
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/file\}\}|{\1file file}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\}\}|{\1file file \2}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* file}|g
+    s|\{\{path\\to\\file\}\}|{file file}|g
+    s|\{\{\\path\\to\\file\}\}|{/file file}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\}\}|{file file \1}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\}\}|{/file file \1}|g
+    s|\{\{path\\to\\file[[:digit:]]* +path\\to\\file[[:digit:]]* +\.\.\.\}\}|{file* file}|g
+    s|\{\{\\path\\to\\file[[:digit:]]* +\\path\\to\\file[[:digit:]]* +\.\.\.\}\}|{/file* file}|g
 
     ## Cases with prefix like excluded_file
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\}\}|{\1file \2 file \3}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]* +\1path/to/\2_+file[[:digit:]]* +\.\.\.\}\}|{\1file* \2 file}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file\}\}|{file \1 file}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\}\}|{/file \1 file}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\}\}|{file \1 file \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\}\}|{/file \1 file \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]* +path\\to\\\1_+file[[:digit:]]* +\.\.\.\}\}|{file* \1 file}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]* +\\path\\to\\\1_+file[[:digit:]]* +\.\.\.\}\}|{/file* \1 file}|g
 
     ## Cases with optional extensions
-    s|\{\{(\/?)path/to/file\[(\.([^{}]\| ])+)\]\}\}|{\1file file with optional \2 extensions}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
+    s|\{\{path\\to\\file\[(\.([^{}]\| ])+)\]\}\}|{file file with optional \1 extensions}|g
+    s|\{\{\\path\\to\\file\[(\.([^{}]\| ])+)\]\}\}|{/file file with optional \1 extensions}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{file file \1 with optional \2 extensions}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{/file file \1 with optional \2 extensions}|g
+    s|\{\{path\\to\\file[[:digit:]]*\[(\.([^{}]\| ])+)\] +path\\to\\file[[:digit:]]*\[\1\] +\.\.\.\}\}|{file* file with optional \1 extensions}|g
+    s|\{\{\\path\\to\\file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\\path\\to\\file[[:digit:]]*\[\1\] +\.\.\.\}\}|{/file* file with optional \1 extensions}|g
 
     ## Cases with mandatory extension
-    s|\{\{(\/?)path/to/file\((\.([^{}]\| ])+)\)\}\}|{\1file file with mandatory \2 extensions}|g
-    s|\{\{(\/?)path/to/file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file file \2 with mandatory \3 extensions}|g
-    s|\{\{(\/?)path/to/file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{\1file* file with mandatory \2 extensions}|g
+    s|\{\{path\\to\\file\((\.([^{}]\| ])+)\)\}\}|{file file with mandatory \1 extensions}|g
+    s|\{\{\\path\\to\\file\((\.([^{}]\| ])+)\)\}\}|{/file file with mandatory \1 extensions}|g
+    s|\{\{path\\to\\file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{file file \1 with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{/file file \1 with mandatory \2 extensions}|g
+    s|\{\{path\\to\\file[[:digit:]]*\((\.([^{}]\| ])+)\) +path\\to\\+file[[:digit:]]*\(\1\) +\.\.\.\}\}|{file* file with mandatory \1 extensions}|g
+    s|\{\{\\path\\to\\file[[:digit:]]*\((\.([^{}]\| ])+)\) +\\path\\to\\+file[[:digit:]]*\(\1\) +\.\.\.\}\}|{/file* file with mandatory \1 extensions}|g
 
     ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file with optional \3 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file \3 with optional \4 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/\2_+file[[:digit:]]*\[\3\] +\.\.\.\}\}|{\1file* \2 file with optional \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{file \1 file with optional \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{/file \1 file with optional \2 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{file \1 file \2 with optional \3 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{/file \1 file \2 with optional \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +path\\to\\\1_+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{file* \1 file with optional \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\\path\\to\\\1_+file[[:digit:]]*\[\2\] +\.\.\.\}\}|{/file* \1 file with optional \2 extensions}|g
 
     ## Cases with mandatory extension and prefix like excluded_file.txt
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file with mandatory \3 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file \3 with mandatory \4 extensions}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/\2_+file[[:digit:]]*\(\3\) +\.\.\.\}\}|{\1file* \2 file with mandatory \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file\((\.([^{}]\| ])+)\)\}\}|{file \1 file with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file\((\.([^{}]\| ])+)\)\}\}|{/file \1 file with mandatory \2 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{file \1 file \2 with mandatory \3 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{/file \1 file \2 with mandatory \3 extensions}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +path\\to\\\1_+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{file* \1 file with mandatory \2 extensions}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +\\path\\to\\\1_+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{/file* \1 file with mandatory \2 extensions}|g
+
+    # --- Linux & Mac OS ---
+    # Expansion
+    ## General cases
+    s|\{\{(/?)(path/to/)?(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/file\4}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?[[:digit:]]* +\1(path/to/)?file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/file1 \1path/to/file2 ...}}|g
+
+    ## Cases with prefix like excluded_file
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
+
+    ## Cases with optional extensions
+    s|\{\{(/?)(path/to/)?(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/file\4[\5]}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?file(_*name)?[[:digit:]]*\[\4\] +\.\.\.\}\}|{{\1path/to/file1[\4] \1path/to/file2[\4] ...}}|g
+
+    ## Cases with mandatory extension
+    s|\{\{(/?)(path/to/)?(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/file\4\5}}|g
+    s|\{\{(/?)(path/to/)?file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?file(_*name)?[[:digit:]]*\4 +\.\.\.\}\}|{{\1path/to/file1\4 \1path/to/file2\4 ...}}|g
+
+    ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\[(\.([^{}]\| ])+)\]\}\}|{{\1path/to/\3_file\5[\6]}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\[\5\] +\.\.\.\}\}|{{\1path/to/\3_file1[\5] \1path/to/\3_file2[\5] ...}}|g
+
+    ## Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)(\.([^{}]\| ])+)\}\}|{{\1path/to/\3_file\5\6}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]*(\.([^{}]\| ])+) +\1(path/to/)?\3_+file(_*name)?[[:digit:]]*\5 +\.\.\.\}\}|{{\1path/to/\3_file1\5 \1path/to/\3_file2\5 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{(/?)path/to/file\}\}|{\1file file}|g
+    s|\{\{(/?)path/to/file([[:digit:]]+)\}\}|{\1file file \2}|g
+    s|\{\{(/?)path/to/file[[:digit:]]* +\1path/to/file[[:digit:]]* +\.\.\.\}\}|{\1file* file}|g
+
+    ## Cases with prefix like excluded_file
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file\}\}|{\1file \2 file}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\}\}|{\1file \2 file \3}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file[[:digit:]]* +\1path/to/\2_+file[[:digit:]]* +\.\.\.\}\}|{\1file* \2 file}|g
+
+    ## Cases with optional extensions
+    s|\{\{(/?)path/to/file\[(\.([^{}]\| ])+)\]\}\}|{\1file file with optional \2 extensions}|g
+    s|\{\{(/?)path/to/file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file file \2 with optional \3 extensions}|g
+    s|\{\{(/?)path/to/file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/file[[:digit:]]*\[\2\] +\.\.\.\}\}|{\1file* file with optional \2 extensions}|g
+
+    ## Cases with mandatory extension
+    s|\{\{(/?)path/to/file\((\.([^{}]\| ])+)\)\}\}|{\1file file with mandatory \2 extensions}|g
+    s|\{\{(/?)path/to/file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file file \2 with mandatory \3 extensions}|g
+    s|\{\{(/?)path/to/file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/+file[[:digit:]]*\(\2\) +\.\.\.\}\}|{\1file* file with mandatory \2 extensions}|g
+
+    ## Cases with optional extensions and prefix like excluded_file[.txt,.jpeg]
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file with optional \3 extensions}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\[(\.([^{}]\| ])+)\]\}\}|{\1file \2 file \3 with optional \4 extensions}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\[(\.([^{}]\| ])+)\] +\1path/to/\2_+file[[:digit:]]*\[\3\] +\.\.\.\}\}|{\1file* \2 file with optional \3 extensions}|g
+
+    ## Cases with mandatory extension and prefix like excluded_file.txt
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file with mandatory \3 extensions}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file([[:digit:]]+)\((\.([^{}]\| ])+)\)\}\}|{\1file \2 file \3 with mandatory \4 extensions}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+file[[:digit:]]*\((\.([^{}]\| ])+)\) +\1path/to/\2_+file[[:digit:]]*\(\3\) +\.\.\.\}\}|{\1file* \2 file with mandatory \3 extensions}|g
   }' <<<"$in_file_content"
 }
 
@@ -574,31 +686,57 @@ convert_code_examples_convert_directory_placeholders() {
   }
 
   sed -E '/^`/ {
+    # --- Windows ---
     # Expansion
     ## General cases
-    s|\{\{(\/?)(path/to/)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
-    s|\{\{(\/?)(path/to/)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/directory\5}}|g
-    s|\{\{(\/?)(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\directory1 \1path\\to\\directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\directory\5}}|g
+    s|\{\{(\\?)(path\\to\\)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\directory1 \1path\\to\\directory2 ...}}|g
 
-    ## Cases with prefix like excluded_file
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(files\|file_*names)[[:digit:]]*\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_file\5}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+file(_*name)?[[:digit:]]* +\1(path/to/)?\3_+file(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_file1 \1path/to/\3_file2 ...}}|g
-
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_directory\6}}|g
-    s|\{\{(\/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
+    ## Cases with prefix like excluded_directory
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path\\to\\\3_directory1 \1path\\to\\\3_directory2 ...}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path\\to\\\3_directory\6}}|g
+    s|\{\{(\\?)(path\\to\\)?([^{}_ /]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path\\to\\)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path\\to\\\3_directory1 \1path\\to\\\3_directory2 ...}}|g
 
     # Conversion
     ## General cases
-    s|\{\{(\/?)path/to/directory\}\}|{\1directory directory}|g
-    s|\{\{(\/?)path/to/directory([[:digit:]]+)\}\}|{\1directory directory \2}|g
-    s|\{\{(\/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* directory}|g
+    s|\{\{path\\to\\directory\}\}|{directory directory}|g
+    s|\{\{\\path\\to\\directory\}\}|{/directory directory}|g
+    s|\{\{path\\to\\directory([[:digit:]]+)\}\}|{directory directory \1}|g
+    s|\{\{\\path\\to\\directory([[:digit:]]+)\}\}|{/directory directory \1}|g
+    s|\{\{path\\to\\directory[[:digit:]]* +path\\to\\directory[[:digit:]]* +\.\.\.\}\}|{directory* directory}|g
+    s|\{\{\\path\\to\\directory[[:digit:]]* +\\path\\to\\directory[[:digit:]]* +\.\.\.\}\}|{/directory* directory}|g
 
-    ## Cases with prefix like excluded_file
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory([[:digit:]]+)\}\}|{\1directory \2 directory \3}|g
-    s|\{\{(\/?)path/to/([^{}_ ]+)_+directory[[:digit:]]* +\1path/to/\2_+directory[[:digit:]]* +\.\.\.\}\}|{\1directory* \2 directory}|g
+    ## Cases with prefix like excluded_directory
+    s|\{\{path\\to\\([^{}_ /]+)_+directory\}\}|{directory \1 directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory\}\}|{/directory \1 directory}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+directory([[:digit:]]+)\}\}|{directory \1 directory \2}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory([[:digit:]]+)\}\}|{/directory \1 directory \2}|g
+    s|\{\{path\\to\\([^{}_ /]+)_+directory[[:digit:]]* +path\\to\\\1_+directory[[:digit:]]* +\.\.\.\}\}|{directory* \1 directory}|g
+    s|\{\{\\path\\to\\([^{}_ /]+)_+directory[[:digit:]]* +\\path\\to\\\1_+directory[[:digit:]]* +\.\.\.\}\}|{/directory* \1 directory}|g
+
+    # --- Linux & Mac OS ---
+    # Expansion
+    ## General cases
+    s|\{\{(/?)(path/to/)?(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/directory\5}}|g
+    s|\{\{(/?)(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/directory1 \1path/to/directory2 ...}}|g
+
+    ## Cases with prefix like excluded_directory
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+(dir(ectorie)?s\|dir(ectory)?_*names)[[:digit:]]*\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?([[:digit:]]*)\}\}|{{\1path/to/\3_directory\6}}|g
+    s|\{\{(/?)(path/to/)?([^{}_ ]+)_+dir(ectory)?(_*name)?[[:digit:]]* +\1(path/to/)?\3_dir(ectory)?(_*name)?[[:digit:]]* +\.\.\.\}\}|{{\1path/to/\3_directory1 \1path/to/\3_directory2 ...}}|g
+
+    # Conversion
+    ## General cases
+    s|\{\{(/?)path/to/directory\}\}|{\1directory directory}|g
+    s|\{\{(/?)path/to/directory([[:digit:]]+)\}\}|{\1directory directory \2}|g
+    s|\{\{(/?)path/to/directory[[:digit:]]* +\1path/to/directory[[:digit:]]* +\.\.\.\}\}|{\1directory* directory}|g
+
+    ## Cases with prefix like excluded_directory
+    s|\{\{(/?)path/to/([^{}_ ]+)_+directory\}\}|{\1directory \2 directory}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+directory([[:digit:]]+)\}\}|{\1directory \2 directory \3}|g
+    s|\{\{(/?)path/to/([^{}_ ]+)_+directory[[:digit:]]* +\1path/to/\2_+directory[[:digit:]]* +\.\.\.\}\}|{\1directory* \2 directory}|g
   }' <<<"$in_file_content"
 }
 
