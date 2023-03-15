@@ -22,4 +22,6 @@ jobs:
         with:
           bats-version: 1.8.2
       - run: |
-          env -C md-to-clip/ make tests
+          mkdir -p ~/.local/bin/
+          sudo apt install pandoc
+          env -C md-to-clip/ make install tests

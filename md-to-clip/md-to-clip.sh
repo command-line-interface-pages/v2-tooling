@@ -87,34 +87,19 @@ throw_error() {
   exit "$FAIL"
 }
 
-# Help colors:
-declare HELP_HEADER_COLOR="\e[$(color_to_code blue)m"
-declare HELP_TEXT_COLOR="\e[$(color_to_code black)m"
-declare HELP_OPTION_COLOR="\e[$(color_to_code green)m"
-declare HELP_PLACEHOLDER_COLOR="\e[$(color_to_code cyan)m"
-declare HELP_PUNCTUATION_COLOR="\e[$(color_to_code gray)m"
-
 help() {
-  echo -e "${HELP_TEXT_COLOR}Converter from TlDr format to Command Line Interface Pages format.
-
-${HELP_HEADER_COLOR}Usage:$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--help$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-h$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--version$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-v$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--author$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-a$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--email$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-e$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR($HELP_OPTION_COLOR--no-file-save$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-nfs$HELP_PUNCTUATION_COLOR)$HELP_TEXT_COLOR
-  $PROGRAM_NAME $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--output-directory$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-od$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<directory>$HELP_PUNCTUATION_COLOR] $HELP_PUNCTUATION_COLOR[($HELP_OPTION_COLOR--special-placeholder-config$HELP_PUNCTUATION_COLOR|$HELP_OPTION_COLOR-spc$HELP_PUNCTUATION_COLOR) $HELP_PLACEHOLDER_COLOR<file.yaml>$HELP_PUNCTUATION_COLOR] $HELP_PLACEHOLDER_COLOR<file1.md file2.md ...>
-
-${HELP_HEADER_COLOR}Converters:$HELP_TEXT_COLOR
-  - Command summary and tag simplification
-  - Placeholder conversion and optimization
-
-${HELP_HEADER_COLOR}Notes:$HELP_TEXT_COLOR
-  Escaping and placeholders with alternatives are not recognized and treated literally."
+  export LESS_TERMCAP_mb=$'\e[1;32m'
+  export LESS_TERMCAP_md=$'\e[1;32m'
+  export LESS_TERMCAP_me=$'\e[0m'
+  export LESS_TERMCAP_se=$'\e[0m'
+  export LESS_TERMCAP_so=$'\e[01;33m'
+  export LESS_TERMCAP_ue=$'\e[0m'
+  export LESS_TERMCAP_us=$'\e[1;4;31m'
+  man "${PROGRAM_NAME%%.sh}"
 }
 
 version() {
-  echo "2.16.0" >&2
+  echo "2.17.0" >&2
 }
 
 author() {
