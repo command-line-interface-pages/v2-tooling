@@ -312,11 +312,22 @@ convert_code_examples_convert_special_placeholders() {
       )
   }
 
+  for sigular_term in "${singular_inputs[@]}"; do
+    in_file_content="$(sed -E "/^\`/ {
+      s|\{\{$sigular_term\}\}|{$output_type $output_description}|g
+      s|\{\{$sigular_term([[:digit:]]+)\}\}|{$output_type \1 $output_description}|g
+    }" <<<"$in_file_content")"
+  done
+
+  for plural_term in "${plural_inputs[@]}"; do
+    in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* $output_description}|g" <<<"$in_file_content")"
+  done
+
   if [[ "$input_allow_prefix" == true ]]; then
     for sigular_term in "${singular_inputs[@]}"; do
       in_file_content="$(sed -E "/^\`/ {
-        s|\{\{([^{}_ ]+)_+$sigular_term\}\}|{$output_type $output_description}|g
-        s|\{\{([^{}_ ]+)_+$sigular_term([[:digit:]])\}\}|{$output_type \2 \1 $output_description}|g
+        s|\{\{([^{}_ ]+)_+$sigular_term\}\}|{$output_type \1 $output_description}|g
+        s|\{\{([^{}_ ]+)_+$sigular_term([[:digit:]]+)\}\}|{$output_type \2 \1 $output_description}|g
       }" <<<"$in_file_content")"
     done
 
@@ -341,17 +352,6 @@ convert_code_examples_convert_special_placeholders() {
 
     for plural_term in "${plural_inputs[@]}"; do
       in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* \1 $output_description}|g" <<<"$in_file_content")"
-    done
-  else
-    for sigular_term in "${singular_inputs[@]}"; do
-      in_file_content="$(sed -E "/^\`/ {
-        s|\{\{$sigular_term\}\}|{$output_type $output_description}|g
-        s|\{\{$sigular_term([[:digit:]])\}\}|{$output_type \1 $output_description}|g
-      }" <<<"$in_file_content")"
-    done
-
-    for plural_term in "${plural_inputs[@]}"; do
-      in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* $output_description}|g" <<<"$in_file_content")"
     done
   fi
 
