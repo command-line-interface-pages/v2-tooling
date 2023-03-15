@@ -267,6 +267,8 @@ convert_code_examples_convert_special_placeholders() {
   [[ -z "$output_type" ]] && return "$FAIL"
   [[ -z "$output_description" ]] && output_description="$input_placeholder"
 
+  declare truncated_input_placeholder="${input_placeholder:0:input_index}"
+
   declare singular_inputs=( # without [[:digit:]] as it is gonna to be captured
     "${input_placeholder}"
     "${input_placeholder}_*${suffix}"
@@ -279,13 +281,36 @@ convert_code_examples_convert_special_placeholders() {
     "${input_placeholder}_*${suffix}s[[:digit:]]*"
   )
 
-  [[ "$input_allow_prefix" == false ]] &&
-    declare plural_inputs+=(
+  ((input_index > 0)) && {
+    singular_inputs+=(
+      "${truncated_input_placeholder}"
+      "${truncated_input_placeholder}_*${suffix}"
+    )
+
+    plural_inputs+=(
+      "${truncated_input_placeholder}s"
+      "${truncated_input_placeholder}s[[:digit:]]*"
+      "${truncated_input_placeholder}_*${suffix}s"
+      "${truncated_input_placeholder}_*${suffix}s[[:digit:]]*"
+    )
+  }
+
+  [[ "$input_allow_prefix" == false ]] && {
+    plural_inputs+=(
       "${input_placeholder}_*${suffix}[[:digit:]]* +${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
       "${input_placeholder}[[:digit:]]* +${input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
       "${input_placeholder}_*${suffix}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\."
       "${input_placeholder}[[:digit:]]* +${input_placeholder}[[:digit:]]* +\.\.\."
     )
+
+    ((input_index > 0)) &&
+      plural_inputs+=(
+        "${truncated_input_placeholder}_*${suffix}[[:digit:]]* +${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}[[:digit:]]* +${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}_*${suffix}[[:digit:]]* +${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+        "${truncated_input_placeholder}[[:digit:]]* +${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+      )
+  }
 
   if [[ "$input_allow_prefix" == true ]]; then
     for sigular_term in "${singular_inputs[@]}"; do
@@ -305,6 +330,14 @@ convert_code_examples_convert_special_placeholders() {
       "([^{}_ ]+)_+${input_placeholder}_*${suffix}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\."
       "([^{}_ ]+)_+${input_placeholder}[[:digit:]]* +\1_+${input_placeholder}[[:digit:]]* +\.\.\."
     )
+
+    ((input_index > 0)) &&
+      plural_inputs+=(
+        "([^{}_ ]+)_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\1_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}[[:digit:]]* +\1_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}_*${suffix}[[:digit:]]* +\1_+${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+        "([^{}_ ]+)_+${truncated_input_placeholder}[[:digit:]]* +\1_+${truncated_input_placeholder}[[:digit:]]* +\.\.\."
+      )
 
     for plural_term in "${plural_inputs[@]}"; do
       in_file_content="$(sed -E "/^\`/ s|\{\{$plural_term\}\}|{$output_type* \1 $output_description}|g" <<<"$in_file_content")"
