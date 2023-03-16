@@ -56,6 +56,37 @@ Output Command Line Interface Page:
 
 ## Completions :pencil:
 
+### [Bash][bash]
+
+```bash
+__md_to_clip__complete() {
+    declare current="$2"
+    declare previous="$3"
+
+    case "$previous" in
+        --output-directory|-od)
+            mapfile -t COMPREPLY < <(compgen -o dirnames -- "$current")
+        ;;
+        --special-placeholder-config|-spc)
+            mapfile -t COMPREPLY < <(compgen -o filenames -- "$current")
+        ;;
+        *)
+            mapfile -t COMPREPLY < <(compgen -W "--help -h
+--version -v
+--author -a
+--email -e
+--no-file-save -nfs
+--output-directory -od
+--special-placeholder-config -spc" -- "$current")
+        ;;
+    esac
+}
+
+complete -F __md_to_clip__complete md-to-clip
+```
+
+[bash]: https://www.gnu.org/software/bash/manual/bash.html
+
 ### [Fish][fish]
 
 ```fish
