@@ -2,6 +2,14 @@
 
 Converter from TlDr format to Command Line Interface Pages format.
 
+## Installation
+
+```bash
+temp="$(mktemp)"
+wget -O "$temp" https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile
+make -f "$temp" remote-install
+```
+
 ## Example
 
 Input TlDr page:
