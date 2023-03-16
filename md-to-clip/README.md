@@ -2,7 +2,15 @@
 
 Converter from TlDr format to Command Line Interface Pages format.
 
-## Example
+## Installation :smile:
+
+```bash
+temp="$(mktemp)"
+wget -O "$temp" https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile
+make -f "$temp" remote-install
+```
+
+## Example :book:
 
 Input TlDr page:
 
@@ -46,7 +54,7 @@ Output Command Line Interface Page:
 `mkdir -m {string value: rwxrw-r--} {directory* value}`
 ```
 
-## Completions
+## Completions :pencil:
 
 ### [Fish][fish]
 
@@ -62,7 +70,7 @@ complete -c md-to-clip -o spc -l special-placeholder-config -d 'Config with spec
 
 [fish]: https://fishshell.com/
 
-## Sample scripts
+## Sample scripts :books:
 
 The following script can be used to refresh all pages at once:
 
