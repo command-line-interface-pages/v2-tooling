@@ -17,7 +17,7 @@ define __install
 	@cp -nv "$(1)/$(script).sh" "$(PREFIX)/$(script)"
 	@cp -nv "$(1)/$(input_config).yaml" "$(HOME)/$(output_config).yaml"
 	@chmod +x "$(PREFIX)/$(script)"
-	@echo "\e[32m- Installing man page from $(1) to $(PREFIX)...\e[0m"
+	@echo "\e[32m- Installing man page from $(1) to $(man_directory)...\e[0m"
 	@pandoc "$(1)/$(man_name).md" -s -t man -o "$(1)/$(man_name)"
 	@sudo mkdir -pv "$(man_directory)"
 	@sudo cp -v "$(1)/$(man_name)" "$(man_directory)"
@@ -33,7 +33,7 @@ install:
 uninstall:
 	@echo "\e[31m- Uninstalling script from $(PREFIX)...\e[0m"
 	@rm -vf "$(PREFIX)/$(script)"
-	@echo "\e[31m- Uninstalling man page from $(PREFIX)...\e[0m"
+	@echo "\e[31m- Uninstalling man page from $(man_directory)...\e[0m"
 	@rm -vf "$(HOME)/$(output_config)"
 	@sudo rm -vf "$(man_directory)/$(man_name).gz"
 
