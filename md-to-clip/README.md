@@ -2,6 +2,12 @@
 
 Converter from TlDr format to Command Line Interface Pages format.
 
+## Prerequisites
+
+- [GNU Make][make]
+
+[make]: https://www.gnu.org/software/make/manual/
+
 ## Installation :smile:
 
 Download installer as a temporary file and execute commands to download and
