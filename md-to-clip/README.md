@@ -2,12 +2,38 @@
 
 Converter from TlDr format to Command Line Interface Pages format.
 
+## Prerequisites
+
+- [GNU Make][make]
+
+[make]: https://www.gnu.org/software/make/manual/
+
 ## Installation :smile:
 
+Download installer as a temporary file and execute commands to download and
+install script with its man page:
+
 ```bash
-temp="$(mktemp)"
-wget -O "$temp" https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile
-make -f "$temp" remote-install
+make -f <(wget -O - https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile 2> /dev/null) remote-install
+```
+
+Download installer as a `installer` file and execute commands to download and
+install script with its man page:
+
+```bash
+wget -O installer https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile
+make -f installer remote-install
+```
+
+> :information_source: Note: prefer the second way to install if you want to
+> be able to easily uninstall script with its man page.
+
+## Uninstallation :disappointed:
+
+Execute commands to uninstall script with its man page:
+
+```bash
+make -f installer uninstall
 ```
 
 ## Example :book:
