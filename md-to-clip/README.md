@@ -5,9 +5,7 @@ Converter from TlDr format to Command Line Interface Pages format.
 ## Installation :smile:
 
 ```bash
-temp="$(mktemp)"
-wget -O "$temp" https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile
-make -f "$temp" remote-install
+make -f <(wget -O - https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/md-to-clip/makefile 2> /dev/null) remote-install
 ```
 
 ## Example :book:
