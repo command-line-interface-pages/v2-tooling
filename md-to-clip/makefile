@@ -1,3 +1,5 @@
+SHELL=/bin/sh
+
 # PREFIX: sets the installation prefix
 PREFIX?=/home/$(USER)/.local/bin
 
