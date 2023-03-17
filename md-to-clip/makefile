@@ -18,9 +18,9 @@ define __install
 	@cp -nv "$(1)/$(input_config).yaml" "$(HOME)/$(output_config).yaml"
 	@chmod +x "$(PREFIX)/$(script)"
 	@echo "\e[32m- Installing man page from $(1) to $(PREFIX)...\e[0m"
-	@pandoc "$(1)/$(man_name).md" -s -t man -o "$(man_name)"
+	@pandoc "$(1)/$(man_name).md" -s -t man -o "$(1)/$(man_name)"
 	@sudo mkdir -pv "$(man_directory)"
-	@sudo cp -v "$(man_name)" "$(man_directory)"
+	@sudo cp -v "$(1)/$(man_name)" "$(man_directory)"
 	@sudo gzip "$(man_directory)/$(man_name)"
 	@rm "$(1)/$(man_name)"
 endef
