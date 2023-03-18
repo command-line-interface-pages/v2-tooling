@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+shopt -s extglob
+
 declare -i SUCCESS=0
 declare -i PARSER_INVALID_CONTENT_CODE=1
 declare -i PARSER_INVALID_SUMMARY_CODE=2
@@ -8,10 +10,7 @@ declare -i PARSER_INVALID_EXAMPLES_CODE=3
 declare -i PARSER_INVALID_TOKENS_CODE=4
 declare -i PARSER_INVALID_ARGUMENT_CODE=5
 declare -i PARSER_NOT_ALLOWED_CODE=6
-
-# For cases where developer forgets to check something and messes up with
-# function argument values
-declare -i PARSER_INTERNAL_FAILURE_CODE=7
+declare -i PARSER_TYPE_CODE=7
 
 
 
@@ -153,7 +152,7 @@ __parser_check__summary() {
         $! bx
         /^(> [^\n:]+\n){1,2}(> [^\n:]+:[^\n]+\n)+$/! Q1' <<<"$in_summary"$'\n' ||
         return "$PARSER_INVALID_SUMMARY_CODE"
-    
+
     return "$SUCCESS"
 }
 
@@ -196,25 +195,93 @@ parser_summary__description() {
     return "$SUCCESS"
 }
 
-# __parser_check_summary__tag <tag>
-# Check whether a tag is valid.
+# __parser_type__simple_value <value>
+# Output a value simple type.
 #
 # Output:
-#   <empty-string>
+#   <type>
 #
 # Return:
-#   - 0 if <tag> is valid
-#   - $PARSER_INVALID_SUMMARY_CODE otherwise
+#   - 0 always
 #
 # Notes:
-#   - <tag> should not contain trailing \n
-__parser_check_summary__tag() {
-    declare in_tag="$1"
+#   - <value> should not contain trailing \n
+#   - possible simple types: boolean, integer, string
+__parser_type__simple_value() {
+    declare in_value="$1"
 
-    [[ "$in_tag" =~ ^(More information|Internal|Deprecated|See also|Aliases\
-|Syntax compatible|Help|Version|Structure compatible)$ ]] ||
-        return "$PARSER_INVALID_SUMMARY_CODE"
-    
+    in_value="$(sed -E 's/^ +//
+        s/ +$//' <<<"$in_value")"
+
+    case "$in_value" in
+        true|false)
+            echo -n boolean
+        ;;
+        ?(+|-)+([[:digit:]]))
+            echo -n integer
+        ;;
+        *)
+            echo -n string
+        ;;
+    esac
+}
+
+# __parser_type__compound_value <value>
+# Output a value compound type.
+#
+# Output:
+#   <type>
+#
+# Return:
+#   - 0 if <value> contains items of one type
+#   - $PARSER_TYPE_CODE otherwise
+#
+# Notes:
+#   - <value> should not contain trailing \n
+#   - possible compound types: boolean-array, integer-array, string-array
+__parser_type__compound_value() {
+    declare in_value="$1"
+
+    mapfile -t items < <(sed -E 's/,/\n/g' <<<"$in_value")
+
+    # shellcheck disable=2155
+    declare first_item_type="$(__parser_type__simple_value "${items[0]}")"
+    declare -i index=1
+
+    # shellcheck disable=2155
+    while ((index < ${#items[@]})); do
+        declare item_type="$(__parser_type__simple_value "${items[index]}")"
+        [[ "$first_item_type" != "$item_type" ]] && return "$PARSER_TYPE_CODE"
+        index+=1
+    done
+
+    echo -n "${first_item_type}-array"
+    return "$SUCCESS"
+}
+
+# __parser_type__value <value>
+# Output a value type.
+#
+# Output:
+#   <type>
+#
+# Return:
+#   - 0 if <value> contains items of one type
+#   - $PARSER_TYPE_CODE otherwise
+#
+# Notes:
+#   - <value> should not contain trailing \n
+#   - possible simple types: boolean, integer, string
+__parser_type__value() {
+    declare in_value="$1"
+
+    if [[ "$in_value" =~ , ]]; then
+        __parser_type__compound_value "$in_value" ||
+            return "$PARSER_TYPE_CODE"
+    else
+        __parser_type__simple_value "$in_value"
+    fi
+
     return "$SUCCESS"
 }
 
@@ -234,15 +301,28 @@ __parser_check_summary__tag_value() {
     declare in_tag="$1"
     declare in_tag_value="$2"
 
-    if [[ "$in_tag" =~ ^(Internal|Deprecated)$ ]]; then
-        [[ "$in_tag_value" =~ ^(true|false)$ ]] || return "$PARSER_INVALID_SUMMARY_CODE"
-    elif [[ "$in_tag" =~ ^(See also|Aliases|Syntax compatible|Structure compatible|Help|Version)$ ]]; then
-        [[ ! "$in_tag_value" =~ ,, ]] || return "$PARSER_INVALID_SUMMARY_CODE"
-    else
-        [[ ! "$in_tag" =~ ^(More information)$ ]] && return "$PARSER_INTERNAL_FAILURE_CODE"
-    fi
+    declare -A valid_tag_types=(
+        ["More information"]=string
+        [Internal]=boolean
+        [Deprecated]=boolean
+        ["See also"]=string/string-array
+        [Aliases]=string/string-array
+        ["Syntax compatible"]=string/string-array
+        [Help]=string/string-array
+        [Version]=string/string-array
+        ["Structure compatible"]=string/string-array
+    )
     
-    echo "$SUCCESS"
+    [[ -v "valid_tag_types[$in_tag]" ]] || return "$PARSER_INVALID_SUMMARY_CODE"
+    mapfile -t types < <(sed -E 's|/|\n|g' <<<"${valid_tag_types[$in_tag]}")
+    # shellcheck disable=2155
+    declare tag_value_type="$(__parser_type__value "$in_tag_value")"
+
+    for type in "${types[@]}"; do
+        [[ "$type" == "$tag_value_type" ]] && return "$SUCCESS"
+    done
+
+    return "$PARSER_INVALID_SUMMARY_CODE"
 }
 
 # __parser_check_summary__tag_values <tags>
@@ -269,7 +349,6 @@ __parser_check_summary__tag_values() {
         declare tag_value="${tags_array[index + 1]}"
         
         if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-            __parser_check_summary__tag "$tag" || return "$?"
             __parser_check_summary__tag_value "$tag" "$tag_value" || return "$?"
         fi
 
@@ -347,10 +426,6 @@ __parser_summary__tag_value() {
         s/ +$//
         s/ +/ /g' <<<"$2")"
 
-    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary__tag "$in_tag" || return "$?"
-    fi
-
     declare tags=
     tags="$(__parser_summary__tags "$in_content")"
     declare -i status=$?
@@ -394,7 +469,7 @@ __parser_summary__tag_value() {
 parser_summary__more_information_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "More information"
+    __parser_summary__tag_value "$in_content" "More information" || return "$?"
     return "$SUCCESS"
 }
 
@@ -415,7 +490,7 @@ parser_summary__more_information_value() {
 parser_summary__internal_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "Internal"
+    __parser_summary__tag_value "$in_content" "Internal" || return "$?"
     return "$SUCCESS"
 }
 
@@ -462,7 +537,7 @@ parser_summary__internal_value_or_default() {
 parser_summary__deprecated_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "Deprecated"
+    __parser_summary__tag_value "$in_content" "Deprecated" || return "$?"
     return "$SUCCESS"
 }
 
