@@ -13,6 +13,7 @@ declare -i PARSER_NOT_ALLOWED_CODE=6
 declare -i PARSER_TYPE_CODE=7
 
 
+
 # parser__version
 # Output a parser version.
 #
