@@ -208,12 +208,12 @@ parser_summary__description() {
 #   - <value> should not contain trailing \n
 #   - possible simple types: boolean, integer, string
 __parser_type__simple_value() {
-    declare in_tag_value="$1"
+    declare in_value="$1"
 
-    in_tag_value="$(sed -E 's/^ +//
-        s/ +$//' <<<"$in_tag_value")"
+    in_value="$(sed -E 's/^ +//
+        s/ +$//' <<<"$in_value")"
 
-    case "$in_tag_value" in
+    case "$in_value" in
         true|false)
             echo -n boolean
         ;;
@@ -233,15 +233,16 @@ __parser_type__simple_value() {
 #   <type>
 #
 # Return:
-#   - 0 always
+#   - 0 if <value> contains items of one type
+#   - $PARSER_TYPE_CODE otherwise
 #
 # Notes:
 #   - <value> should not contain trailing \n
 #   - possible compound types: boolean-array, integer-array, string-array
 __parser_type__compound_value() {
-    declare in_tag_value="$1"
+    declare in_value="$1"
 
-    mapfile -t items < <(sed -E 's/,/\n/g' <<<"$in_tag_value")
+    mapfile -t items < <(sed -E 's/,/\n/g' <<<"$in_value")
 
     # shellcheck disable=2155
     declare first_item_type="$(__parser_type__simple_value "${items[0]}")"
@@ -265,19 +266,20 @@ __parser_type__compound_value() {
 #   <type>
 #
 # Return:
-#   - 0 always
+#   - 0 if <value> contains items of one type
+#   - $PARSER_TYPE_CODE otherwise
 #
 # Notes:
 #   - <value> should not contain trailing \n
 #   - possible simple types: boolean, integer, string
 __parser_type__value() {
-    declare in_tag_value="$1"
+    declare in_value="$1"
 
-    if [[ "$in_tag_value" =~ , ]]; then
-        __parser_type__compound_value "$in_tag_value" ||
+    if [[ "$in_value" =~ , ]]; then
+        __parser_type__compound_value "$in_value" ||
             return "$PARSER_TYPE_CODE"
     else
-        __parser_type__simple_value "$in_tag_value"
+        __parser_type__simple_value "$in_value"
     fi
 
     return "$SUCCESS"
