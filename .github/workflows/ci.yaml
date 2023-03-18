@@ -24,4 +24,4 @@ jobs:
       - run: |
           mkdir -p ~/.local/bin/
           sudo apt install pandoc
-          env -C md-to-clip/ make install tests
+          env -C md-to-clip/ make install test
