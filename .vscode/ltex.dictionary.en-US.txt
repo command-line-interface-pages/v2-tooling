@@ -1,1 +1,2 @@
 md-to-clip
+IntelliSense
