@@ -2,9 +2,9 @@ SHELL=/bin/sh
 
 # PREFIX: sets the installation prefix
 PREFIX?=/home/$(USER)/.local/bin
-# Whether to install a man page (0: install, 1: not)
+# Whether to install a man page (0: install, <anything else>: not)
 INSTALL_MAN?=0
-# Whether to uninstall a man page (0: install, 1: not)
+# Whether to uninstall a man page (0: uninstall, <anything else>: not)
 UNINSTALL_MAN?=0
 
 script=md-to-clip
