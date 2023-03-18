@@ -60,9 +60,9 @@ test:
 .PHONY: lint
 lint:
 	@echo "\e[33m- Running shell checks...\e[0m"
-	@shellcheck $(script).sh
+	@shellcheck "$(script).sh"
 	@echo "\e[33m- Running markdown checks...\e[0m"
-	@markdownlint -c ../.markdownlint.yaml $(script).1.md
+	@markdownlint -c ../.markdownlint.yaml "$(script).1.md"
 
 .PHONY: remote-install
 remote-install:
