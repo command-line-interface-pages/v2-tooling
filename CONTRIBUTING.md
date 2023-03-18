@@ -2,16 +2,18 @@
 
 ## Prerequisites
 
-The following Visual Studio Code extensions are required for IntelliSense in theme
-files:
+### Visual Studio Code
 
-- [Bash IDE](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
-- [Bash Debug](https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug)
-- [Bats](https://marketplace.visualstudio.com/items?itemName=jetmartin.bats)
-- [shell-format](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format)
-- [ShellCheck](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck)
-- [make-lsp-vscode](https://marketplace.visualstudio.com/items?itemName=alexclewontin.make-lsp-vscode)
-- [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+- Bash:
+  - [Bash IDE (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
+  - [Bash Debug (Debugger)](https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug)
+  - [Bats (Tester)](https://marketplace.visualstudio.com/items?itemName=jetmartin.bats)
+  - [shell-format (Formatter)](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format)
+  - [ShellCheck (Linter)](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck)
+- Makefile:
+  - [make-lsp-vscode (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=alexclewontin.make-lsp-vscode)
+- YAML:
+  - [YAML (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 
 ## How to get started?
 
