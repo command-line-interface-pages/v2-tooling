@@ -424,10 +424,6 @@ __parser_summary__tag_value() {
         s/ +$//
         s/ +/ /g' <<<"$2")"
 
-    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary__tag "$in_tag" || return "$?"
-    fi
-
     declare tags=
     tags="$(__parser_summary__tags "$in_content")"
     declare -i status=$?
@@ -471,7 +467,7 @@ __parser_summary__tag_value() {
 parser_summary__more_information_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "More information"
+    __parser_summary__tag_value "$in_content" "More information" || return "$?"
     return "$SUCCESS"
 }
 
@@ -492,7 +488,7 @@ parser_summary__more_information_value() {
 parser_summary__internal_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "Internal"
+    __parser_summary__tag_value "$in_content" "Internal" || return "$?"
     return "$SUCCESS"
 }
 
@@ -539,7 +535,7 @@ parser_summary__internal_value_or_default() {
 parser_summary__deprecated_value() {
     declare in_content="$1"
 
-    __parser_summary__tag_value "$in_content" "Deprecated"
+    __parser_summary__tag_value "$in_content" "Deprecated" || return "$?"
     return "$SUCCESS"
 }
 
