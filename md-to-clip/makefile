@@ -52,8 +52,8 @@ uninstall:
 .PHONY: reinstall
 reinstall: uninstall install
 
-.PHONY: tests
-tests:
+.PHONY: test
+test:
 	@echo "\e[33m- Running all tests...\e[0m"
 	@bats --print-output-on-failure $(shell find ./tests/ -type f -name '*.bats')
 
