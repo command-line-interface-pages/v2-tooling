@@ -57,6 +57,13 @@ test:
 	@echo "\e[33m- Running all tests...\e[0m"
 	@bats --print-output-on-failure $(shell find ./tests/ -type f -name '*.bats')
 
+.PHONY: lint
+lint:
+	@echo "\e[33m- Running shell checks...\e[0m"
+	@shellcheck $(script).sh
+	@echo "\e[33m- Running markdown checks...\e[0m"
+	@markdownlint $(script).1.md
+
 .PHONY: remote-install
 remote-install:
 	@echo "\e[34m- Downloading files...\e[0m"
