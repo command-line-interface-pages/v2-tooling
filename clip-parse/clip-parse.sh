@@ -10,11 +10,7 @@ declare -i PARSER_INVALID_EXAMPLES_CODE=3
 declare -i PARSER_INVALID_TOKENS_CODE=4
 declare -i PARSER_INVALID_ARGUMENT_CODE=5
 declare -i PARSER_NOT_ALLOWED_CODE=6
-
-# For cases where developer forgets to check something and messes up with
-# function argument values
-declare -i PARSER_INTERNAL_FAILURE_CODE=7
-declare -i PARSER_TYPE_CODE=8
+declare -i PARSER_TYPE_CODE=7
 
 
 # parser__version
