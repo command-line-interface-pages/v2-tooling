@@ -2,6 +2,10 @@ SHELL=/bin/sh
 
 # PREFIX: sets the installation prefix
 PREFIX?=/home/$(USER)/.local/bin
+# Whether to install a man page (0: install, 1: not)
+INSTALL_MAN?=0
+# Whether to uninstall a man page (0: install, 1: not)
+UNINSTALL_MAN?=0
 
 script=md-to-clip
 input_config=placeholders
@@ -17,6 +21,10 @@ define __install
 	@cp -nv "$(1)/$(script).sh" "$(PREFIX)/$(script)"
 	@cp -nv "$(1)/$(input_config).yaml" "$(HOME)/$(output_config).yaml"
 	@chmod +x "$(PREFIX)/$(script)"
+	@[ $(INSTALL_MAN) -eq 0 ] || { \
+		echo "\e[36m- Installing man page from $(1) to $(man_directory) cancelled...\e[0m"; \
+		return 1; \
+	}
 	@echo "\e[32m- Installing man page from $(1) to $(man_directory)...\e[0m"
 	@pandoc "$(1)/$(man_name).md" -s -t man -o "$(1)/$(man_name)"
 	@sudo mkdir -pv "$(man_directory)"
@@ -33,6 +41,10 @@ install:
 uninstall:
 	@echo "\e[31m- Uninstalling script from $(PREFIX)...\e[0m"
 	@rm -vf "$(PREFIX)/$(script)"
+	@[ $(UNINSTALL_MAN) -eq 0 ] || { \
+		echo "\e[36m- Uninstalling man page from $(man_directory) cancelled...\e[0m"; \
+		return 1; \
+	}
 	@echo "\e[31m- Uninstalling man page from $(man_directory)...\e[0m"
 	@rm -vf "$(HOME)/$(output_config)"
 	@sudo rm -vf "$(man_directory)/$(man_name).gz"
