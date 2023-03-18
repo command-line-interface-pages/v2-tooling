@@ -11,3 +11,5 @@
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QConvert sed page and save it to ~/Documents/sed.clip\\E$"}
 {"rule":"LC_AFTER_PERIOD","sentence":"^\\QConvert sed page and save it to sed.clip in the folder with the input file\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QConvert sed page\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBash IDE\nBash Debug\nBats\nshell-format\nShellCheck\nmake-lsp-vscode\nYAML\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBash:\nBash IDE (IntelliSence)\nBash Debug (Debugger)\nBats (Tester)\nshell-format (Formatter)\nShellCheck (Linter)\nMakefile:\nmake-lsp-vscode (IntelliSence)\nYAML:\nYAML (IntelliSence)\\E$"}
