@@ -13,6 +13,6 @@ There are several tools available for now:
 - [converter to TlDr format](clip-to-md/)
 - [placeholder syntax explainer](clip-ask/)
 
-## Writing pages :hammer_and_wrench:
+## Writing scripts :hammer_and_wrench:
 
 Read [this](./CONTRIBUTING.md) guide for details.
