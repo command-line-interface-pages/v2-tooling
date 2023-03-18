@@ -13,7 +13,8 @@ md-to-clip - convert from TlDr format to Command Line Interface Pages format
 **md-to-clip** *--author*|*-a*  
 **md-to-clip** *--email*|*-e*  
 **md-to-clip** *--no-file-save*|*-nfs*  
-**md-to-clip** [*--output-directory*|*-od* *DIRECTORY*] [*--special-placeholder-config*|*-spc* *FILE.yaml*] <FILE.md FILE2.md ...>
+**md-to-clip** [*--output-directory*|*-od* *DIRECTORY*]
+  [*--special-placeholder-config*|*-spc* *FILE.yaml*] <FILE.md FILE2.md ...>
 
 # DESCRIPTION
 
