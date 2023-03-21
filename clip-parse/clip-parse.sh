@@ -1048,7 +1048,7 @@ __parser_summary__tag_definition() {
     return "$SUCCESS"
 }
 
-# parser_summary__cleaned_up <content>
+# parser_summary__prettified <content>
 # Output summary with sorted tags and applied spacing and punctuation fixes.
 #
 # Output:
@@ -1062,7 +1062,7 @@ __parser_summary__tag_definition() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary__cleaned_up() {
+parser_summary__prettified() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1071,25 +1071,25 @@ parser_summary__cleaned_up() {
 
     CHECK= # as we already checked input there is no need to do it in each data request
     # shellcheck disable=2155
-    declare description="$(parser_summary__description "$in_content")"
+    declare description="$(parser_summary__description_prettified "$in_content")"
     # shellcheck disable=2155
-    declare more_information_value="$(parser_summary__more_information_value "$in_content")"
+    declare more_information_value="$(parser_summary__more_information_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare internal_value="$(parser_summary__internal_value_or_default "$in_content")"
+    declare internal_value="$(parser_summary__internal_value_prettified_or_default "$in_content")"
     # shellcheck disable=2155
-    declare deprecated_value="$(parser_summary__deprecated_value_or_default "$in_content")"
+    declare deprecated_value="$(parser_summary__deprecated_value_prettified_or_default "$in_content")"
     # shellcheck disable=2155
-    declare see_also_value="$(parser_summary__see_also_value "$in_content")"
+    declare see_also_value="$(parser_summary__see_also_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare aliases_value="$(parser_summary__aliases_value "$in_content")"
+    declare aliases_value="$(parser_summary__aliases_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare syntax_compatible_value="$(parser_summary__syntax_compatible_value "$in_content")"
+    declare syntax_compatible_value="$(parser_summary__syntax_compatible_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare help_value="$(parser_summary__help_value "$in_content")"
+    declare help_value="$(parser_summary__help_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare version_value="$(parser_summary__version_value "$in_content")"
+    declare version_value="$(parser_summary__version_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare structure_compatible_value="$(parser_summary__structure_compatible_value "$in_content")"
+    declare structure_compatible_value="$(parser_summary__structure_compatible_value_prettified "$in_content")"
     
     echo -n "$(sed -E 's/^/> /' <<<"$description")
 $(__parser_summary__tag_definition "Internal" "$internal_value")
