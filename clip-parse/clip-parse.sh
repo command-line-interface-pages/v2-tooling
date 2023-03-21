@@ -119,12 +119,38 @@ parser__header() {
         __parser_check__content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
     fi
 
-    sed -nE '1 {
-        s/^# +//
+    sed -nE '1 s/^#//p' <<<"$in_content"
+
+    return "$SUCCESS"
+}
+
+# parser__header <content>
+# Output a prettified header.
+#
+# Output:
+#   <header>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser__header_prettified() {
+    declare in_content="$1"
+
+    declare header
+    header="$(parser__header "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    sed -E 's/^ +//
         s/ +$//
-        s/ +/ /g
-        p
-    }' <<<"$in_content"
+        s/ +/ /g' <<<"$header"
 
     return "$SUCCESS"
 }
