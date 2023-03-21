@@ -372,6 +372,7 @@ __parser_check_summary__tag_value() {
     declare in_tag="$1"
     declare in_tag_value="$2"
 
+    # several types are delimited via "/"
     declare -A valid_tag_types=(
         ["More information"]=string
         [Internal]=boolean
