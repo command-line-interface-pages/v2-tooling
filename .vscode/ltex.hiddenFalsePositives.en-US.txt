@@ -13,3 +13,19 @@
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QConvert sed page\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBash IDE\nBash Debug\nBats\nshell-format\nShellCheck\nmake-lsp-vscode\nYAML\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QBash:\nBash IDE (IntelliSence)\nBash Debug (Debugger)\nBats (Tester)\nshell-format (Formatter)\nShellCheck (Linter)\nMakefile:\nmake-lsp-vscode (IntelliSence)\nYAML:\nYAML (IntelliSence)\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qsource clip-parse.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser\\_\\_version.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser\\_\\_header_prettified \"$page\".\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_summary\\_\\_description_prettified \"$page\".\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_examples\\_\\_code_prettified_at \"$page\" 0.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_examples\\_\\_description_prettified_at \"$page\" 0.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_examples\\_\\_description_alternative_tokens_at \"$page\" 0.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_examples\\_\\_description_mnemonic_tokens_at \"$page\" 0.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qparser_examples\\_\\_code_placeholder_tokens_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser\\_\\_header_prettified \"$page\".\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_summary\\_\\_description_prettified \"$page\".\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_description_prettified_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_code_prettified_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_description_alternative_tokens_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_description_mnemonic_tokens_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_code_placeholder_tokens_at \"$page\" 0.\\E$"}

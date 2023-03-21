@@ -2,11 +2,39 @@
 
 Command Line Interface Pages parser.
 
-## Features :rocket:
+## Prerequisites
 
-- Almost complete [v2.7.0 syntax](https://github.com/command-line-interface-pages/syntax/blob/main/base.md) support except:
-  - escaping comma in placeholder examples
-  - range expansion in placeholder examples
+- [GNU Make][make]
+
+[make]: https://www.gnu.org/software/make/manual/
+
+## Installation :smile:
+
+Download installer as a temporary file and execute commands to download and
+install parser with its man page:
+
+```bash
+make -f <(wget -O - https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/clip-parse/makefile 2> /dev/null) remote-install
+```
+
+Download installer as a `installer` file and execute commands to download and
+install parser with its man page:
+
+```bash
+wget -O installer https://raw.githubusercontent.com/command-line-interface-pages/v2-tooling/main/clip-parse/makefile
+make -f installer remote-install
+```
+
+> :information_source: Note: prefer the second way to install if you want to
+> be able to easily uninstall parser with its man page.
+
+## Uninstallation :disappointed:
+
+Execute commands to uninstall parser with its man page:
+
+```bash
+make -f installer uninstall
+```
 
 ## Examples :books:
 
