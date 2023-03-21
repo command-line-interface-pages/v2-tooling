@@ -25,6 +25,9 @@ except:
 
 # EXAMPLES
 
+*source clip-parse*
+: Source a parser API
+
 *parser__version*
 : Get a parser version
 
