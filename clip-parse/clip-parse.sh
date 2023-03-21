@@ -1131,16 +1131,8 @@ __parser_examples__all() {
     fi
     
     # shellcheck disable=2016
-    sed -nE '/^-/ {
-        s/^- +//
-        s/ *:$//
-        p
-    }
-    /^`/ {
-        s/^` *//
-        s/ *`$//
-        p
-    }' <<<"$in_content"
+    sed -nE '/^-/ s/^-|:$//gp
+        /^`/ s/^`|`$//gp' <<<"$in_content"
 
     return "$SUCCESS"
 }
@@ -1217,6 +1209,36 @@ parser_examples__description_at() {
     return "$SUCCESS"
 }
 
+# parser_examples__description_prettified_at <content> <index>
+# Output a prettified example description.
+#
+# Output:
+#   <description>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__description_prettified_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare header
+    header="$(parser_examples__description_at "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    __parser_string__prettify "$header"
+    return "$SUCCESS"
+}
+
 # parser_examples__code_at <content> <index>
 # Output an example code.
 #
@@ -1255,6 +1277,36 @@ parser_examples__code_at() {
     fi
 
     sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
+    return "$SUCCESS"
+}
+
+# parser_examples__code_prettified_at <content> <index>
+# Output a prettified example code.
+#
+# Output:
+#   <code>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_prettified_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare header
+    header="$(parser_examples__code_at "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    sed -E 's/^ +| +$//g' <<<"$header"
     return "$SUCCESS"
 }
 
@@ -1488,7 +1540,7 @@ parser_examples__description_alternative_tokens_at() {
     fi
 
     declare description=
-    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1566,7 +1618,7 @@ parser_examples__description_mnemonic_tokens_at() {
     fi
 
     declare description=
-    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1628,7 +1680,7 @@ parser_examples__code_placeholder_tokens_at() {
     fi
 
     declare code=
-    code="$(parser_examples__code_at "$in_content" "$in_index")"
+    code="$(parser_examples__code_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -2183,8 +2235,8 @@ parser_examples__expanded_or_original_at() {
 
     # shellcheck disable=2155
     if ((status != 0)); then
-        declare original_description="$(parser_examples__description_at "$in_content" "$in_index")"
-        declare original_code="$(parser_examples__code_at "$in_content" "$in_index")"
+        declare original_description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
+        declare original_code="$(parser_examples__code_prettified_at "$in_content" "$in_index")"
         echo -n '- '
         # shellcheck disable=2016
         printf '%s:\n\n`%s`\n\n' "$original_description" "$original_code"
