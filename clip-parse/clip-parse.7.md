@@ -17,6 +17,12 @@ naming convention:
 
 These prefixes can be treated like namespaces in other programming languages.
 
+Parser supports almost all v2.7.0 syntax (https://github.com/command-line-interface-pages/syntax/blob/main/base.md)
+except:
+
+- escaping comma in placeholder examples
+- range expansion in placeholder examples
+
 # EXAMPLES
 
 *parser__version*
