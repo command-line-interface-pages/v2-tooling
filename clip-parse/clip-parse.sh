@@ -23,7 +23,7 @@ declare -i PARSER_TYPE_CODE=7
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.4.0"
+    echo "1.4.1"
     return "$SUCCESS"
 }
 
@@ -2235,6 +2235,10 @@ parser_examples__expanded_or_original_at() {
 
     # shellcheck disable=2155
     if ((status != 0)); then
+        if [[ -n "$CHECK" ]] && ((CHECK == 0)) && ((status == PARSER_INVALID_CONTENT_CODE)); then
+            return "$status"
+        fi
+        
         declare original_description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
         declare original_code="$(parser_examples__code_prettified_at "$in_content" "$in_index")"
         echo -n '- '
