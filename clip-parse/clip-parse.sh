@@ -228,13 +228,40 @@ parser_summary__description() {
         __parser_check__summary "$summary" || return "$?"
     fi
 
-    sed -nE '/^> [^:]+$/ {
-        s/^> +//
-        s/\.$//
-        s/ +$//
-        s/  +/ /g
-        p
-    }' <<<"$summary"
+    sed -nE '/^> [^:]+$/ s/^>//p' <<<"$summary"
+    return "$SUCCESS"
+}
+
+# parser_summary__description <content>
+# Output a prettified description from a summary.
+#
+# Output:
+#   <description>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__description_prettified() {
+    declare in_content="$1"
+
+    declare description
+    description="$(parser_summary__description "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    mapfile -t description_lines < <(echo "$description")
+
+    for line in "${description_lines[@]}"; do
+        __parser_string__prettify "$line"
+    done
 
     return "$SUCCESS"
 }
