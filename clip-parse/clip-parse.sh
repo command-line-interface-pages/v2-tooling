@@ -51,7 +51,7 @@ __parser_string__join() {
   return "$SUCCESS"
 }
 
-# __parser_string__unify <string>
+# __parser_string__prettify_as_list <string>
 # Output a string without repeated comma-separated items.
 #
 # Output:
@@ -62,11 +62,13 @@ __parser_string__join() {
 #
 # Notes:
 #   - <string> should not contain trailing \n
-__parser_string__unify() {
+__parser_string__prettify_as_list() {
     declare in_string="$1"
 
-    mapfile -t string_array < <(echo -n "$in_string" | sed -E 's/ +/ /g
-    s/ *, */\n/g' | sort -r -u)
+    mapfile -t string_array < <(echo -n "$in_string" | sed -E 's/^ +//
+        s/ +$//
+        s/ +/ /g
+        s/ *, */\n/g' | sort -r -u)
 
     __parser_string__join ", " "${string_array[@]}"
     return "$SUCCESS"
