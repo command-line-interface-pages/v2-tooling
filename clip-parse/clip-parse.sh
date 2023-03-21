@@ -23,7 +23,7 @@ declare -i PARSER_TYPE_CODE=7
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.3.0"
+    echo "1.4.0"
     return "$SUCCESS"
 }
 
