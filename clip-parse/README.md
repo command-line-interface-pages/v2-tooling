@@ -52,7 +52,7 @@ Let's say we put it in `$page` variable.
   :bulb: **answer**
 
   ```bash
-  parser__header "$page"
+  parser__header_prettified "$page"
   ```
 
   :checkered_flag: **output**
@@ -65,7 +65,7 @@ Let's say we put it in `$page` variable.
   :bulb: **answer**
 
   ```bash
-  parser_summary__description "$page"
+  parser_summary__description_prettified "$page"
   ```
 
   :checkered_flag: **output**
@@ -79,7 +79,7 @@ Let's say we put it in `$page` variable.
   :bulb: **answer**
 
   ```bash
-  parser_examples__description_at "$page" 0
+  parser_examples__description_prettified_at "$page" 0
   ```
 
   :checkered_flag: **output**
@@ -92,7 +92,7 @@ Let's say we put it in `$page` variable.
   :bulb: **answer**
 
   ```bash
-  parser_examples__code_at "$page" 0
+  parser_examples__code_prettified_at "$page" 0
   ```
 
   :checkered_flag: **output**

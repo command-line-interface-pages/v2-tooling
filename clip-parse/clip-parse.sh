@@ -23,7 +23,7 @@ declare -i PARSER_TYPE_CODE=7
 # Return:
 #   - 0 always
 parser__version() {
-    echo "1.3.0"
+    echo "1.4.1"
     return "$SUCCESS"
 }
 
@@ -51,7 +51,7 @@ __parser_string__join() {
   return "$SUCCESS"
 }
 
-# __parser_string__unify <string>
+# __parser_string__prettify_as_list <string>
 # Output a string without repeated comma-separated items.
 #
 # Output:
@@ -62,13 +62,36 @@ __parser_string__join() {
 #
 # Notes:
 #   - <string> should not contain trailing \n
-__parser_string__unify() {
+__parser_string__prettify_as_list() {
     declare in_string="$1"
 
-    mapfile -t string_array < <(echo -n "$in_string" | sed -E 's/ +/ /g
-    s/ *, */\n/g' | sort -r -u)
+    mapfile -t string_array < <(echo -n "$in_string" | sed -E 's/^ +//
+        s/ +$//
+        s/ +/ /g
+        s/ *, */\n/g' | sort -r -u)
 
     __parser_string__join ", " "${string_array[@]}"
+    return "$SUCCESS"
+}
+
+# __parser_string__prettify <string>
+# Output a prettified string.
+#
+# Output:
+#   <string>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <string> should not contain trailing \n
+__parser_string__prettify() {
+    declare in_string="$1"
+
+    sed -E 's/^ +//
+        s/ +$//
+        s/ +/ /g' <<<"$in_string"
+
     return "$SUCCESS"
 }
 
@@ -119,13 +142,36 @@ parser__header() {
         __parser_check__content "$in_content" || return "$PARSER_INVALID_CONTENT_CODE"
     fi
 
-    sed -nE '1 {
-        s/^# +//
-        s/ +$//
-        s/ +/ /g
-        p
-    }' <<<"$in_content"
+    sed -nE '1 s/^#//p' <<<"$in_content"
 
+    return "$SUCCESS"
+}
+
+# parser__header <content>
+# Output a prettified header.
+#
+# Output:
+#   <header>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE otherwise
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser__header_prettified() {
+    declare in_content="$1"
+
+    declare header
+    header="$(parser__header "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    __parser_string__prettify "$header"
     return "$SUCCESS"
 }
 
@@ -184,13 +230,40 @@ parser_summary__description() {
         __parser_check__summary "$summary" || return "$?"
     fi
 
-    sed -nE '/^> [^:]+$/ {
-        s/^> +//
-        s/\.$//
-        s/ +$//
-        s/  +/ /g
-        p
-    }' <<<"$summary"
+    sed -nE '/^> [^:]+$/ s/^>//p' <<<"$summary"
+    return "$SUCCESS"
+}
+
+# parser_summary__description <content>
+# Output a prettified description from a summary.
+#
+# Output:
+#   <description>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__description_prettified() {
+    declare in_content="$1"
+
+    declare description
+    description="$(parser_summary__description "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    mapfile -t description_lines < <(echo "$description")
+
+    for line in "${description_lines[@]}"; do
+        __parser_string__prettify "$line"
+    done
 
     return "$SUCCESS"
 }
@@ -210,8 +283,7 @@ parser_summary__description() {
 __parser_type__simple_value() {
     declare in_value="$1"
 
-    in_value="$(sed -E 's/^ +//
-        s/ +$//' <<<"$in_value")"
+    in_value="$(__parser_string__prettify "$in_value")"
 
     case "$in_value" in
         true|false)
@@ -243,7 +315,6 @@ __parser_type__compound_value() {
     declare in_value="$1"
 
     mapfile -t items < <(sed -E 's/,/\n/g' <<<"$in_value")
-
     # shellcheck disable=2155
     declare first_item_type="$(__parser_type__simple_value "${items[0]}")"
     declare -i index=1
@@ -301,6 +372,7 @@ __parser_check_summary__tag_value() {
     declare in_tag="$1"
     declare in_tag_value="$2"
 
+    # several types are delimited via "/"
     declare -A valid_tag_types=(
         ["More information"]=string
         [Internal]=boolean
@@ -389,16 +461,12 @@ __parser_summary__tags() {
     # shellcheck disable=2155
     declare tags="$(sed -nE '/^> [^:]+:.+$/ {
         s/^> +//
-        s/\.$//
-        s/ +$//
-        s/ +:$//
-        s/ +/ /g
-        s/: +/\n/
+        s/ *:/\n/
         p
     }' <<<"$summary")"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
-        __parser_check_summary__tag_values "$tags" || return "$?"
+        sed -E '' | __parser_check_summary__tag_values "$tags" || return "$?"
     fi
 
     echo -n "$tags"
@@ -421,10 +489,7 @@ __parser_summary__tags() {
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
 __parser_summary__tag_value() {
     declare in_content="$1"
-    # shellcheck disable=2155
-    declare in_tag="$(sed -E 's/^ +//
-        s/ +$//
-        s/ +/ /g' <<<"$2")"
+    declare in_tag="$2"
 
     declare tags=
     tags="$(__parser_summary__tags "$in_content")"
@@ -452,6 +517,36 @@ __parser_summary__tag_value() {
     return "$SUCCESS"
 }
 
+# __parser_summary__tag_value_prettified <content> <tag>
+# Output a tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+__parser_summary__tag_value_prettified() {
+    declare in_content="$1"
+    declare in_tag="$2"
+
+    declare value
+    value="$(__parser_summary__tag_value "$in_content" "$in_tag")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    __parser_string__prettify "$value"
+    return "$SUCCESS"
+}
+
 # parser_summary__more_information_value <content>
 # Output "More information" tag value from a summary.
 #
@@ -473,6 +568,27 @@ parser_summary__more_information_value() {
     return "$SUCCESS"
 }
 
+# parser_summary__more_information_value_prettified <content>
+# Output "More information" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__more_information_value_prettified() {
+    declare in_content="$1"
+
+    __parser_summary__tag_value_prettified "$in_content" "More information" || return "$?"
+    return "$SUCCESS"
+}
+
 # parser_summary__internal_value <content>
 # Output "Internal" tag value from a summary.
 #
@@ -491,6 +607,27 @@ parser_summary__internal_value() {
     declare in_content="$1"
 
     __parser_summary__tag_value "$in_content" "Internal" || return "$?"
+    return "$SUCCESS"
+}
+
+# parser_summary__internal_value_prettified <content>
+# Output "Internal" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__internal_value_prettified() {
+    declare in_content="$1"
+
+    __parser_summary__tag_value_prettified "$in_content" "Internal" || return "$?"
     return "$SUCCESS"
 }
 
@@ -520,6 +657,32 @@ parser_summary__internal_value_or_default() {
     return "$SUCCESS"
 }
 
+# parser_summary__internal_value_prettified_or_default <content>
+# Output "Internal" prettified tag value from a summary or default.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__internal_value_prettified_or_default() {
+    declare in_content="$1"
+
+    declare tag_value=
+    tag_value="$(parser_summary__internal_value_prettified "$in_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+    [[ -z "$tag_value" ]] && tag_value=false
+    echo -n "$tag_value"
+    return "$SUCCESS"
+}
+
 # parser_summary__deprecated_value <content>
 # Output "Deprecated" tag value from a summary.
 #
@@ -538,6 +701,27 @@ parser_summary__deprecated_value() {
     declare in_content="$1"
 
     __parser_summary__tag_value "$in_content" "Deprecated" || return "$?"
+    return "$SUCCESS"
+}
+
+# parser_summary__deprecated_value_prettified <content>
+# Output "Deprecated" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__deprecated_value_prettified() {
+    declare in_content="$1"
+
+    __parser_summary__tag_value_prettified "$in_content" "Deprecated" || return "$?"
     return "$SUCCESS"
 }
 
@@ -567,6 +751,32 @@ parser_summary__deprecated_value_or_default() {
     return "$SUCCESS"
 }
 
+# parser_summary__deprecated_value_prettified_or_default <content>
+# Output "Deprecated" tag value from a summary or default.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__deprecated_value_prettified_or_default() {
+    declare in_content="$1"
+
+    declare output=
+    output="$(parser_summary__deprecated_value_prettified "$in_content")"
+    # shellcheck disable=2181
+    (($? == 0)) || return "$?"
+    [[ -z "$output" ]] && output=false
+    echo -n "$output"
+    return "$SUCCESS"
+}
+
 # parser_summary__see_also_value <content>
 # Output "See also" tag value from a summary.
 #
@@ -584,7 +794,28 @@ parser_summary__deprecated_value_or_default() {
 parser_summary__see_also_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "See also")")"
+    __parser_summary__tag_value "$in_content" "See also"
+    return "$SUCCESS"
+}
+
+# parser_summary__see_also_value_prettified <content>
+# Output "See also" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__see_also_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "See also")"
     return "$SUCCESS"
 }
 
@@ -605,7 +836,28 @@ parser_summary__see_also_value() {
 parser_summary__aliases_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Aliases")")"
+    __parser_summary__tag_value "$in_content" "Aliases"
+    return "$SUCCESS"
+}
+
+# parser_summary__aliases_value_prettified <content>
+# Output "Aliases" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__aliases_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "Aliases")"
     return "$SUCCESS"
 }
 
@@ -626,7 +878,28 @@ parser_summary__aliases_value() {
 parser_summary__syntax_compatible_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Syntax compatible")")"
+    __parser_summary__tag_value "$in_content" "Syntax compatible"
+    return "$SUCCESS"
+}
+
+# parser_summary__syntax_compatible_value_prettified <content>
+# Output "Syntax compatible" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__syntax_compatible_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "Syntax compatible")"
     return "$SUCCESS"
 }
 
@@ -647,7 +920,28 @@ parser_summary__syntax_compatible_value() {
 parser_summary__help_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Help")")"
+    __parser_summary__tag_value "$in_content" "Help"
+    return "$SUCCESS"
+}
+
+# parser_summary__help_value_prettified <content>
+# Output "Help" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__help_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "Help")"
     return "$SUCCESS"
 }
 
@@ -668,7 +962,28 @@ parser_summary__help_value() {
 parser_summary__version_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Version")")"
+    __parser_summary__tag_value "$in_content" "Version"
+    return "$SUCCESS"
+}
+
+# parser_summary__version_value_prettified <content>
+# Output "Version" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__version_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "Version")"
     return "$SUCCESS"
 }
 
@@ -689,7 +1004,28 @@ parser_summary__version_value() {
 parser_summary__structure_compatible_value() {
     declare in_content="$1"
 
-    echo -n "$(__parser_string__unify "$(__parser_summary__tag_value "$in_content" "Structure compatible")")"
+    __parser_summary__tag_value "$in_content" "Structure compatible"
+    return "$SUCCESS"
+}
+
+# parser_summary__structure_compatible_value_prettified <content>
+# Output "Structure compatible" prettified tag value from a summary.
+#
+# Output:
+#   <tag-value>
+#
+# Return:
+#   - 0 if <content> and it's summary are valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_SUMMARY_CODE if <content> summary is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_summary__structure_compatible_value_prettified() {
+    declare in_content="$1"
+
+    __parser_string__prettify_as_list "$(__parser_summary__tag_value "$in_content" "Structure compatible")"
     return "$SUCCESS"
 }
 
@@ -714,7 +1050,7 @@ __parser_summary__tag_definition() {
     return "$SUCCESS"
 }
 
-# parser_summary__cleaned_up <content>
+# parser_summary__prettified <content>
 # Output summary with sorted tags and applied spacing and punctuation fixes.
 #
 # Output:
@@ -728,7 +1064,7 @@ __parser_summary__tag_definition() {
 # Notes:
 #   - <content> should not contain trailing \n
 #   - checks are performed just when $CHECK environment variable is not empty and is zero
-parser_summary__cleaned_up() {
+parser_summary__prettified() {
     declare in_content="$1"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -737,25 +1073,25 @@ parser_summary__cleaned_up() {
 
     CHECK= # as we already checked input there is no need to do it in each data request
     # shellcheck disable=2155
-    declare description="$(parser_summary__description "$in_content")"
+    declare description="$(parser_summary__description_prettified "$in_content")"
     # shellcheck disable=2155
-    declare more_information_value="$(parser_summary__more_information_value "$in_content")"
+    declare more_information_value="$(parser_summary__more_information_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare internal_value="$(parser_summary__internal_value_or_default "$in_content")"
+    declare internal_value="$(parser_summary__internal_value_prettified_or_default "$in_content")"
     # shellcheck disable=2155
-    declare deprecated_value="$(parser_summary__deprecated_value_or_default "$in_content")"
+    declare deprecated_value="$(parser_summary__deprecated_value_prettified_or_default "$in_content")"
     # shellcheck disable=2155
-    declare see_also_value="$(parser_summary__see_also_value "$in_content")"
+    declare see_also_value="$(parser_summary__see_also_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare aliases_value="$(parser_summary__aliases_value "$in_content")"
+    declare aliases_value="$(parser_summary__aliases_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare syntax_compatible_value="$(parser_summary__syntax_compatible_value "$in_content")"
+    declare syntax_compatible_value="$(parser_summary__syntax_compatible_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare help_value="$(parser_summary__help_value "$in_content")"
+    declare help_value="$(parser_summary__help_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare version_value="$(parser_summary__version_value "$in_content")"
+    declare version_value="$(parser_summary__version_value_prettified "$in_content")"
     # shellcheck disable=2155
-    declare structure_compatible_value="$(parser_summary__structure_compatible_value "$in_content")"
+    declare structure_compatible_value="$(parser_summary__structure_compatible_value_prettified "$in_content")"
     
     echo -n "$(sed -E 's/^/> /' <<<"$description")
 $(__parser_summary__tag_definition "Internal" "$internal_value")
@@ -795,16 +1131,8 @@ __parser_examples__all() {
     fi
     
     # shellcheck disable=2016
-    sed -nE '/^-/ {
-        s/^- +//
-        s/ *:$//
-        p
-    }
-    /^`/ {
-        s/^` *//
-        s/ *`$//
-        p
-    }' <<<"$in_content"
+    sed -nE '/^-/ s/^-|:$//gp
+        /^`/ s/^`|`$//gp' <<<"$in_content"
 
     return "$SUCCESS"
 }
@@ -881,6 +1209,36 @@ parser_examples__description_at() {
     return "$SUCCESS"
 }
 
+# parser_examples__description_prettified_at <content> <index>
+# Output a prettified example description.
+#
+# Output:
+#   <description>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__description_prettified_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare header
+    header="$(parser_examples__description_at "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    __parser_string__prettify "$header"
+    return "$SUCCESS"
+}
+
 # parser_examples__code_at <content> <index>
 # Output an example code.
 #
@@ -919,6 +1277,36 @@ parser_examples__code_at() {
     fi
 
     sed -nE "$((in_index * 2 + 2)) p" <<<"$examples"
+    return "$SUCCESS"
+}
+
+# parser_examples__code_prettified_at <content> <index>
+# Output a prettified example code.
+#
+# Output:
+#   <code>
+#
+# Return:
+#   - 0 if <content> is valid
+#   - $PARSER_INVALID_CONTENT_CODE if <content> is invalid
+#   - $PARSER_INVALID_ARGUMENT_CODE if <index> is invalid
+#
+# Notes:
+#   - <content> should not contain trailing \n
+#   - checks are performed just when $CHECK environment variable is not empty and is zero
+parser_examples__code_prettified_at() {
+    declare in_content="$1"
+    declare -i in_index="$2"
+
+    declare header
+    header="$(parser_examples__code_at "$in_content")"
+    declare -i status=$?
+
+    if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
+        ((status == 0)) || return "$?"
+    fi
+
+    sed -E 's/^ +| +$//g' <<<"$header"
     return "$SUCCESS"
 }
 
@@ -1152,7 +1540,7 @@ parser_examples__description_alternative_tokens_at() {
     fi
 
     declare description=
-    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1230,7 +1618,7 @@ parser_examples__description_mnemonic_tokens_at() {
     fi
 
     declare description=
-    description="$(parser_examples__description_at "$in_content" "$in_index")"
+    description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1292,7 +1680,7 @@ parser_examples__code_placeholder_tokens_at() {
     fi
 
     declare code=
-    code="$(parser_examples__code_at "$in_content" "$in_index")"
+    code="$(parser_examples__code_prettified_at "$in_content" "$in_index")"
     declare -i status="$?"
 
     if [[ -n "$CHECK" ]] && ((CHECK == 0)); then
@@ -1847,8 +2235,12 @@ parser_examples__expanded_or_original_at() {
 
     # shellcheck disable=2155
     if ((status != 0)); then
-        declare original_description="$(parser_examples__description_at "$in_content" "$in_index")"
-        declare original_code="$(parser_examples__code_at "$in_content" "$in_index")"
+        if [[ -n "$CHECK" ]] && ((CHECK == 0)) && ((status == PARSER_INVALID_CONTENT_CODE)); then
+            return "$status"
+        fi
+        
+        declare original_description="$(parser_examples__description_prettified_at "$in_content" "$in_index")"
+        declare original_code="$(parser_examples__code_prettified_at "$in_content" "$in_index")"
         echo -n '- '
         # shellcheck disable=2016
         printf '%s:\n\n`%s`\n\n' "$original_description" "$original_code"
