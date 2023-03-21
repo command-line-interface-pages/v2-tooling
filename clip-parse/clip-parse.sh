@@ -281,8 +281,7 @@ parser_summary__description_prettified() {
 __parser_type__simple_value() {
     declare in_value="$1"
 
-    in_value="$(sed -E 's/^ +//
-        s/ +$//' <<<"$in_value")"
+    in_value="$(__parser_string__prettify "$in_value")"
 
     case "$in_value" in
         true|false)
@@ -314,7 +313,6 @@ __parser_type__compound_value() {
     declare in_value="$1"
 
     mapfile -t items < <(sed -E 's/,/\n/g' <<<"$in_value")
-
     # shellcheck disable=2155
     declare first_item_type="$(__parser_type__simple_value "${items[0]}")"
     declare -i index=1
