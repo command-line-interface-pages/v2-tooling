@@ -11,9 +11,9 @@ clip-parse - parse Command Line Interface Pages
 **clip-parse** contains several functions for parsing pages following this
 naming convention:
 
-- *parser__\**: for header handling
-- *parser_summary__\**: for summary handling
-- *parser_examples__\**: for example handling
+- *parser\_\_\**: for header handling
+- *parser_summary\_\_\**: for summary handling
+- *parser_examples\_\_\**: for example handling
 
 These prefixes can be treated like namespaces in other programming languages.
 
@@ -28,19 +28,19 @@ except:
 *source clip-parse*
 : Source a parser API
 
-*parser__version*
+*parser\_\_version*
 : Get a parser version
 
-*parser__header_prettified "$page"*
+*parser\_\_header_prettified "$page"*
 : Get a page header
 
-*parser_summary__description_prettified "$page"*
+*parser_summary\_\_description_prettified "$page"*
 : Get a page description
 
-*parser_examples__description_prettified_at "$page" 0*
+*parser_examples\_\_description_prettified_at "$page" 0*
 : Get an example description
 
-*parser_examples__code_prettified_at "$page" 0*
+*parser_examples\_\_code_prettified_at "$page" 0*
 : Get an example code
 
 # BUGS
