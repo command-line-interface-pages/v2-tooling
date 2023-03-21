@@ -26,7 +26,7 @@ make -f installer remote-install
 ```
 
 > :information_source: Note: prefer the second way to install if you want to
-> be able to easily uninstall script with its man page.
+> be able to easily uninstall parser with its man page.
 
 ## Uninstallation :disappointed:
 
