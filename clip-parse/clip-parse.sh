@@ -72,6 +72,27 @@ __parser_string__unify() {
     return "$SUCCESS"
 }
 
+# __parser_string__prettify <string>
+# Output a prettified string.
+#
+# Output:
+#   <string>
+#
+# Return:
+#   - 0 always
+#
+# Notes:
+#   - <string> should not contain trailing \n
+__parser_string__prettify() {
+    declare in_string="$1"
+
+    sed -E 's/^ +//
+        s/ +$//
+        s/ +/ /g' <<<"$in_string"
+
+    return "$SUCCESS"
+}
+
 
 
 # __parser_check__content <content>
@@ -148,10 +169,7 @@ parser__header_prettified() {
         ((status == 0)) || return "$?"
     fi
 
-    sed -E 's/^ +//
-        s/ +$//
-        s/ +/ /g' <<<"$header"
-
+    __parser_string__prettify "$header"
     return "$SUCCESS"
 }
 
