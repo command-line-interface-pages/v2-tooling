@@ -43,6 +43,15 @@ except:
 *parser_examples\_\_code_prettified_at "$page" 0*
 : Get an example code
 
+*parser_examples\_\_description_alternative_tokens_at "$page" 0*
+: Get tokens for alternatives
+
+*parser_examples\_\_description_mnemonic_tokens_at "$page" 0*
+: Get tokens for mnemonics
+
+*parser_examples\_\_code_placeholder_tokens_at "$page" 0*
+: Get tokens for placeholders
+
 # BUGS
 
 https://github.com/command-line-interface-pages/v2-tooling/tree/main/clip-parse
