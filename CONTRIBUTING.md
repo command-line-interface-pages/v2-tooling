@@ -4,16 +4,17 @@
 
 ### Visual Studio Code
 
+- [common extensions](https://command-line-interface-pages.github.io/site.github.io/extensions/)
 - Bash:
-  - [Bash IDE (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
-  - [Bash Debug (Debugger)](https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug)
-  - [Bats (Tester)](https://marketplace.visualstudio.com/items?itemName=jetmartin.bats)
-  - [shell-format (Formatter)](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format)
-  - [ShellCheck (Linter)](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck)
+  - [Bash IDE (linter, intellisence, snippets, highlighting)](https://marketplace.visualstudio.com/items?itemName=mads-hartmann.bash-ide-vscode)
+  - [Bash Debug (debugger)](https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug)
+  - [Bats (unit test executor)](https://marketplace.visualstudio.com/items?itemName=jetmartin.bats)
+  - [shell-format (formatter)](https://marketplace.visualstudio.com/items?itemName=foxundermoon.shell-format)
+  - [ShellCheck (linter)](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck)
 - Makefile:
-  - [make-lsp-vscode (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=alexclewontin.make-lsp-vscode)
+  - [make-lsp-vscode (intellisence, snippets)](https://marketplace.visualstudio.com/items?itemName=alexclewontin.make-lsp-vscode)
 - YAML:
-  - [YAML (IntelliSence)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+  - [YAML (linter, formatter, intellisence, snippets)](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 
 ## How to get started?
 

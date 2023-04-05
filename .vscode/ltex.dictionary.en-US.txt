@@ -1,3 +1,6 @@
 md-to-clip
 IntelliSense
 IntelliSence
+intellisence
+ShellCheck
+make-lsp-vscode
