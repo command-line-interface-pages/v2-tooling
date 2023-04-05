@@ -29,3 +29,4 @@
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_description_alternative_tokens_at \"$page\" 0.\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_description_mnemonic_tokens_at \"$page\" 0.\\E$"}
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qparser_examples\\_\\_code_placeholder_tokens_at \"$page\" 0.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qci-status help-wanted-issues goals\\E$"}
