@@ -8,7 +8,7 @@ Toolkit for [v2][syntax] syntax.
 
 [goals]: https://command-line-interface-pages.github.io/site.github.io/goals/#introduction-%E2%84%B9
 [help-wanted-issues]: https://github.com/command-line-interface-pages/v2-tooling/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22
-[syntax]: https://github.com/command-line-interface-pages/syntax/blob/main/base.md
+[syntax]: https://github.com/command-line-interface-pages/syntax/blob/main/yaml-based/base.md
 
 ## Quick introduction :rocket:
 
